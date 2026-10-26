@@ -8,3 +8,6 @@ node_modules/
 .env.*
 **/release-private.pem
 *.key
+
+build/
+__pycache__/

@@ -1,0 +1,6 @@
+.sparkboard/
+node_modules/
+package-lock.json
+*.dmg
+*.app/
+build/

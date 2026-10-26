@@ -1,85 +1,151 @@
 # Sparkboard
 
-A local-first canvas inspired by Lucidspark and Apple Freeform.
+A local-first canvas inspired by Lucidspark and Apple Freeform. MIT licensed.
 
-[Download the macOS installer](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.1.0) · Apple Silicon · macOS 14+
+[macOS release downloads](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases) · Apple Silicon · macOS 14+
 
-## Run
+## Start from a fresh clone
 
-Run `npm start` from this folder, then open http://localhost:3000. Requires Node.js; no dependencies or API key are needed.
+Requires Node.js 24 or newer. There is no frontend bundler and no API key is required.
 
-Run `npm run check` for JavaScript syntax checks and `npm test` for the board-operation tests.
+```sh
+git clone https://github.com/7drbw7mdgf-lgtm/sparkboard.git
+cd sparkboard
+npm ci
+npm run build
+npm start
+```
+
+Open [localhost:3000](http://localhost:3000). `npm run build` checks the complete public-file/import graph and prepares a local sandbox update. It generates disposable sandbox signing keys under ignored `.sparkboard/`; it never needs the publisher's private key or changes `update-public-key.pem`.
+
+```sh
+npm run check         # Syntax-check all JavaScript modules
+npm test              # Board model, IndexedDB, save scheduling, updater and clean-build tests
+npm run format:check  # Check source formatting
+npm run format        # Format JavaScript, CSS, HTML and documentation
+```
+
+The dev dependencies are a formatter and `fake-indexeddb` for storage tests. The running web app uses browser APIs and Node built-ins only.
+
+## Code map
+
+| Area                                                                         | Location                                                                  |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Startup and event registration                                               | `app.js`                                                                  |
+| Board lifecycle and save coordinator                                         | `src/boards.js`                                                           |
+| IndexedDB schema, migration, transactions, media encoding and debounce queue | `src/storage/`                                                            |
+| Canvas interaction, text editing, selection and commands                     | `src/canvas.js`, `src/editor.js`, `src/selection.js`, `src/commands.js`   |
+| Rendering, inspector, tools and viewport                                     | `src/rendering.js`, `src/inspector.js`, `src/tools.js`, `src/viewport.js` |
+| Media, clipboard, import/export, scenes and dialogs                          | The corresponding modules in `src/`                                       |
+| Session state and shared helpers                                             | `src/state.js`, `src/core.js`                                             |
+| Board geometry and portable-backup validation                                | `board-model.js`                                                          |
+| Update lifecycle                                                             | `updater.cjs`                                                             |
+| Signed package validation, GitHub transport and atomic files                 | `lib/updates/`                                                            |
+| Public asset manifest used by web builds, releases and desktop packaging     | `lib/public-files.cjs`                                                    |
+| Native macOS wrapper                                                         | `desktop/`                                                                |
+
+UI modules share session state and named operations; they do not open database transactions. The repository and save scheduler have no DOM dependency and are tested independently. The starter image lives in `assets/`, rather than as an encoded string inside the application source.
 
 ## Create and collect
 
 - Sticky notes and editable text
 - One searchable Shapes menu: rectangle, circle, triangle, diamond, hexagon, star, arrow, speech bubble and frame
 - Object-to-object connectors and freehand drawing with color and width controls
-- Images and PDF attachment cards using the media button or drag and drop
-- Images are resized to at most 1400 pixels on the longest side before saving; GIFs become still images
+- Images and PDF cards using the media button, clipboard or drag and drop
+- Images resize to at most 1400 pixels on the longest side; GIFs become still images
 - PDF cards retain the original document for download; there is no inline PDF viewer
 - Web link cards; paste a URL to create one
-- Paste text to create a note, or paste images from the clipboard
 
-## Organize and format
+Shift-click or drag empty canvas to select multiple items. **Style & arrange** provides text formatting, rotation, grouping, layer order, locking, alignment and distribution. Frames are visual containers; group a frame with its contents to move them together. Scenes save named camera positions. Find searches the active board; the board library searches board titles.
 
-Shift-click to add or remove items from a selection, or drag empty canvas to select a region. Select an item and open **Style & arrange** in the floating toolbar for text size, bold, alignment, colors, rotation, border width, grouping, layer order and alignment/distribution. Locked items stay selected but cannot be edited or moved until unlocked. All members of a group are selected and moved together. Frames are visual containers; group a frame with its contents to move them together.
+## Storage and autosave
 
-Use the grid and snap buttons at bottom left, and zoom/fit controls at bottom right. Scene views save the current pan and zoom, giving you named places to return to on a board. Find searches note text, files and link addresses. The board library searches board titles.
+IndexedDB database `sparkboard-workspace`, schema version 2, contains:
 
-## Save and export
+| Store       | Entry                                                                      |
+| ----------- | -------------------------------------------------------------------------- |
+| `boards`    | One board keyed by ID, with media references instead of embedded file data |
+| `summaries` | One lightweight library row per board, without objects or attachments      |
+| `media`     | One binary Blob per unique file content and MIME type                      |
+| `mediaRefs` | Indexed board-to-media references for shared-file lifetime tracking        |
+| `settings`  | Individual active-board and migration settings                             |
 
-Boards and media save in IndexedDB in the current browser on this device. Earlier localStorage boards are migrated automatically. A small synchronous recovery copy is also kept when the workspace fits in localStorage. Wait for “All changes saved” before closing a board with large attachments. JSON exports include assets, grouping, formatting and scenes and can be imported from the board library. Export PNG or SVG for images; choose Print / Save as PDF to use the browser print dialog. This is a local app; it does not provide iCloud sync, accounts or live collaboration.
+Opening the library reads summaries only. Opening a board loads its media on demand. Editing one board never rewrites another board or its unchanged attachments. Removing an attachment deletes its Blob only after its last board reference is removed. Undo can restore a removed attachment from the active session cache.
+
+Typing saves after **300 ms of inactivity**, with a **2-second maximum wait** during continuous typing. Structural edits save immediately. Switching boards, importing, closing the native app, or installing an update flushes outstanding writes. Failed writes remain pending and can be retried; “saved” is shown only after the transaction commits.
+
+Existing v1 IndexedDB and localStorage workspaces migrate automatically. Sources are merged per board using their timestamps. The migration commits all boards, media, references and its completion marker in one transaction before removing the legacy aggregate. An interrupted migration retains the original data and can be retried. The now-empty v1 object store may remain as a compatibility artifact; no workspace blob is written to it.
+
+A small **per-board metadata journal** is written to localStorage only when leaving a page with pending edits. It contains media IDs, never attachment bytes. Newer journals are replayed once on startup; an older completed save cannot erase a newer journal. If storage is unavailable or legacy data cannot be parsed, the app reports the problem rather than silently creating a replacement workspace.
+
+Boards stay in the current browser or desktop app on this device. JSON export/import includes media and is the portable backup format. SVG, PNG and print/PDF exports are also available. There are no accounts, cloud sync or live collaboration.
+
+## macOS build from a fresh clone
+
+Requires an Apple Silicon Mac, macOS 14+, Python 3, and Xcode Command Line Tools. No publisher signing key or pre-existing sandbox file is needed.
+
+```sh
+npm ci
+npm run build:mac
+```
+
+The helper downloads a checksum-pinned official Node runtime, prepares its own sandbox fixture, and builds `build/macos/Sparkboard.app`. The app bundles the runtime, all frontend modules/assets, backend helper modules and both software licenses. Private keys and user boards are excluded.
+
+To supply an already-downloaded **official self-contained** Node runtime and optionally make a DMG:
+
+```sh
+python3 scripts/build-macos.py \
+  --node /absolute/path/to/node-v24.22.1-darwin-arm64/bin/node \
+  --work /absolute/path/to/build \
+  --dmg /absolute/path/to/Sparkboard.dmg
+```
+
+A Homebrew binary with external dylib dependencies is rejected. Development builds are locally signed, not Apple-notarized.
+
+The app serves its private window from `localhost:43871`; its updater writes to `~/Library/Application Support/Sparkboard/updates`, outside the signed bundle. Browser and desktop workspaces are separate: use editable JSON export/import to move boards between them.
+
+## Updates and release signing
+
+**App updates → Local sandbox** exercises check, download, verified install and rollback without contacting GitHub. Prepare or refresh the local fixture with `npm run build` or `npm run sandbox:prepare`. The fixture uses an isolated local key and cannot be installed as a publisher-signed GitHub release. The tracked publisher public key is never replaced by a development build.
+
+Public releases use Ed25519 signatures plus SHA-256 file hashes. The updater stages a complete public-file manifest, activates it with an atomic pointer, and retains the previous version. A newer bundled desktop app takes precedence over an older staged web version. Node/updater bootstrap changes require a new desktop/server build; modular web releases declare updater protocol 2 so older installers reject incompatible bundles safely.
+
+Publisher workflow:
+
+```sh
+npm run release:build -- \
+  --version 1.2.1 \
+  --key /secure/path/to/publisher-private.pem \
+  --notes /absolute/path/to/release-notes.md
+```
+
+The private key must match `update-public-key.pem`. Missing or mismatched publisher keys fail with an actionable message, without changing the trust anchor. The original maintainer can also use the ignored `.sparkboard/keys/release-private.pem` location. Keep signing keys private and backed up.
+
+Publish a public GitHub release tagged with the matching version and attach the generated `sparkboard-update.json` under that exact filename. Then select **GitHub releases** in the app, save the repository URL and check for updates. Private repositories are not supported by this updater. Sandbox remains the default source.
 
 ## Shortcuts
 
-| Action | Shortcut |
-| --- | --- |
-| Select / Pan | V / H |
-| Pan temporarily | Space + drag |
-| Sticky / Text / Link | N / T / L |
-| Rectangle / Circle / Frame | R / O / F |
-| Connector / Draw | C / P |
-| Multi-select | Shift-click / drag empty canvas |
-| Select all | Cmd/Ctrl + A |
-| Edit | Enter or double-click |
-| Copy / Paste | Cmd/Ctrl + C / V |
-| Duplicate | Cmd/Ctrl + D |
-| Group / Ungroup | Cmd/Ctrl + G / Shift + G |
-| Undo / Redo | Cmd/Ctrl + Z / Shift + Z |
-| Find | Cmd/Ctrl + F |
-| Nudge | Arrow keys; Shift for 10 px |
-| Delete | Backspace / Delete |
-| Zoom | Pinch or Ctrl + scroll |
+| Action                     | Shortcut                        |
+| -------------------------- | ------------------------------- |
+| Select / Pan               | V / H                           |
+| Pan temporarily            | Space + drag                    |
+| Sticky / Text / Link       | N / T / L                       |
+| Rectangle / Circle / Frame | R / O / F                       |
+| Connector / Draw           | C / P                           |
+| Multi-select               | Shift-click / drag empty canvas |
+| Select all                 | Cmd/Ctrl + A                    |
+| Edit                       | Enter or double-click           |
+| Copy / Paste               | Cmd/Ctrl + C / V                |
+| Duplicate                  | Cmd/Ctrl + D                    |
+| Group / Ungroup            | Cmd/Ctrl + G / Shift + G        |
+| Undo / Redo                | Cmd/Ctrl + Z / Shift + Z        |
+| Find                       | Cmd/Ctrl + F                    |
+| Nudge                      | Arrow keys; Shift for 10 px     |
+| Delete                     | Backspace / Delete              |
+| Zoom                       | Pinch or Ctrl + scroll          |
 
 Google Fonts are optional; system fonts are used when unavailable.
 
-## Updates (sandbox enabled)
+## License
 
-Open **App updates** in the header. The default **Local sandbox** source makes no GitHub requests. A signed local v1.1.1 test release is included in this workspace. Try **Check for updates → Download update → Install & reload**. Use **Restore** to return to the previous version, or **Reset sandbox** to return to the bundled app and repeat the exercise. Boards, images, PDFs and scenes remain in the same browser storage. Pending edits are saved before an install or rollback.
-
-The updater verifies an Ed25519 publisher signature and SHA-256 hashes before staging files. Activation changes an atomic local pointer; bundled source files are retained. An incomplete installed release restores the bundled app on server startup. Runtime state, downloaded versions and signing secrets live in the ignored `.sparkboard/` directory and cannot be fetched through the web server.
-
-This updater installs the web app files. The Node server and updater bootstrap are retained separately and require a normal source update when those components change.
-
-### Prepare a sandbox release
-
-Run `npm run sandbox:prepare` after editing the bundled app. This signs a test release one patch version above `package.json` using the local publisher key. Rebuild or reset the sandbox to test new source changes; an activated release serves its staged files until reset or rollback.
-
-### Connect GitHub later
-
-No live update repository is configured by default; the app stays in sandbox mode. To connect a public release repository later:
-
-1. Keep `.sparkboard/keys/release-private.pem` private and backed up. Keep `update-public-key.pem` with the app. The public key must remain stable for existing installations to trust your releases.
-2. Prepare release notes in a text file and run `npm run release:build -- --version 1.2.0 --notes /absolute/path/to/release-notes.txt`.
-3. Publish a public GitHub release tagged `v1.2.0` and attach the generated `.sparkboard/releases/1.2.0/sparkboard-update.json` asset under the exact filename `sparkboard-update.json`. The payload version and release tag must agree.
-4. Open App updates, select **GitHub releases**, enter that repository's URL, and choose **Save update source**.
-5. Check, download and install. Releases signed by a different key, incompatible packages and files with invalid hashes are rejected. Private repositories are not supported by this local updater.
-
-Release discovery uses GitHub's latest stable release API; release assets are downloaded over HTTPS from GitHub's asset servers. The sandbox uses the same package verifier, staging, activation and rollback code with a local source.
-
-## macOS app / DMG
-
-The Apple Silicon desktop wrapper lives in `desktop/Launcher.swift`. It uses a native WKWebView with persistent app storage and launches the bundled Node runtime on `localhost:43871`. Update staging lives in `~/Library/Application Support/Sparkboard/updates`, leaving the signed app bundle unchanged. JSON import/export is the supported way to move boards between a browser and the desktop app.
-
-The build helper `scripts/build-macos.py` accepts `--node /absolute/path/to/an/official/Node/bin/node --work /absolute/build/folder`. It produces a locally signed `.app`, bundles the public update-verification key and the signed sandbox release, and excludes private signing keys. Create a compressed disk image from a staging folder containing `Sparkboard.app`, an `Applications` shortcut, and installation instructions. The current DMG requires an Apple Silicon Mac running macOS 14 or later. It is not Apple-notarized.
+[MIT](LICENSE), copyright 2026 Sparkboard contributors. The desktop bundle includes Node.js's separate license.
