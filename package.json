@@ -1,0 +1,14 @@
+{
+  "name": "sparkboard",
+  "version": "1.1.0",
+  "private": true,
+  "description": "A local-first visual whiteboard inspired by Lucidspark",
+  "scripts": {
+    "start": "node server.cjs",
+    "check": "node --check app.js && node --check board-model.js && node --check server.cjs && node --check updater.cjs && node --check update-client.js && node --check scripts/release.cjs",
+    "test": "node --test board-model.test.cjs updater.test.cjs",
+    "sandbox:prepare": "node scripts/release.cjs --sandbox",
+    "release:build": "node scripts/release.cjs",
+    "release:keygen": "node scripts/release.cjs --keygen"
+  }
+}

@@ -1,0 +1,10 @@
+.sparkboard/
+node_modules/
+.DS_Store
+*.app/
+*.dmg
+*.dmg.sha256
+.env
+.env.*
+**/release-private.pem
+*.key
