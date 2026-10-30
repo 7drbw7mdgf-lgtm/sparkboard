@@ -1,12 +1,18 @@
 # Sparkboard
 
-A local-first canvas inspired by Lucidspark and Apple Freeform. MIT licensed.
+A simple, local-first visual whiteboard inspired by Lucidspark and Apple Freeform. Sketch ideas, organize sticky notes, connect shapes, and drop in images, PDFs, maps, and videos—all stored locally on your device with no accounts or cloud setup.
 
-[macOS release downloads](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases) · Apple Silicon · macOS 14+
+**[Download Sparkboard 1.2.0 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.2.0/Sparkboard-1.2.0-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.2.0) · [MIT License](LICENSE)
 
-## Start from a fresh clone
+## Install or run
 
-Requires Node.js 24 or newer. There is no frontend bundler and no API key is required.
+### macOS app
+
+Download **[Sparkboard-1.2.0-macOS-arm64.dmg](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.2.0/Sparkboard-1.2.0-macOS-arm64.dmg)**, open it, and drag **Sparkboard** to **Applications**. Everything needed to run the app is bundled inside.
+
+### Run in your browser
+
+Requires Node.js 24 or newer (no external API keys or frontend bundler required):
 
 ```sh
 git clone https://github.com/7drbw7mdgf-lgtm/sparkboard.git
@@ -16,112 +22,15 @@ npm run build
 npm start
 ```
 
-Open [localhost:3000](http://localhost:3000). `npm run build` checks the complete public-file/import graph and prepares a local sandbox update. It generates disposable sandbox signing keys under ignored `.sparkboard/`; it never needs the publisher's private key or changes `update-public-key.pem`.
+Then open [http://localhost:3000](http://localhost:3000).
 
-```sh
-npm run check         # Syntax-check all JavaScript modules
-npm test              # Board model, IndexedDB, save scheduling, updater and clean-build tests
-npm run format:check  # Check source formatting
-npm run format        # Format JavaScript, CSS, HTML and documentation
-```
+## Features
 
-The dev dependencies are a formatter and `fake-indexeddb` for storage tests. The running web app uses browser APIs and Node built-ins only.
-
-## Code map
-
-| Area                                                                         | Location                                                                  |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Startup and event registration                                               | `app.js`                                                                  |
-| Board lifecycle and save coordinator                                         | `src/boards.js`                                                           |
-| IndexedDB schema, migration, transactions, media encoding and debounce queue | `src/storage/`                                                            |
-| Canvas interaction, text editing, selection and commands                     | `src/canvas.js`, `src/editor.js`, `src/selection.js`, `src/commands.js`   |
-| Rendering, inspector, tools and viewport                                     | `src/rendering.js`, `src/inspector.js`, `src/tools.js`, `src/viewport.js` |
-| Media, clipboard, import/export, scenes and dialogs                          | The corresponding modules in `src/`                                       |
-| Session state and shared helpers                                             | `src/state.js`, `src/core.js`                                             |
-| Board geometry and portable-backup validation                                | `board-model.js`                                                          |
-| Update lifecycle                                                             | `updater.cjs`                                                             |
-| Signed package validation, GitHub transport and atomic files                 | `lib/updates/`                                                            |
-| Public asset manifest used by web builds, releases and desktop packaging     | `lib/public-files.cjs`                                                    |
-| Native macOS wrapper                                                         | `desktop/`                                                                |
-
-UI modules share session state and named operations; they do not open database transactions. The repository and save scheduler have no DOM dependency and are tested independently. The starter image lives in `assets/`, rather than as an encoded string inside the application source.
-
-## Create and collect
-
-- Sticky notes and editable text
-- One searchable Shapes menu: rectangle, circle, triangle, diamond, hexagon, star, arrow, speech bubble and frame
-- Object-to-object connectors and freehand drawing with color and width controls
-- Images and PDF cards using the media button, clipboard or drag and drop
-- Images resize to at most 1400 pixels on the longest side; GIFs become still images
-- PDF cards retain the original document for download; there is no inline PDF viewer
-- Web link cards; paste a URL to create one
-
-Shift-click or drag empty canvas to select multiple items. **Style & arrange** provides text formatting, rotation, grouping, layer order, locking, alignment and distribution. Frames are visual containers; group a frame with its contents to move them together. Scenes save named camera positions. Find searches the active board; the board library searches board titles.
-
-## Storage and autosave
-
-IndexedDB database `sparkboard-workspace`, schema version 2, contains:
-
-| Store       | Entry                                                                      |
-| ----------- | -------------------------------------------------------------------------- |
-| `boards`    | One board keyed by ID, with media references instead of embedded file data |
-| `summaries` | One lightweight library row per board, without objects or attachments      |
-| `media`     | One binary Blob per unique file content and MIME type                      |
-| `mediaRefs` | Indexed board-to-media references for shared-file lifetime tracking        |
-| `settings`  | Individual active-board and migration settings                             |
-
-Opening the library reads summaries only. Opening a board loads its media on demand. Editing one board never rewrites another board or its unchanged attachments. Removing an attachment deletes its Blob only after its last board reference is removed. Undo can restore a removed attachment from the active session cache.
-
-Typing saves after **300 ms of inactivity**, with a **2-second maximum wait** during continuous typing. Structural edits save immediately. Switching boards, importing, closing the native app, or installing an update flushes outstanding writes. Failed writes remain pending and can be retried; “saved” is shown only after the transaction commits.
-
-Existing v1 IndexedDB and localStorage workspaces migrate automatically. Sources are merged per board using their timestamps. The migration commits all boards, media, references and its completion marker in one transaction before removing the legacy aggregate. An interrupted migration retains the original data and can be retried. The now-empty v1 object store may remain as a compatibility artifact; no workspace blob is written to it.
-
-A small **per-board metadata journal** is written to localStorage only when leaving a page with pending edits. It contains media IDs, never attachment bytes. Newer journals are replayed once on startup; an older completed save cannot erase a newer journal. If storage is unavailable or legacy data cannot be parsed, the app reports the problem rather than silently creating a replacement workspace.
-
-Boards stay in the current browser or desktop app on this device. JSON export/import includes media and is the portable backup format. SVG, PNG and print/PDF exports are also available. There are no accounts, cloud sync or live collaboration.
-
-## macOS build from a fresh clone
-
-Requires an Apple Silicon Mac, macOS 14+, Python 3, and Xcode Command Line Tools. No publisher signing key or pre-existing sandbox file is needed.
-
-```sh
-npm ci
-npm run build:mac
-```
-
-The helper downloads a checksum-pinned official Node runtime, prepares its own sandbox fixture, and builds `build/macos/Sparkboard.app`. The app bundles the runtime, all frontend modules/assets, backend helper modules and both software licenses. Private keys and user boards are excluded.
-
-To supply an already-downloaded **official self-contained** Node runtime and optionally make a DMG:
-
-```sh
-python3 scripts/build-macos.py \
-  --node /absolute/path/to/node-v24.22.1-darwin-arm64/bin/node \
-  --work /absolute/path/to/build \
-  --dmg /absolute/path/to/Sparkboard.dmg
-```
-
-A Homebrew binary with external dylib dependencies is rejected. Development builds are locally signed, not Apple-notarized.
-
-The app serves its private window from `localhost:43871`; its updater writes to `~/Library/Application Support/Sparkboard/updates`, outside the signed bundle. Browser and desktop workspaces are separate: use editable JSON export/import to move boards between them.
-
-## Updates and release signing
-
-**App updates → Local sandbox** exercises check, download, verified install and rollback without contacting GitHub. Prepare or refresh the local fixture with `npm run build` or `npm run sandbox:prepare`. The fixture uses an isolated local key and cannot be installed as a publisher-signed GitHub release. The tracked publisher public key is never replaced by a development build.
-
-Public releases use Ed25519 signatures plus SHA-256 file hashes. The updater stages a complete public-file manifest, activates it with an atomic pointer, and retains the previous version. A newer bundled desktop app takes precedence over an older staged web version. Node/updater bootstrap changes require a new desktop/server build; modular web releases declare updater protocol 2 so older installers reject incompatible bundles safely.
-
-Publisher workflow:
-
-```sh
-npm run release:build -- \
-  --version 1.2.1 \
-  --key /secure/path/to/publisher-private.pem \
-  --notes /absolute/path/to/release-notes.md
-```
-
-The private key must match `update-public-key.pem`. Missing or mismatched publisher keys fail with an actionable message, without changing the trust anchor. The original maintainer can also use the ignored `.sparkboard/keys/release-private.pem` location. Keep signing keys private and backed up.
-
-Publish a public GitHub release tagged with the matching version and attach the generated `sparkboard-update.json` under that exact filename. Then select **GitHub releases** in the app, save the repository URL and check for updates. Private repositories are not supported by this updater. Sandbox remains the default source.
+- **Notes, shapes & drawing:** Sticky notes, editable text, object-to-object connectors, freehand drawing, and a searchable shape menu (rectangle, circle, triangle, diamond, hexagon, star, arrow, speech bubble, and frame).
+- **PDFs, videos & maps:** Drop in images and local PDFs (rendered right on the board with page navigation), or use the **Embed** menu to add YouTube/Vimeo videos, Google Maps, and PDF links.
+- **Floating workspace:** Switch between open boards in the top tab bar, close tabs without deleting boards, reopen saved boards from the library, and double-click any tab (or press `F2`) to rename it.
+- **Arrange & style:** Multi-select, group, lock, rotate, align, and reorder layers from **Style & arrange**. Toggle grid and snapping together with a single button, and save named camera positions with **Scenes**.
+- **Local storage & backups:** Boards autosave locally on your device. Export or import full editable JSON backups (including attachments) to back up your work or move boards between the browser and Mac app, or export to PNG, SVG, and PDF.
 
 ## Shortcuts
 
@@ -135,6 +44,7 @@ Publish a public GitHub release tagged with the matching version and attach the 
 | Multi-select               | Shift-click / drag empty canvas |
 | Select all                 | Cmd/Ctrl + A                    |
 | Edit                       | Enter or double-click           |
+| Rename board tab           | Double-click tab or F2          |
 | Copy / Paste               | Cmd/Ctrl + C / V                |
 | Duplicate                  | Cmd/Ctrl + D                    |
 | Group / Ungroup            | Cmd/Ctrl + G / Shift + G        |
@@ -144,20 +54,15 @@ Publish a public GitHub release tagged with the matching version and attach the 
 | Delete                     | Backspace / Delete              |
 | Zoom                       | Pinch or Ctrl + scroll          |
 
-Google Fonts are optional; system fonts are used when unavailable.
+## Development & packaging
+
+```sh
+npm run check         # Syntax-check all JavaScript modules
+npm test              # Run automated tests
+npm run format        # Format JavaScript, CSS, HTML and Markdown
+npm run build:mac     # Build build/macos/Sparkboard.app (Apple Silicon, macOS 14+)
+```
 
 ## License
 
-[MIT](LICENSE), copyright 2026 Sparkboard contributors. The desktop bundle includes Node.js's separate license.
-
-### Embedded content
-
-The toolbar’s Embed menu adds YouTube/Vimeo videos, maps by place or full Google Maps link, and remote PDF links. Local PDFs use the file picker and render on the board with page navigation and a download option. Activate a card to interact with it; drag its heading or resize its corner to arrange it. External content loads only when activated, and remote PDF hosts may restrict embedding. Image/PDF exports show embed titles and addresses; editable JSON backups preserve embeds and local attachments.
-
-The bundled local PDF viewer uses Mozilla PDF.js 6.4.299 (Apache-2.0); upstream license notices are retained in `assets/pdfjs/`. Its browser and worker files, character maps, standard fonts, and image decoders are served locally. No PDF bytes are uploaded for rendering.
-
-### Workspace controls
-
-The floating strip contains only open board tabs. Use the library button to reopen saved boards, the plus button for a new board, and each tab’s close button to close its view. Closing a tab preserves its board and attachments. Open tabs persist across reloads. Double-click a tab name, or focus it and press F2, to rename the board.
-
-Board actions live in the floating pill at the top right. Undo, redo, grid, and help sit above zoom at the bottom right. The single grid button toggles both the visible grid and snapping together.
+[MIT](LICENSE), copyright 2026 Sparkboard contributors. The macOS bundle includes the Node.js runtime license, and the local PDF viewer uses bundled Mozilla PDF.js (Apache-2.0) in `assets/pdfjs/`.
