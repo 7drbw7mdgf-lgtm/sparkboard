@@ -27,6 +27,9 @@ export function undo() {
   state.future.push(boardState());
   Object.assign(state.board, state.history.pop());
   state.selected.clear();
+  state.reshapeId = null;
+  state.connectorStart = null;
+  state.connectorDraft = null;
   render();
   save();
 }
@@ -36,6 +39,9 @@ export function redo() {
   state.history.push(boardState());
   Object.assign(state.board, state.future.pop());
   state.selected.clear();
+  state.reshapeId = null;
+  state.connectorStart = null;
+  state.connectorDraft = null;
   render();
   save();
 }

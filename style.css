@@ -1631,7 +1631,7 @@ header .divider {
   max-width: 57%;
 }
 #connections {
-  z-index: -9;
+  z-index: 2;
 }
 
 /* Floating workspace controls keep the canvas open and the board strip compact. */
@@ -2324,11 +2324,15 @@ header .divider {
   cursor: move;
   pointer-events: all;
 }
+#connections .connector-endpoint,
+#connections .selection-halo,
+#connections .connector-draft {
+  pointer-events: none;
+}
 #connections .connector-endpoint {
   fill: #fff;
   stroke: #ed7959;
   stroke-width: 2px;
-  pointer-events: none;
 }
 #connections .connector-label {
   pointer-events: all;
@@ -2339,6 +2343,22 @@ header .divider {
   stroke-width: 1.2px;
   stroke-dasharray: 4 3;
   pointer-events: none;
+}
+#canvas:not([data-tool='select']):not([data-tool='eraser']) #connections path,
+#canvas:not([data-tool='select']):not([data-tool='eraser']) #connections .connector-label,
+body.is-panning #connections path,
+body.is-panning #connections .connector-label {
+  pointer-events: none;
+}
+#canvas[data-tool='pen'] #objects .object,
+#canvas[data-tool='line'] #objects .object,
+#canvas[data-tool='eraser'] #objects .object,
+#canvas[data-tool='hand'] #objects .object,
+body.is-panning #objects .object {
+  pointer-events: none;
+}
+body.is-panning #canvas {
+  cursor: grabbing !important;
 }
 #properties #reshape svg {
   width: 16px;

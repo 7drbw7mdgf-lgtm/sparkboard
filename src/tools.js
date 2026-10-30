@@ -71,7 +71,9 @@ export function setTool(t) {
   finishEdit();
   state.tool = t;
   state.connectorStart = null;
+  state.connectorDraft = null;
   if (t !== 'select') state.reshapeId = null;
+  $('#canvas').dataset.tool = t;
   $$('#tools [data-tool]').forEach((b) => b.classList.toggle('active', b.dataset.tool === t));
   $('#shape-toggle').classList.toggle('active', M.shapes.includes(t));
   closeShapes();
@@ -88,7 +90,8 @@ export function setTool(t) {
     if (scenesPanel) scenesPanel.hidden = true;
   }
   properties();
-  $('#canvas').style.cursor = t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
+  $('#canvas').style.cursor =
+    state.space || t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
   $('#hint').textContent =
     t === 'line'
       ? 'Drag on the canvas to draw a line · Format options on the right'
@@ -102,5 +105,5 @@ export function setTool(t) {
               ? 'Shift-click to multi-select · Drag ports ● to connect · Space + drag to pan'
               : t === 'hand'
                 ? 'Drag to move around your board'
-                : `Click to add ${shapeNames[t] || t}`;
+                : `Click or drag to add ${shapeNames[t] || t}`;
 }

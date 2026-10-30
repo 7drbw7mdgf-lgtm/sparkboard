@@ -52,6 +52,13 @@ export const icons = {
   link: '<path d="m10 14 4-4M9 16l-2 2a4 4 0 0 1-5-5l5-5a4 4 0 0 1 5 0m0 0 2-2a4 4 0 0 1 5 5l-5 5a4 4 0 0 1-5 0"/>',
 };
 export const shapeNames = {
+  sticky: 'Sticky note',
+  text: 'Text',
+  path: 'Freehand drawing',
+  image: 'Image',
+  file: 'PDF document',
+  link: 'Web link',
+  embed: 'Embed',
   shape: 'Rectangle',
   pill: 'Rounded pill',
   circle: 'Circle',

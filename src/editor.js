@@ -89,8 +89,14 @@ export function finishEdit() {
   save();
 }
 export function activeEditor() {
-  return (
-    document.activeElement?.matches('input,textarea,select,[contenteditable="plaintext-only"]') ||
-    state.editing
-  );
+  const el = document.activeElement;
+  if (!el) return state.editing;
+  if (el.matches('textarea,[contenteditable="plaintext-only"]')) return true;
+  if (el.tagName === 'INPUT') {
+    const type = (el.type || 'text').toLowerCase();
+    return !['range', 'color', 'checkbox', 'radio', 'file', 'button', 'submit', 'reset'].includes(
+      type,
+    );
+  }
+  return state.editing;
 }

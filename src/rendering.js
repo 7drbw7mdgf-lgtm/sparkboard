@@ -95,6 +95,39 @@ export function render() {
   updateHistory();
 }
 
+export function renderFast() {
+  if (!state.board) return;
+  const objectsById = new Map(state.board.objects.map((item) => [item.id, item]));
+  $$('#objects .object').forEach((el) => {
+    const n = objectsById.get(el.dataset.id);
+    if (!n) return;
+    el.style.cssText = objectStyle(n);
+    if (M.shapes.includes(n.type)) {
+      const svg = el.querySelector('.shape-body');
+      if (svg) svg.outerHTML = shapeSvg(n);
+      if (state.reshapeId === n.id) {
+        const verts = M.shapeVertices(n);
+        const edges = el.querySelectorAll('.edge-handle');
+        verts.forEach((v, i) => {
+          const next = verts[(i + 1) % verts.length];
+          if (edges[i]) {
+            edges[i].style.left = `${(v.x + next.x) / 2}%`;
+            edges[i].style.top = `${(v.y + next.y) / 2}%`;
+          }
+        });
+        const handles = el.querySelectorAll('.vertex-handle');
+        verts.forEach((v, i) => {
+          if (handles[i]) {
+            handles[i].style.left = `${v.x}%`;
+            handles[i].style.top = `${v.y}%`;
+          }
+        });
+      }
+    }
+  });
+  renderLines();
+}
+
 export function connectorGeometry(n) {
   return M.connectorRoute(n, state.board?.objects || []).d;
 }
@@ -104,10 +137,16 @@ export function renderLines() {
   M.dedupeConnectors(state.board.objects);
   const lines = state.board.objects
     .filter((n) => ['connector', 'line', 'path'].includes(n.type))
+    .slice()
+    .sort((a, b) => (a.z ?? 0) - (b.z ?? 0))
     .map((n) => {
       const selected = state.selected.has(n.id);
       if (n.type === 'path') {
         const d = M.smoothPath(n.points);
+        const width = n.strokeWidth || 4;
+        const halo = selected
+          ? `<path class="selection-halo" d="${d}" fill="none" stroke="#ed7959" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.32"/>`
+          : '';
         const anchors =
           state.reshapeId === n.id && selected && !n.locked
             ? n.points
@@ -116,8 +155,10 @@ export function renderLines() {
                     `<circle class="path-vertex" data-id="${n.id}" data-path-vertex="${i}" cx="${p.x}" cy="${p.y}" r="5"/>`,
                 )
                 .join('')
-            : '';
-        return `<g data-id="${n.id}"><path class="path-hit" data-id="${n.id}" d="${d}" fill="none" stroke="transparent" stroke-width="${Math.max(14, (n.strokeWidth || 4) + 10)}" stroke-linecap="round" stroke-linejoin="round"/><path data-id="${n.id}" d="${d}" fill="none" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 4}" stroke-linecap="round" stroke-linejoin="round"${lineDashAttr(n.lineStyle, n.strokeWidth || 4)}/>${anchors}</g>`;
+            : selected && n.points.length
+              ? `<circle class="connector-endpoint" data-id="${n.id}" cx="${n.points[0].x}" cy="${n.points[0].y}" r="4"/><circle class="connector-endpoint" data-id="${n.id}" cx="${n.points.at(-1).x}" cy="${n.points.at(-1).y}" r="4"/>`
+              : '';
+        return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="path-hit" data-id="${n.id}" d="${d}" fill="none" stroke="transparent" stroke-width="${Math.max(14, width + 10)}" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${d}" fill="none" stroke="${n.color || '#86917b'}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${lineDashAttr(n.lineStyle, width)}/>${anchors}</g>`;
       }
       const route = n.type === 'line' ? M.lineRoute(n) : M.connectorRoute(n, state.board.objects);
       if (!route.d) return '';
@@ -125,6 +166,9 @@ export function renderLines() {
         width = n.strokeWidth || 2,
         dash = lineDashAttr(n.lineStyle || 'solid', width),
         markers = markerAttrs(n);
+      const halo = selected
+        ? `<path class="selection-halo" d="${route.d}" fill="none" stroke="#ed7959" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.28"/>`
+        : '';
       const label = n.text
         ? (() => {
             const w = Math.max(44, Math.min(240, n.text.length * 7.4 + 20));
@@ -136,7 +180,7 @@ export function renderLines() {
           ? `<circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="0" cx="${route.start.x}" cy="${route.start.y}" r="5.5"/><circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="${n.points.length - 1}" cx="${route.end.x}" cy="${route.end.y}" r="5.5"/>`
           : `<circle class="connector-endpoint" data-id="${n.id}" cx="${route.start.x}" cy="${route.start.y}" r="4.5"/><circle class="connector-endpoint" data-id="${n.id}" cx="${route.end.x}" cy="${route.end.y}" r="4.5"/>`
         : '';
-      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${handles}</g>`;
+      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${handles}</g>`;
     })
     .join('');
   const draft = state.connectorDraft
@@ -159,7 +203,7 @@ export function selectVisual() {
   }
   // Index once rather than scanning the entire board for every rendered element.
   const objectsById = new Map(state.board.objects.map((item) => [item.id, item]));
-  $('#objects .object').forEach((el) => {
+  $$('#objects .object').forEach((el) => {
     const n = objectsById.get(el.dataset.id);
     if (!n) return;
     const isSelected = state.selected.has(n.id);

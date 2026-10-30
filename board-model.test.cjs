@@ -232,3 +232,98 @@ test('expanded shape library, standalone lines, arrowheads, dash styles and conn
   const validated = M.validateBoard({ objects });
   assert.equal(validated.objects.length, 4);
 });
+test('editor focus detection, shapeNames coverage, and selection halo / inspector rendering', async () => {
+  const { shapeNames } = await import('./src/icons.js');
+  for (const key of [
+    'sticky',
+    'text',
+    'path',
+    'image',
+    'file',
+    'link',
+    'embed',
+    'line',
+    'connector',
+    ...M.shapes,
+  ]) {
+    assert.ok(shapeNames[key], `Missing shapeNames entry for ${key}`);
+  }
+  const { activeEditor } = await import('./src/editor.js');
+  const prevDoc = globalThis.document;
+  try {
+    globalThis.document = {
+      activeElement: {
+        tagName: 'INPUT',
+        type: 'range',
+        matches: () => false,
+      },
+    };
+    assert.ok(!activeEditor(), 'Range input should not block canvas shortcuts');
+    globalThis.document.activeElement = {
+      tagName: 'INPUT',
+      type: 'color',
+      matches: () => false,
+    };
+    assert.ok(!activeEditor(), 'Color input should not block canvas shortcuts');
+    globalThis.document.activeElement = {
+      tagName: 'SELECT',
+      matches: () => false,
+    };
+    assert.ok(!activeEditor(), 'Select element should not block canvas shortcuts');
+    globalThis.document.activeElement = {
+      tagName: 'INPUT',
+      type: 'text',
+      matches: () => false,
+    };
+    assert.equal(activeEditor(), true, 'Text input should count as active editor');
+
+    const { state } = await import('./src/state.js');
+    const { selectVisual, renderFast } = await import('./src/rendering.js');
+    const makeEl = (id = '') => ({
+      dataset: { id },
+      style: { cssText: '' },
+      hidden: false,
+      disabled: false,
+      textContent: '',
+      innerHTML: '',
+      classList: { toggle: () => {}, add: () => {}, remove: () => {} },
+      setAttribute: () => {},
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      append: () => {},
+    });
+    const elements = new Map();
+    const objEl = makeEl('s1');
+    globalThis.document = {
+      querySelector: (sel) => {
+        if (sel === '#objects .object') return objEl; // single element without .forEach!
+        if (!elements.has(sel)) elements.set(sel, makeEl());
+        return elements.get(sel);
+      },
+      querySelectorAll: (sel) => (sel === '#objects .object' ? [objEl] : []),
+      createElement: () => makeEl(),
+    };
+    state.board = {
+      objects: [
+        { id: 's1', type: 'sticky', x: 10, y: 20, w: 190, h: 170, text: 'Note', color: '#f3eac2' },
+        {
+          id: 'p1',
+          type: 'path',
+          points: [
+            { x: 0, y: 0 },
+            { x: 40, y: 40 },
+          ],
+          color: '#626e56',
+          strokeWidth: 4,
+        },
+      ],
+      scenes: [],
+    };
+    state.selected = new Set(['s1', 'p1']);
+    selectVisual();
+    renderFast();
+    assert.match(elements.get('#connections').innerHTML, /selection-halo/);
+  } finally {
+    globalThis.document = prevDoc;
+  }
+});

@@ -1,12 +1,12 @@
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
 import { linkDialog } from './links.js';
-import { selectVisual } from './rendering.js';
+import { render, renderFast, selectVisual } from './rendering.js';
 import { closeShapes, setTool } from './tools.js';
 import { properties } from './inspector.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
-import { commit, redo, undo } from './history.js';
+import { commit, redo, snapshot, undo } from './history.js';
 import { command, deleteSelected, duplicate, toggleLock, toggleReshape } from './commands.js';
 import { applyView, fit, zoom } from './viewport.js';
 import { toggleScenes } from './scenes.js';
@@ -159,31 +159,82 @@ export function setupControls() {
     if (b.dataset.align) commit(() => M.align(editableNodes(), b.dataset.align));
     if (b.dataset.distribute) commit(() => M.distribute(editableNodes(), b.dataset.distribute));
   };
-  $('#inspector-body').onchange = (e) => {
-    const prop = e.target.dataset.prop;
-    if (!prop) return;
-    let value = e.target.value;
+  const applyInspectorProp = (prop, rawValue) => {
+    let value = rawValue;
     if (['fontSize', 'rotation', 'strokeWidth'].includes(prop)) {
       value = Number(value);
-      if (!Number.isFinite(value)) return;
+      if (!Number.isFinite(value)) return false;
       if (prop === 'fontSize') value = Math.max(8, Math.min(144, value));
       if (prop === 'rotation') value = Math.max(-360, Math.min(360, value));
     }
-    commit(() =>
-      editableNodes().forEach((n) => {
-        if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
-          n.type = value;
-          delete n.vertices;
-        } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
-          n.color = value;
-        } else if (prop === 'text' && ['connector', 'line'].includes(n.type)) {
-          const trimmed = String(value || '').trim();
-          if (trimmed) n.text = trimmed;
-          else delete n.text;
-        } else n[prop] = value;
-      }),
-    );
+    editableNodes().forEach((n) => {
+      if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
+        n.type = value;
+        delete n.vertices;
+      } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
+        n.color = value;
+      } else if (prop === 'text' && ['connector', 'line'].includes(n.type)) {
+        const trimmed = String(value || '').trim();
+        if (trimmed) n.text = trimmed;
+        else delete n.text;
+      } else n[prop] = value;
+    });
+    return true;
   };
+  let inspectorInputSnap = false;
+  $('#inspector-body').oninput = (e) => {
+    const prop = e.target.dataset.prop;
+    if (!prop || !['range', 'color'].includes(e.target.type)) return;
+    if (!inspectorInputSnap) {
+      snapshot();
+      inspectorInputSnap = true;
+    }
+    if (applyInspectorProp(prop, e.target.value)) renderFast();
+  };
+  $('#inspector-body').onchange = (e) => {
+    const prop = e.target.dataset.prop;
+    if (!prop) return;
+    if (inspectorInputSnap) {
+      inspectorInputSnap = false;
+      applyInspectorProp(prop, e.target.value);
+      render();
+      save();
+      return;
+    }
+    commit(() => applyInspectorProp(prop, e.target.value));
+  };
+  const lineOptsPanel = $('#line-options');
+  if (lineOptsPanel) {
+    lineOptsPanel.onchange = (e) => {
+      const id = e.target.id;
+      const map = {
+        'line-route': 'route',
+        'line-style': 'lineStyle',
+        'line-start-arrow': 'startArrow',
+        'line-end-arrow': 'endArrow',
+        'line-color': 'color',
+        'line-width': 'strokeWidth',
+      };
+      const prop = map[id];
+      if (!prop) return;
+      const targets = editableNodes().filter((n) => ['line', 'connector'].includes(n.type));
+      if (!targets.length) return;
+      const val = prop === 'strokeWidth' ? Number(e.target.value) || 2 : e.target.value;
+      commit(() => targets.forEach((n) => (n[prop] = val)));
+    };
+  }
+  const drawOptsPanel = $('#drawing-options');
+  if (drawOptsPanel) {
+    drawOptsPanel.onchange = (e) => {
+      const id = e.target.id;
+      const prop = id === 'pen-color' ? 'color' : id === 'pen-width' ? 'strokeWidth' : null;
+      if (!prop) return;
+      const targets = editableNodes().filter((n) => n.type === 'path');
+      if (!targets.length) return;
+      const val = prop === 'strokeWidth' ? Number(e.target.value) || 4 : e.target.value;
+      commit(() => targets.forEach((n) => (n[prop] = val)));
+    };
+  }
   document.addEventListener('pointerdown', (e) => {
     if (!e.target.closest('.shape-picker')) closeShapes();
   });
@@ -227,8 +278,11 @@ export function setupControls() {
       key = e.key.toLowerCase();
     if (e.code === 'Space') {
       e.preventDefault();
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur?.();
+      }
       state.space = true;
-      $('#canvas').style.cursor = 'grab';
+      if (state.drag?.type !== 'pan') $('#canvas').style.cursor = 'grab';
       return;
     }
     if (mod) {
@@ -309,9 +363,12 @@ export function setupControls() {
   });
   window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') {
+      if (!activeEditor()) e.preventDefault();
       state.space = false;
-      $('#canvas').style.cursor =
-        state.tool === 'hand' ? 'grab' : state.tool === 'select' ? 'default' : 'crosshair';
+      if (state.drag?.type !== 'pan') {
+        $('#canvas').style.cursor =
+          state.tool === 'hand' ? 'grab' : state.tool === 'select' ? 'default' : 'crosshair';
+      }
     }
   });
   window.addEventListener('blur', () => {

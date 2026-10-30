@@ -124,6 +124,23 @@ export function renderInspector() {
         )}</select></label></div><div class="form-row"><label>Color<input type="color" aria-label="Line color" data-prop="stroke" value="${n.color || '#86917b'}" ${disabled}></label><label>Thickness (${n.strokeWidth ?? 2}px)<input type="range" min="1" max="12" step="1" data-prop="strokeWidth" aria-label="Stroke width" value="${n.strokeWidth ?? 2}" ${disabled}></label></div>${!multi ? `<label class="stack-field">Label<input type="text" maxlength="160" placeholder="Add a line label…" value="${esc(n.text || '')}" data-prop="text" aria-label="Connector label" ${disabled}></label>` : ''}</div><div class="inspector-section"><label class="field-label">ORDER</label><div class="form-row"><button class="action-button" data-command="front" ${disabled}>↑ To front</button><button class="action-button" data-command="back" ${disabled}>↓ To back</button><button class="action-button" data-command="lock">${locked ? 'Unlock' : 'Lock'}</button></div></div>`;
     return;
   }
+  if (ns.every((item) => item.type === 'path')) {
+    const lineStyle = n.lineStyle || 'solid';
+    $('#inspector-body').innerHTML =
+      `<div class="inspector-section"><label class="field-label">STROKE STYLE <span>Freehand</span></label><div class="segmented">${[
+        ['solid', 'Solid'],
+        ['dashed', 'Dashed'],
+        ['dotted', 'Dotted'],
+      ]
+        .map(
+          ([k, label]) =>
+            `<button data-line-style="${k}" class="${lineStyle === k ? 'active' : ''}" ${disabled}>${label}</button>`,
+        )
+        .join(
+          '',
+        )}</div><div class="form-row"><label>Stroke<input type="color" aria-label="Stroke color" data-prop="stroke" value="${n.color || '#626e56'}" ${disabled}></label><label>Thickness (${n.strokeWidth ?? 4}px)<input type="range" min="1" max="16" step="1" data-prop="strokeWidth" aria-label="Stroke width" value="${n.strokeWidth ?? 4}" ${disabled}></label></div>${!multi ? `<div class="form-row"><button class="action-button ${state.reshapeId === n.id ? 'active' : ''}" data-command="reshape" ${disabled}>${state.reshapeId === n.id ? '✓ Done reshaping' : '◇ Reshape points'}</button></div>` : ''}</div><div class="inspector-section"><label class="field-label">ORDER</label><div class="form-row"><button class="action-button" data-command="front" ${disabled}>↑ To front</button><button class="action-button" data-command="back" ${disabled}>↓ To back</button><button class="action-button" data-command="lock">${locked ? 'Unlock' : 'Lock'}</button></div></div>`;
+    return;
+  }
   const shapePicker =
     !multi && M.shapes.includes(n.type)
       ? `<label class="stack-field">Shape<select data-prop="type" aria-label="Shape type" ${disabled}>${M.shapes
@@ -134,12 +151,16 @@ export function renderInspector() {
           .join('')}</select></label>`
       : '';
   const lineStyle = n.lineStyle || 'solid';
+  const hasFill = ns.some((item) => item.type === 'sticky' || M.shapes.includes(item.type));
+  const fillField = hasFill
+    ? `<label>Fill<input type="color" aria-label="Fill color" data-prop="color" value="${n.color && n.color !== 'transparent' ? n.color : '#e3ead8'}" ${disabled}></label>`
+    : '';
   const reshapeControls =
     !multi && (M.shapes.includes(n.type) || n.type === 'path')
       ? `<div class="form-row"><button class="action-button ${state.reshapeId === n.id ? 'active' : ''}" data-command="reshape" ${disabled}>${state.reshapeId === n.id ? '✓ Done reshaping' : '◇ Reshape points'}</button>${M.shapes.includes(n.type) ? `<button class="action-button" data-command="reset-vertices" ${Array.isArray(n.vertices) && !locked ? '' : 'disabled'}>Reset shape</button>` : ''}</div>`
       : '';
   $('#inspector-body').innerHTML =
-    `<div class="inspector-section"><label class="field-label">APPEARANCE <span>${multi ? ns.length + ' items' : shapeNames[n.type] || n.type}</span></label>${shapePicker}<div class="form-row"><label>Font size<input type="number" min="8" max="144" value="${n.fontSize || 17}" data-prop="fontSize" aria-label="Font size" ${disabled}></label><label>Rotation<input type="number" min="-360" max="360" value="${n.rotation || 0}" data-prop="rotation" aria-label="Rotation" ${disabled}></label></div><div class="segmented"><button data-command="bold" class="${n.fontWeight === 700 ? 'active' : ''}" title="Bold" ${disabled}><b>B</b></button>${['left', 'center', 'right'].map((a) => `<button data-align-text="${a}" title="Text align ${a}" class="${(n.align || 'center') === a ? 'active' : ''}" ${disabled}>${a === 'left' ? '☰' : a === 'center' ? '≡' : '☷'}</button>`).join('')}</div><div class="form-row"><label>Text<input type="color" aria-label="Text color" data-prop="textColor" value="${n.textColor || '#3c4234'}" ${disabled}></label><label>Border / ink<input type="color" aria-label="Border color" data-prop="stroke" value="${n.stroke || n.color || '#a8b39c'}" ${disabled}></label></div><div class="segmented">${[
+    `<div class="inspector-section"><label class="field-label">APPEARANCE <span>${multi ? ns.length + ' items' : shapeNames[n.type] || n.type}</span></label>${shapePicker}<div class="form-row"><label>Font size<input type="number" min="8" max="144" value="${n.fontSize || 17}" data-prop="fontSize" aria-label="Font size" ${disabled}></label><label>Rotation<input type="number" min="-360" max="360" value="${n.rotation || 0}" data-prop="rotation" aria-label="Rotation" ${disabled}></label></div><div class="segmented"><button data-command="bold" class="${n.fontWeight === 700 ? 'active' : ''}" title="Bold" ${disabled}><b>B</b></button>${['left', 'center', 'right'].map((a) => `<button data-align-text="${a}" title="Text align ${a}" class="${(n.align || 'center') === a ? 'active' : ''}" ${disabled}>${a === 'left' ? '☰' : a === 'center' ? '≡' : '☷'}</button>`).join('')}</div><div class="form-row">${fillField}<label>Text<input type="color" aria-label="Text color" data-prop="textColor" value="${n.textColor || '#3c4234'}" ${disabled}></label><label>Border / ink<input type="color" aria-label="Border color" data-prop="stroke" value="${n.stroke || n.color || '#a8b39c'}" ${disabled}></label></div><div class="segmented">${[
       ['solid', 'Solid'],
       ['dashed', 'Dashed'],
       ['dotted', 'Dotted'],

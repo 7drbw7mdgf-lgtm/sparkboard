@@ -83,15 +83,21 @@ export function setupViewport() {
     (e) => {
       if (e.target.closest('.pdf-viewer') && !e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
+      const factor = e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? 120 : 1,
+        dx = e.deltaX * factor,
+        dy = e.deltaY * factor;
       if (e.ctrlKey || e.metaKey)
         zoom(
-          state.view.z * Math.exp(-e.deltaY * 0.007),
+          state.view.z * Math.exp(-dy * 0.007),
           e.clientX,
           e.clientY - $('#canvas').getBoundingClientRect().top,
         );
-      else {
-        state.view.x -= e.deltaX;
-        state.view.y -= e.deltaY;
+      else if (e.shiftKey && dx === 0 && dy !== 0) {
+        state.view.x -= dy;
+        applyView();
+      } else {
+        state.view.x -= dx;
+        state.view.y -= dy;
         applyView();
       }
     },

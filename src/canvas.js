@@ -1,13 +1,25 @@
 import { toast } from './notifications.js';
-import { selectIds, selectedNodes } from './selection.js';
+import { selectIds } from './selection.js';
 import { applyView, point, screenPoint } from './viewport.js';
 import { save } from './boards.js';
-import { render, renderLines, selectVisual } from './rendering.js';
+import { render, renderFast, renderLines, selectVisual } from './rendering.js';
 import { finishEdit, startEdit } from './editor.js';
 import { setTool } from './tools.js';
 import { state } from './state.js';
-import { commit, snapshot } from './history.js';
+import { commit, snapshot, updateHistory } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
+
+function roundPt(p) {
+  return {
+    x: Math.round(p.x * 10) / 10,
+    y: Math.round(p.y * 10) / 10,
+  };
+}
+
+function isFrameInterior(n, p) {
+  if (!n || n.type !== 'frame') return false;
+  return p.x - n.x > 16 && n.x + n.w - p.x > 16 && p.y - n.y > 44 && n.y + n.h - p.y > 16;
+}
 
 function currentLineOptions(defaultRoute = 'straight') {
   return {
@@ -143,25 +155,41 @@ export function endPointer(e) {
   const d = state.drag;
   state.drag = null;
   state.guides = [];
+  document.body.classList.remove('is-panning');
+  $('#canvas').style.cursor =
+    state.space || state.tool === 'hand'
+      ? 'grab'
+      : state.tool === 'select'
+        ? 'default'
+        : 'crosshair';
   $('#selection-box').hidden = true;
   if (e && $('#canvas').hasPointerCapture(e.pointerId))
     $('#canvas').releasePointerCapture(e.pointerId);
+  if (d.type === 'pan') return;
   if (d.type === 'connect-port') {
     const draft = state.connectorDraft;
     state.connectorDraft = null;
     if (draft?.to && draft.to !== d.from) {
+      let createdId;
       commit(() => {
-        const opts = currentLineOptions('curved');
-        const id = upsertConnector({
+        const opts = d.opts || currentLineOptions('curved');
+        createdId = upsertConnector({
           from: d.from,
           to: draft.to,
           fromPort: d.fromPort,
           toPort: draft.toPort,
           ...opts,
         });
-        state.selected = new Set([id]);
+        state.selected = new Set([createdId]);
       });
+      state.connectorStart = null;
+      if (d.fromTool) setTool('select');
+      selectVisual();
     } else {
+      if (d.fromTool) {
+        state.connectorStart = d.from;
+        toast('Click another object to connect it');
+      }
       renderLines();
     }
     return;
@@ -194,17 +222,30 @@ export function endPointer(e) {
     setTool('select');
     return;
   }
+  if (d.type === 'draw-shape') {
+    setTool('select');
+    render();
+    save();
+    return;
+  }
   if (d.type === 'draw') {
     let n = state.board.objects.find((n) => n.id === d.id);
     if (n && n.points.length === 1)
       n.points.push({
-        x: n.points[0].x + 0.1,
-        y: n.points[0].y + 0.1,
+        x: Math.round((n.points[0].x + 0.5) * 10) / 10,
+        y: Math.round((n.points[0].y + 0.5) * 10) / 10,
       });
-    state.selected = new Set([d.id]);
-    render();
+    renderLines();
+    updateHistory();
     save();
-  } else if (d.changed) {
+    return;
+  }
+  if (d.type === 'move' && !d.changed && !d.shiftKey && d.wasSelected && state.selected.size > 1) {
+    state.selected = M.expandGroups(state.board.objects, [d.id]);
+    selectVisual();
+    return;
+  }
+  if (d.changed) {
     render();
     save();
   } else {
@@ -219,11 +260,20 @@ export function setupCanvas() {
     if (state.editing && e.target.closest('[contenteditable]')) return;
     e.preventDefault();
     finishEdit();
+    if (
+      document.activeElement &&
+      document.activeElement !== document.body &&
+      !e.target.closest('input,textarea,select,button,[contenteditable]')
+    ) {
+      document.activeElement.blur?.();
+    }
     const p = point(e),
-      el = e.target.closest('[data-id]'),
-      n = el && state.board.objects.find((n) => n.id === el.dataset.id);
+      el = e.target.closest('[data-id]');
+    let n = el && state.board.objects.find((n) => n.id === el.dataset.id);
     if (state.space || state.tool === 'hand' || e.button === 1) {
       e.preventDefault();
+      document.body.classList.add('is-panning');
+      $('#canvas').style.cursor = 'grabbing';
       state.drag = {
         type: 'pan',
         cx: e.clientX,
@@ -347,12 +397,12 @@ export function setupCanvas() {
       return;
     }
     if (state.tool === 'connector') {
-      if (!n || ['path', 'line', 'connector', 'frame'].includes(n.type)) return;
-      if (!state.connectorStart) {
-        state.connectorStart = n.id;
-        selectIds([n.id]);
-        toast('Click another object to connect it');
-      } else if (state.connectorStart !== n.id) {
+      if (!n || ['path', 'line', 'connector', 'frame'].includes(n.type)) {
+        state.connectorStart = null;
+        renderLines();
+        return;
+      }
+      if (state.connectorStart && state.connectorStart !== n.id) {
         const from = state.connectorStart,
           opts = currentLineOptions('curved');
         let createdId;
@@ -363,18 +413,40 @@ export function setupCanvas() {
             ...opts,
           });
         });
+        state.connectorStart = null;
         setTool('select');
         state.selected = new Set([createdId]);
         selectVisual();
+        return;
       }
+      const opts = currentLineOptions('curved'),
+        startPt = { x: Math.round(n.x + n.w / 2), y: Math.round(n.y + n.h / 2) };
+      state.connectorStart = n.id;
+      selectIds([n.id]);
+      state.connectorDraft = {
+        from: n.id,
+        d: `M${startPt.x},${startPt.y} L${p.x},${p.y}`,
+        ...opts,
+      };
+      state.drag = {
+        type: 'connect-port',
+        from: n.id,
+        fromPort: null,
+        startPt,
+        opts,
+        fromTool: true,
+      };
+      capture(e);
+      renderLines();
       return;
     }
     if (state.tool === 'pen') {
       snapshot();
+      const pt = roundPt(p);
       const path = {
         id: uid(),
         type: 'path',
-        points: [p],
+        points: [pt],
         color: $('#pen-color').value,
         strokeWidth: Number($('#pen-width').value),
       };
@@ -384,11 +456,52 @@ export function setupCanvas() {
         id: path.id,
       };
       capture(e);
+      renderLines();
+      return;
+    }
+    if (M.shapes.includes(state.tool)) {
+      snapshot();
+      const type = state.tool,
+        defaultW = type === 'frame' ? 420 : 190,
+        defaultH = type === 'frame' ? 320 : 170,
+        created = node(
+          type,
+          p.x,
+          p.y,
+          defaultW,
+          defaultH,
+          type === 'frame' ? 'NEW FRAME' : '',
+          type === 'frame' ? 'transparent' : colors[1],
+        );
+      state.board.objects.push(created);
+      state.selected = new Set([created.id]);
+      state.drag = {
+        type: 'draw-shape',
+        id: created.id,
+        shapeType: type,
+        start: p,
+        moved: false,
+      };
+      render();
+      capture(e);
       return;
     }
     if (state.tool !== 'select') {
       addAt(state.tool, p);
       return;
+    }
+    const rotateEl = e.target.closest('.rotate-handle');
+    const resizeEl = e.target.closest('.resize');
+    if (
+      n &&
+      n.type === 'frame' &&
+      !state.selected.has(n.id) &&
+      !e.shiftKey &&
+      !rotateEl &&
+      !resizeEl &&
+      isFrameInterior(n, p)
+    ) {
+      n = null;
     }
     if (!n) {
       if (!e.shiftKey) state.selected.clear();
@@ -403,8 +516,6 @@ export function setupCanvas() {
       selectVisual();
       return;
     }
-    const rotateEl = e.target.closest('.rotate-handle');
-    const resizeEl = e.target.closest('.resize');
     if (e.shiftKey && !rotateEl && !resizeEl) {
       const ids = M.expandGroups(state.board.objects, [n.id]);
       if (state.selected.has(n.id)) ids.forEach((id) => state.selected.delete(id));
@@ -412,7 +523,8 @@ export function setupCanvas() {
       selectVisual();
       return;
     }
-    if (!state.selected.has(n.id)) {
+    const wasSelected = state.selected.has(n.id);
+    if (!wasSelected) {
       state.selected = M.expandGroups(state.board.objects, [n.id]);
       if (state.reshapeId !== n.id) state.reshapeId = null;
     }
@@ -446,6 +558,8 @@ export function setupCanvas() {
       dir: resizeEl?.dataset.dir || 'se',
       start: p,
       id: n.id,
+      wasSelected,
+      shiftKey: e.shiftKey,
       movingIds,
       original: state.board.objects.filter((o) => movingIds.has(o.id) && !o.locked).map(M.clone),
       changed: false,
@@ -479,6 +593,27 @@ export function setupCanvas() {
         ...state.drag.opts,
       };
       renderLines();
+      return;
+    }
+    if (state.drag.type === 'draw-shape') {
+      const n = state.board.objects.find((o) => o.id === state.drag.id);
+      if (!n) return;
+      const dx = p.x - state.drag.start.x,
+        dy = p.y - state.drag.start.y;
+      if (!state.drag.moved && Math.hypot(dx, dy) * state.view.z < 6) return;
+      state.drag.moved = true;
+      let w = Math.max(36, Math.abs(dx)),
+        h = Math.max(36, Math.abs(dy));
+      if (e.shiftKey) {
+        const size = Math.max(w, h);
+        w = size;
+        h = size;
+      }
+      n.x = Math.round(dx < 0 ? state.drag.start.x - w : state.drag.start.x);
+      n.y = Math.round(dy < 0 ? state.drag.start.y - h : state.drag.start.y);
+      n.w = Math.round(w);
+      n.h = Math.round(h);
+      renderFast();
       return;
     }
     if (state.drag.type === 'connect-port') {
@@ -529,11 +664,14 @@ export function setupCanvas() {
         y = Math.min(p.y, state.drag.start.y),
         w = Math.abs(p.x - state.drag.start.x),
         h = Math.abs(p.y - state.drag.start.y);
+      if (w * state.view.z < 3 && h * state.view.z < 3) return;
       const ids = state.board.objects
-        .filter((n) => n.type !== 'frame' && n.type !== 'connector')
         .filter((n) => {
-          let b = M.bounds(n, state.board.objects);
-          return b.x >= x && b.y >= y && b.x + b.w <= x + w && b.y + b.h <= y + h;
+          const b = M.bounds(n, state.board.objects);
+          if (n.type === 'frame' || n.type === 'connector') {
+            return b.x >= x && b.y >= y && b.x + b.w <= x + w && b.y + b.h <= y + h;
+          }
+          return b.x + b.w >= x && b.x <= x + w && b.y + b.h >= y && b.y <= y + h;
         })
         .map((n) => n.id);
       state.selected = M.expandGroups(state.board.objects, [...state.drag.original, ...ids]);
@@ -543,8 +681,9 @@ export function setupCanvas() {
     const n = state.board.objects.find((n) => n.id === state.drag.id);
     if (!n) return;
     if (state.drag.type === 'draw') {
-      if (Math.hypot(p.x - n.points.at(-1).x, p.y - n.points.at(-1).y) > 2 / state.view.z) {
-        n.points.push(p);
+      const last = n.points.at(-1);
+      if (Math.hypot(p.x - last.x, p.y - last.y) > 1.5 / state.view.z) {
+        n.points.push(roundPt(p));
         renderLines();
       }
       return;
@@ -556,7 +695,7 @@ export function setupCanvas() {
       }
       const local = localShapePoint(n, p);
       M.moveVertex(n, state.drag.index, local);
-      render();
+      renderFast();
       return;
     }
     if (state.drag.type === 'line-vertex') {
@@ -575,7 +714,7 @@ export function setupCanvas() {
         snapshot();
         state.drag.changed = true;
       }
-      n.points[state.drag.index] = { x: p.x, y: p.y };
+      n.points[state.drag.index] = roundPt(p);
       renderLines();
       return;
     }
@@ -590,7 +729,7 @@ export function setupCanvas() {
       if (deg > 180) deg -= 360;
       if (e.shiftKey) deg = Math.round(deg / 15) * 15;
       n.rotation = deg;
-      render();
+      renderFast();
       return;
     }
     let dx = p.x - state.drag.start.x,
@@ -644,7 +783,7 @@ export function setupCanvas() {
         M.translate(target, dx, dy);
       }
     }
-    render();
+    renderFast();
   });
 
   $('#canvas').addEventListener('pointerup', endPointer);

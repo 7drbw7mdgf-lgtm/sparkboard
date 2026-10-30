@@ -2,15 +2,13 @@
 
 A simple, local-first visual whiteboard. Sketch ideas, organize sticky notes, connect shapes, and drop in images, PDFs, maps, and videos—all stored locally on your device with no accounts or cloud setup.
 
-**[Download Sparkboard 1.3.0 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.0/Sparkboard-1.3.0-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.3.0) · [MIT License](LICENSE)
-
-**Source version: 1.3.1.** The downloadable macOS installer remains **1.3.0** until a new signed and tested binary is published. See [v1.3.1 release notes](RELEASE_NOTES_1.3.1.md) for changes in source.
+**[Download Sparkboard 1.3.1 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.1/Sparkboard-1.3.1-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.3.1) · [MIT License](LICENSE)
 
 ## Install or run
 
 ### macOS app
 
-Download **[Sparkboard-1.3.0-macOS-arm64.dmg](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.0/Sparkboard-1.3.0-macOS-arm64.dmg)**, open it, and drag **Sparkboard** to **Applications**. Everything needed to run the app is bundled inside.
+Download **[Sparkboard-1.3.1-macOS-arm64.dmg](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.1/Sparkboard-1.3.1-macOS-arm64.dmg)**, open it, and drag **Sparkboard** to **Applications**. Everything needed to run the app is bundled inside.
 
 ### Run in your browser
 
