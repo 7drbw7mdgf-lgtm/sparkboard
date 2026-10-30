@@ -2,13 +2,13 @@
 
 A simple, local-first visual whiteboard. Sketch ideas, organize sticky notes, connect shapes, and drop in images, PDFs, maps, and videos—all stored locally on your device with no accounts or cloud setup.
 
-**[Download Sparkboard 1.2.0 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.2.0/Sparkboard-1.2.0-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.2.0) · [MIT License](LICENSE)
+**[Download Sparkboard 1.3.0 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.0/Sparkboard-1.3.0-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.3.0) · [MIT License](LICENSE)
 
 ## Install or run
 
 ### macOS app
 
-Download **[Sparkboard-1.2.0-macOS-arm64.dmg](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.2.0/Sparkboard-1.2.0-macOS-arm64.dmg)**, open it, and drag **Sparkboard** to **Applications**. Everything needed to run the app is bundled inside.
+Download **[Sparkboard-1.3.0-macOS-arm64.dmg](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.0/Sparkboard-1.3.0-macOS-arm64.dmg)**, open it, and drag **Sparkboard** to **Applications**. Everything needed to run the app is bundled inside.
 
 ### Run in your browser
 
@@ -26,8 +26,9 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ## Features
 
-- **Notes, shapes & vector reshaping:** Sticky notes, editable text, and a searchable 9-shape library. Press `A` or click **Reshape points** (`◇`) to drag, add, or remove vector anchor points on any shape or stroke just like Illustrator.
-- **Smart connectors & ports:** Drag from any object's `N / E / S / W` connection ports, switch between **Straight**, **Curved**, and **Elbow** routing, and add inline connector labels.
+- **Notes, 18 shapes & vector reshaping:** Sticky notes, editable text, and a searchable 18-shape library. Press `A` or click **Reshape points** (`◇`) to drag, add, or remove vector anchor points on any shape or stroke just like Illustrator.
+- **Line tool & smart connectors:** Draw standalone lines (`L`) or connect objects via `N / E / S / W` ports (`C`), with selectable **Straight**, **Curved**, and **Elbow** routing, **Solid / Dashed / Dotted** strokes, custom start/end arrowheads (`None`, `Open`, `Filled`, `Circle`, `Diamond`), and inline labels.
+- **Unified Format panel & built-in updates:** Customize appearance, line styles, shape types, and alignment in the **Format** panel, with automatic background update checks and verified one-click updates from GitHub releases.
 - **Smooth drawing & eraser:** Freehand strokes use quadratic Bezier smoothing, with a dedicated **Stroke Eraser (`E`)** tool.
 - **PDFs, videos & maps:** Drop in images and local PDFs (rendered right on the board with page navigation), or use the **Embed** menu to add YouTube/Vimeo videos, Google Maps, and PDF links.
 - **Floating workspace & smart frames:** Switch between open boards in the top tab bar, close tabs without deleting boards, and drag **Frames** to automatically move items inside them.
@@ -40,9 +41,10 @@ Then open [http://localhost:3000](http://localhost:3000).
 | -------------------------- | ------------------------------- |
 | Select / Pan               | V / H                           |
 | Pan temporarily            | Space + drag                    |
-| Sticky / Text / Link       | N / T / L                       |
+| Sticky / Text / Link       | N / T / K                       |
 | Rectangle / Circle / Frame | R / O / F                       |
-| Connector / Draw / Eraser  | C / P / E                       |
+| Line / Connect / Draw      | L / C / P                       |
+| Stroke eraser              | E                               |
 | Reshape anchor points      | A                               |
 | Multi-select               | Shift-click / drag empty canvas |
 | Select all                 | Cmd/Ctrl + A                    |
