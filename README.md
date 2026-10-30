@@ -26,11 +26,13 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ## Features
 
-- **Notes, shapes & drawing:** Sticky notes, editable text, object-to-object connectors, freehand drawing, and a searchable shape menu (rectangle, circle, triangle, diamond, hexagon, star, arrow, speech bubble, and frame).
+- **Notes, shapes & vector reshaping:** Sticky notes, editable text, and a searchable 9-shape library. Press `A` or click **Reshape points** (`◇`) to drag, add, or remove vector anchor points on any shape or stroke just like Illustrator.
+- **Smart connectors & ports:** Drag from any object's `N / E / S / W` connection ports, switch between **Straight**, **Curved**, and **Elbow** routing, and add inline connector labels.
+- **Smooth drawing & eraser:** Freehand strokes use quadratic Bezier smoothing, with a dedicated **Stroke Eraser (`E`)** tool.
 - **PDFs, videos & maps:** Drop in images and local PDFs (rendered right on the board with page navigation), or use the **Embed** menu to add YouTube/Vimeo videos, Google Maps, and PDF links.
-- **Floating workspace:** Switch between open boards in the top tab bar, close tabs without deleting boards, reopen saved boards from the library, and double-click any tab (or press `F2`) to rename it.
-- **Arrange & style:** Multi-select, group, lock, rotate, align, and reorder layers from **Style & arrange**. Toggle grid and snapping together with a single button, and save named camera positions with **Scenes**.
-- **Local storage & backups:** Boards autosave locally on your device. Export or import full editable JSON backups (including attachments) to back up your work or move boards between the browser and Mac app, or export to PNG, SVG, and PDF.
+- **Floating workspace & smart frames:** Switch between open boards in the top tab bar, close tabs without deleting boards, and drag **Frames** to automatically move items inside them.
+- **4-corner resize, rotation & smart guides:** Resize from any corner (`Shift` to lock aspect ratio), rotate directly on the canvas (`Shift` to snap 15°), and snap to orange smart-alignment guides.
+- **Local storage & backups:** Boards autosave locally on your device. Export or import full editable JSON backups (including attachments), or export to PNG, SVG, and PDF.
 
 ## Shortcuts
 
@@ -40,7 +42,8 @@ Then open [http://localhost:3000](http://localhost:3000).
 | Pan temporarily            | Space + drag                    |
 | Sticky / Text / Link       | N / T / L                       |
 | Rectangle / Circle / Frame | R / O / F                       |
-| Connector / Draw           | C / P                           |
+| Connector / Draw / Eraser  | C / P / E                       |
+| Reshape anchor points      | A                               |
 | Multi-select               | Shift-click / drag empty canvas |
 | Select all                 | Cmd/Ctrl + A                    |
 | Edit                       | Enter or double-click           |

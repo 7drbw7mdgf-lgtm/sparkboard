@@ -1,6 +1,6 @@
 import { toast } from './notifications.js';
 import { finishEdit } from './editor.js';
-import { connectorGeometry, shapeSvg } from './rendering.js';
+import { shapeSvg } from './rendering.js';
 import { state } from './state.js';
 import { M, colors, esc } from './core.js';
 export function wrapText(text, maxWidth, fontSize) {
@@ -29,11 +29,18 @@ export function exportSVG() {
   const lines = state.board.objects
     .filter((n) => ['path', 'connector'].includes(n.type))
     .map((n) => {
-      const d =
-        n.type === 'path'
-          ? n.points.map((p, i) => (i ? 'L' : 'M') + p.x + ',' + p.y).join(' ')
-          : connectorGeometry(n);
-      return `<path d="${d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || (n.type === 'path' ? 4 : 2)}" fill="none" stroke-linecap="round" stroke-linejoin="round" ${n.type === 'connector' ? 'marker-end="url(#export-arrow)"' : ''}/>`;
+      if (n.type === 'path') {
+        const d = M.smoothPath(n.points);
+        return `<path d="${d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 4}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
+      const route = M.connectorRoute(n, state.board.objects);
+      const label = n.text
+        ? (() => {
+            const w = Math.max(44, Math.min(240, n.text.length * 7.4 + 20));
+            return `<g transform="translate(${route.labelX},${route.labelY})"><rect x="${-w / 2}" y="-12" width="${w}" height="24" rx="12" fill="#ffffff" stroke="#d5dbd0" stroke-width="1.2"/><text text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#3c4234">${esc(n.text)}</text></g>`;
+          })()
+        : '';
+      return `<path d="${route.d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 2}" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#export-arrow)"/>${label}`;
     })
     .join('');
   const objects = state.board.objects

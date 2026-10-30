@@ -29,6 +29,10 @@ export const icons = {
   frame: '<path d="M4 9V4h5m6 0h5v5M4 15v5h5m6 0h5v-5"/>',
   connector: '<path d="M4 19 20 4m-7 0h7v7"/>',
   pen: '<path d="m5 16-1 5 5-1L21 8l-4-4ZM14 7l4 4"/>',
+  eraser:
+    '<path d="m7 21-4.3-4.3a2 2 0 0 1 0-2.8L14.6 2a2 2 0 0 1 2.8 0l4.3 4.3a2 2 0 0 1 0 2.8L11 21H7Zm14 0h-9M9 9l6 6"/>',
+  reshape:
+    '<rect x="3" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><path d="M7 5h10M19 7v10M17 19H7M5 17V7"/>',
   media:
     '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="2"/><path d="m3 18 6-6 4 4 3-3 5 5"/>',
   link: '<path d="m10 14 4-4M9 16l-2 2a4 4 0 0 1-5-5l5-5a4 4 0 0 1 5 0m0 0 2-2a4 4 0 0 1 5 5l-5 5a4 4 0 0 1-5 0"/>',
@@ -51,6 +55,7 @@ export const labels = {
   text: 'Text · T',
   connector: 'Connector · C',
   pen: 'Draw · P',
+  eraser: 'Stroke eraser · E',
   media: 'Images & PDFs',
   link: 'Link card · L',
   embed: 'Embed PDF, map or video',

@@ -2184,3 +2184,173 @@ header .divider {
   text-decoration: none;
   font-size: 10px;
 }
+
+/* 4-corner resize handles, rotation handle, connection ports, smart guides & Illustrator reshape */
+.object .resize {
+  border-radius: 2px;
+  box-shadow: 0 1px 3px #0000001a;
+}
+.object .resize.nw {
+  top: -7px;
+  left: -7px;
+  right: auto;
+  bottom: auto;
+  cursor: nwse-resize;
+}
+.object .resize.ne {
+  top: -7px;
+  right: -7px;
+  bottom: auto;
+  cursor: nesw-resize;
+}
+.object .resize.sw {
+  bottom: -7px;
+  left: -7px;
+  right: auto;
+  cursor: nesw-resize;
+}
+.object .resize.se {
+  bottom: -7px;
+  right: -7px;
+  cursor: nwse-resize;
+}
+.object .rotate-handle {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #ed7959;
+  cursor: grab;
+  z-index: 4;
+  box-shadow: 0 1px 4px #0000001f;
+}
+.object .rotate-handle::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5px;
+  height: 14px;
+  background: #ed7959;
+  pointer-events: none;
+}
+.object .port {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #7d8f69;
+  opacity: 0;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease;
+  z-index: 5;
+  cursor: crosshair;
+}
+.object:hover .port,
+.object.selected .port {
+  opacity: 0.9;
+}
+.object.reshaping .port,
+.object.editing .port,
+.object.locked .port {
+  display: none;
+}
+.object .port:hover {
+  opacity: 1;
+  background: #ed7959;
+  border-color: #ed7959;
+  transform: scale(1.28);
+}
+.object .port-n {
+  top: -15px;
+  left: calc(50% - 5px);
+}
+.object .port-s {
+  bottom: -15px;
+  left: calc(50% - 5px);
+}
+.object .port-e {
+  right: -15px;
+  top: calc(50% - 5px);
+}
+.object .port-w {
+  left: -15px;
+  top: calc(50% - 5px);
+}
+.object.reshaping {
+  outline: 1.5px dashed #4a78c2;
+  outline-offset: 2px;
+}
+.object .vertex-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  background: #fff;
+  border: 2px solid #3b6fc2;
+  border-radius: 2px;
+  cursor: move;
+  z-index: 6;
+  box-shadow: 0 1px 4px #00000026;
+}
+.object .vertex-handle:hover {
+  background: #3b6fc2;
+  transform: scale(1.2);
+}
+.object .edge-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  background: #eef4ff;
+  border: 1.5px solid #6b96db;
+  border-radius: 50%;
+  cursor: copy;
+  z-index: 5;
+  opacity: 0.85;
+}
+.object .edge-handle:hover {
+  background: #3b6fc2;
+  border-color: #3b6fc2;
+  transform: scale(1.3);
+  opacity: 1;
+}
+#connections .path-vertex {
+  fill: #fff;
+  stroke: #3b6fc2;
+  stroke-width: 2px;
+  cursor: move;
+  pointer-events: all;
+}
+#connections .connector-label {
+  pointer-events: all;
+  cursor: pointer;
+}
+#connections .smart-guide {
+  stroke: #ed7959;
+  stroke-width: 1.2px;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+#properties #reshape svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+#properties #reshape.active,
+.action-button.active {
+  background: #fff0e9;
+  color: #dd6945;
+  border-color: #edac96;
+}

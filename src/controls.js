@@ -7,7 +7,7 @@ import { properties } from './inspector.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
 import { commit, redo, undo } from './history.js';
-import { command, deleteSelected, duplicate, toggleLock } from './commands.js';
+import { command, deleteSelected, duplicate, toggleLock, toggleReshape } from './commands.js';
 import { applyView, fit, zoom } from './viewport.js';
 import { toggleScenes } from './scenes.js';
 import { modal, searchBoard, showBoards, showHelp } from './dialogs.js';
@@ -117,6 +117,7 @@ export function setupControls() {
   $('#edit').onclick = () => {
     if (state.selected.size === 1) startEdit([...state.selected][0]);
   };
+  if ($('#reshape')) $('#reshape').onclick = toggleReshape;
   $('#swatches').onclick = (e) => {
     let c = e.target.dataset.color;
     if (c)
@@ -140,6 +141,12 @@ export function setupControls() {
     const b = e.target.closest('button');
     if (!b) return;
     if (b.dataset.command) command(b.dataset.command);
+    if (b.dataset.route)
+      commit(() =>
+        editableNodes()
+          .filter((n) => n.type === 'connector')
+          .forEach((n) => (n.route = b.dataset.route)),
+      );
     if (b.dataset.alignText)
       commit(() => editableNodes().forEach((n) => (n.align = b.dataset.alignText)));
     if (b.dataset.align) commit(() => M.align(editableNodes(), b.dataset.align));
@@ -158,7 +165,11 @@ export function setupControls() {
     commit(() =>
       editableNodes().forEach((n) => {
         if (prop === 'stroke' && ['path', 'connector'].includes(n.type)) n.color = value;
-        else n[prop] = value;
+        else if (prop === 'text' && n.type === 'connector') {
+          const trimmed = String(value || '').trim();
+          if (trimmed) n.text = trimmed;
+          else delete n.text;
+        } else n[prop] = value;
       }),
     );
   };
@@ -182,6 +193,11 @@ export function setupControls() {
       if ($('#dialog').open) return;
       if (activeEditor()) {
         document.activeElement.blur();
+        return;
+      }
+      if (state.reshapeId) {
+        state.reshapeId = null;
+        selectVisual();
         return;
       }
       state.selected.clear();
@@ -249,7 +265,18 @@ export function setupControls() {
       let step = e.shiftKey ? 10 : 1,
         dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0,
         dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
-      commit(() => editableNodes().forEach((n) => M.translate(n, dx, dy)));
+      commit(() => {
+        const moving = new Set(editableNodes().map((n) => n.id));
+        for (const id of [...moving]) {
+          const item = state.board.objects.find((o) => o.id === id);
+          if (item?.type === 'frame') {
+            M.frameChildren(state.board.objects, item.id).forEach((cid) => moving.add(cid));
+          }
+        }
+        state.board.objects
+          .filter((n) => moving.has(n.id) && !n.locked)
+          .forEach((n) => M.translate(n, dx, dy));
+      });
       return;
     }
     const map = {
@@ -262,8 +289,10 @@ export function setupControls() {
       f: 'frame',
       c: 'connector',
       p: 'pen',
+      e: 'eraser',
     };
-    if (key === 'l') linkDialog();
+    if (key === 'a' && state.selected.size === 1) toggleReshape();
+    else if (key === 'l') linkDialog();
     else if (map[key]) setTool(map[key]);
   });
   window.addEventListener('keyup', (e) => {

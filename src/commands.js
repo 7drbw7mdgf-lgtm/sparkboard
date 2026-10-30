@@ -1,4 +1,5 @@
 import { toast } from './notifications.js';
+import { selectVisual } from './rendering.js';
 import { M, uid } from './core.js';
 import { state } from './state.js';
 import { commit } from './history.js';
@@ -11,29 +12,60 @@ export function deleteSelected() {
       (n) => !ids.has(n.id) && !ids.has(n.from) && !ids.has(n.to),
     );
     state.selected.clear();
+    state.reshapeId = null;
   });
 }
 export function duplicate() {
   if (!editableNodes().length) return;
   commit(() => {
-    const copies = M.duplicate(state.board.objects, state.selected, uid);
+    const expanded = new Set(state.selected);
+    for (const id of state.selected) {
+      const n = state.board.objects.find((o) => o.id === id);
+      if (n?.type === 'frame') {
+        M.frameChildren(state.board.objects, n.id).forEach((cid) => expanded.add(cid));
+      }
+    }
+    const copies = M.duplicate(state.board.objects, expanded, uid);
     state.board.objects.push(...copies);
     state.selected = new Set(copies.map((n) => n.id));
+    state.reshapeId = null;
   });
 }
 export function toggleLock() {
   const allLocked = selectedNodes().every((n) => n.locked);
+  state.reshapeId = null;
   commit(() => selectedNodes().forEach((n) => (n.locked = !allLocked)));
   toast(allLocked ? 'Selection unlocked' : 'Selection locked');
+}
+export function toggleReshape() {
+  const ns = editableNodes();
+  if (ns.length !== 1) return;
+  const n = ns[0];
+  if (!M.shapes.includes(n.type) && n.type !== 'path') return;
+  state.reshapeId = state.reshapeId === n.id ? null : n.id;
+  selectVisual();
+  toast(
+    state.reshapeId
+      ? 'Reshape mode: drag anchor points, click midpoints to add, Option-click to remove'
+      : 'Reshape mode off',
+  );
 }
 export function command(action) {
   if (action === 'lock') {
     toggleLock();
     return;
   }
+  if (action === 'reshape') {
+    toggleReshape();
+    return;
+  }
   if (!editableNodes().length) return;
   commit(() => {
     const ns = editableNodes();
+    if (action === 'reset-vertices') {
+      ns.forEach((n) => delete n.vertices);
+      state.reshapeId = null;
+    }
     if (action === 'bold') ns.forEach((n) => (n.fontWeight = n.fontWeight === 700 ? 400 : 700));
     if (action === 'group') {
       let group = uid();

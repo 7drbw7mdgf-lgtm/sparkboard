@@ -103,3 +103,81 @@ test('fit bounds include drawings and rotated objects', () => {
   assert.ok(box.y < 0);
   assert.equal(box.y + box.h, 200);
 });
+test('connector routing supports straight, curved and elbow paths with ports and labels', () => {
+  const objects = [n('a', 0, 0), n('b', 300, 120)];
+  const straight = M.connectorRoute({ from: 'a', to: 'b', route: 'straight' }, objects);
+  const curved = M.connectorRoute(
+    { from: 'a', to: 'b', route: 'curved', fromPort: 'e', toPort: 'w', text: 'Next step' },
+    objects,
+  );
+  const elbow = M.connectorRoute(
+    { from: 'a', to: 'b', route: 'elbow', fromPort: 's', toPort: 'n' },
+    objects,
+  );
+  assert.match(straight.d, /^M[\d.-]+,[\d.-]+ L[\d.-]+,[\d.-]+$/);
+  assert.match(curved.d, /^M[\d.-]+,[\d.-]+ C/);
+  assert.match(elbow.d, /^M[\d.-]+,[\d.-]+ (L[\d.-]+,[\d.-]+ ?){3,}$/);
+  assert.ok(Number.isFinite(curved.labelX) && Number.isFinite(curved.labelY));
+  const validated = M.validateBoard({
+    objects: [
+      ...objects,
+      {
+        id: 'c1',
+        type: 'connector',
+        from: 'a',
+        to: 'b',
+        route: 'curved',
+        fromPort: 'e',
+        toPort: 'w',
+        text: 'Leads to',
+      },
+    ],
+  });
+  assert.equal(validated.objects[2].route, 'curved');
+  assert.equal(validated.objects[2].text, 'Leads to');
+});
+test('frames auto-capture unlocked child items inside their bounds', () => {
+  const objects = [
+    n('frame-1', 0, 0, { type: 'frame', w: 400, h: 300 }),
+    n('inside-note', 40, 40, { type: 'sticky', w: 120, h: 100 }),
+    n('locked-note', 60, 60, { type: 'sticky', w: 100, h: 80, locked: true }),
+    n('outside-note', 500, 500, { type: 'sticky', w: 120, h: 100 }),
+  ];
+  assert.deepEqual(M.frameChildren(objects, 'frame-1'), ['inside-note']);
+});
+test('four-corner resize anchors opposite corners and smart guides snap aligned edges', () => {
+  const original = { x: 100, y: 100, w: 200, h: 100 };
+  const nw = M.resizeBox(original, 'nw', -40, -20, { lockAspect: true });
+  assert.equal(nw.x + nw.w, 300);
+  assert.equal(nw.y + nw.h, 200);
+  assert.equal(nw.w, 240);
+  assert.equal(nw.h, 120);
+  const guides = M.smartGuides({ x: 103, y: 250, w: 100, h: 80 }, [original], 5);
+  assert.equal(guides.dx, -3);
+  assert.ok(guides.guides.some((g) => g.axis === 'x' && g.pos === 100));
+});
+test('freehand smoothPath emits quadratic Bezier curves and pathHitsPoint detects eraser hits', () => {
+  const pts = [
+    { x: 0, y: 0 },
+    { x: 20, y: 30 },
+    { x: 50, y: 10 },
+    { x: 80, y: 40 },
+  ];
+  const d = M.smoothPath(pts);
+  assert.match(d, /^M0,0 Q20,30 35,20 Q50,10 65,25 L80,40$/);
+  const stroke = { type: 'path', points: pts, strokeWidth: 4 };
+  assert.equal(M.pathHitsPoint(stroke, { x: 10, y: 15 }, 6), true);
+  assert.equal(M.pathHitsPoint(stroke, { x: 200, y: 200 }, 6), false);
+});
+test('Illustrator-style shape vertex editing moves, inserts, removes and validates vertices', () => {
+  const shape = n('tri', 0, 0, { type: 'triangle' });
+  assert.equal(M.shapeVertices(shape).length, 3);
+  M.insertVertex(shape, 0, { x: 80, y: 40 });
+  assert.equal(shape.vertices.length, 4);
+  M.moveVertex(shape, 1, { x: 85, y: 45 });
+  assert.deepEqual(shape.vertices[1], { x: 85, y: 45 });
+  M.removeVertex(shape, 1);
+  assert.equal(shape.vertices.length, 3);
+  const validated = M.validateBoard({ objects: [shape] });
+  assert.equal(validated.objects[0].vertices.length, 3);
+});

@@ -13,13 +13,14 @@ export function setupTools() {
     'shapes',
     'connector',
     'pen',
+    'eraser',
     'media',
     'embed',
     'link',
   ]
     .map(
       (k, i) =>
-        (i === 2 || i === 7 ? '<div class="tool-sep"></div>' : '') +
+        (i === 2 || i === 8 ? '<div class="tool-sep"></div>' : '') +
         (k === 'shapes'
           ? `<div class="shape-picker"><button id="shape-toggle" data-label="Shapes" aria-label="Shapes" aria-expanded="false" aria-controls="shape-menu">${svgIcon('shape')}<span class="expand-caret" aria-hidden="true">›</span></button><div id="shape-menu" role="group" aria-label="Choose a shape" hidden><div class="shape-menu-head"><span class="shape-menu-title">SHAPE LIBRARY</span><span>9 shapes</span></div><input id="shape-search" type="search" placeholder="Find a shape…" aria-label="Search shapes"><div id="shape-grid">${M.shapes.map((k) => `<button data-tool="${k}" aria-label="${shapeNames[k]}" data-shape-name="${shapeNames[k].toLowerCase()}">${svgIcon(k)}<span>${shapeNames[k]}</span></button>`).join('')}</div><p id="shape-empty" hidden>No matching shapes.</p><p class="shape-tip">Choose a shape, then click the canvas.</p></div></div>`
           : `<button data-tool="${k}" data-label="${labels[k]}" aria-label="${labels[k]}">${svgIcon(k)}</button>`),
@@ -68,6 +69,7 @@ export function setTool(t) {
   finishEdit();
   state.tool = t;
   state.connectorStart = null;
+  if (t !== 'select') state.reshapeId = null;
   $$('#tools [data-tool]').forEach((b) => b.classList.toggle('active', b.dataset.tool === t));
   $('#shape-toggle').classList.toggle('active', M.shapes.includes(t));
   closeShapes();
@@ -75,12 +77,14 @@ export function setTool(t) {
   $('#canvas').style.cursor = t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
   $('#hint').textContent =
     t === 'connector'
-      ? 'Click two objects to connect them'
+      ? 'Click two objects or drag from a port ● to connect them'
       : t === 'pen'
-        ? 'Draw on the canvas · Choose your pen above'
-        : t === 'select'
-          ? 'Shift-click to multi-select · Space + drag to pan'
-          : t === 'hand'
-            ? 'Drag to move around your board'
-            : `Click to add ${shapeNames[t] || t}`;
+        ? 'Draw smooth strokes on the canvas · Choose your pen above'
+        : t === 'eraser'
+          ? 'Drag across drawn strokes to erase them'
+          : t === 'select'
+            ? 'Shift-click to multi-select · Drag ports ● to connect · Space + drag to pan'
+            : t === 'hand'
+              ? 'Drag to move around your board'
+              : `Click to add ${shapeNames[t] || t}`;
 }
