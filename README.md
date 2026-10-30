@@ -1,6 +1,6 @@
 # Sparkboard
 
-A simple, local-first visual whiteboard inspired by Lucidspark and Apple Freeform. Sketch ideas, organize sticky notes, connect shapes, and drop in images, PDFs, maps, and videos—all stored locally on your device with no accounts or cloud setup.
+A simple, local-first visual whiteboard. Sketch ideas, organize sticky notes, connect shapes, and drop in images, PDFs, maps, and videos—all stored locally on your device with no accounts or cloud setup.
 
 **[Download Sparkboard 1.2.0 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.2.0/Sparkboard-1.2.0-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.2.0) · [MIT License](LICENSE)
 
