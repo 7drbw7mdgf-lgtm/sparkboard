@@ -1,3 +1,4 @@
+import { embedDialog } from './embeds.js';
 import { state } from './state.js';
 import { finishEdit } from './editor.js';
 import { linkDialog } from './links.js';
@@ -13,6 +14,7 @@ export function setupTools() {
     'connector',
     'pen',
     'media',
+    'embed',
     'link',
   ]
     .map(
@@ -34,7 +36,12 @@ export function setupTools() {
       return;
     }
     let t = b.dataset.tool;
+    if (t === 'embed') {
+      embedDialog();
+      return;
+    }
     if (t === 'media') {
+      $('#media-file').accept = 'image/png,image/jpeg,image/webp,image/gif,application/pdf';
       $('#media-file').click();
       return;
     }

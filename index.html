@@ -7,27 +7,44 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
-      <button class="brand" id="boards" title="Your boards">
-        <span class="logo">✳</span><b>sparkboard</b></button
-      ><span class="divider"></span>
-      <div class="board-info">
-        <input id="title" aria-label="Board name" value="The next big thing" /><span id="saved"
-          >✓ All changes saved locally</span
-        >
+    <header class="workspace-header">
+      <div class="board-tab-bar">
+        <button
+          id="boards"
+          class="library-button"
+          title="Board library"
+          aria-label="Your boards"
+        ></button>
+        <nav id="board-tabs" aria-label="Open boards"></nav>
+        <button id="new-board" title="Create a new board" aria-label="New board">＋</button>
       </div>
-      <span class="header-space"></span
-      ><button class="quiet" id="search-board" title="Find on board (⌘F)">
-        ⌕ <span>Find</span></button
-      ><button class="quiet" id="scenes" title="Saved scenes" aria-label="Saved scenes">
-        ▣ <span>Scenes</span></button
-      ><button class="quiet" id="templates" title="Templates" aria-label="Templates">
-        ▦ <span>Templates</span></button
-      ><button class="quiet" id="export" title="Export board" aria-label="Export board">
-        ↗ <span>Export</span></button
-      ><span class="avatar" title="Your local workspace">Y</span
-      ><button class="primary" id="new-board">＋ New board</button>
+      <div class="header-actions" aria-label="Board actions">
+        <button
+          class="quiet"
+          id="search-board"
+          title="Find on board (⌘F)"
+          aria-label="Find on board"
+        >
+          <span>Find</span>
+        </button>
+        <button class="quiet" id="scenes" title="Saved scenes" aria-label="Saved scenes">
+          <span>Scenes</span>
+        </button>
+        <button class="quiet" id="templates" title="Templates" aria-label="Templates">
+          <span>Templates</span>
+        </button>
+        <button class="quiet" id="export" title="Export board" aria-label="Export board">
+          <span>Export</span>
+        </button>
+      </div>
+      <span id="saved" class="sr-only" role="status">All changes saved on this device</span>
     </header>
+    <section id="empty-workspace" aria-label="Workspace" hidden>
+      <span class="empty-spark">✳</span>
+      <h1>A little space for your next idea.</h1>
+      <p>Your boards are saved in your library.</p>
+      <button id="open-library" class="primary">Browse your boards</button>
+    </section>
     <main id="canvas" aria-label="Whiteboard canvas">
       <div id="world">
         <svg id="connections" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -94,7 +111,6 @@
     <div class="bottom-left">
       <button id="undo" title="Undo (⌘Z)">↶</button><button id="redo" title="Redo (⌘⇧Z)">↷</button
       ><span></span><button id="grid-toggle" title="Show or hide grid" aria-pressed="true">⠿</button
-      ><button id="snap-toggle" title="Snap to grid" aria-pressed="false">⌗</button
       ><button id="help" title="Keyboard shortcuts">?</button>
     </div>
     <div class="bottom-hint" id="hint">

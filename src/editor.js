@@ -1,3 +1,4 @@
+import { embedDialog } from './embeds.js';
 import { save, scheduleSave } from './boards.js';
 import { $ } from './core.js';
 import { selectVisual } from './rendering.js';
@@ -9,6 +10,10 @@ export function startEdit(id) {
   finishEdit();
   const n = state.board.objects.find((n) => n.id === id);
   if (!n || n.locked || ['path', 'connector', 'image', 'file'].includes(n.type)) return;
+  if (n.type === 'embed') {
+    embedDialog(n);
+    return;
+  }
   if (n.type === 'link') {
     linkDialog(n);
     return;

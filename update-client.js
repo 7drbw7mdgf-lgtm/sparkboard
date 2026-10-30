@@ -10,9 +10,10 @@
   button.id = 'updates';
   button.title = 'App updates';
   button.setAttribute('aria-label', 'App updates');
-  button.innerHTML = '↓ <span>Updates</span>';
-  const header = document.querySelector('header');
-  header.insertBefore(button, header.querySelector('.avatar'));
+  button.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span>Updates</span>';
+  const header = document.querySelector('.header-actions');
+  header.append(button);
   const dialog = document.createElement('dialog');
   dialog.id = 'updates-dialog';
   dialog.setAttribute('aria-label', 'Sparkboard updates');

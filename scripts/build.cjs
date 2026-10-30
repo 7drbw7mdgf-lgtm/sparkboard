@@ -9,7 +9,9 @@ const files = collectPublicFiles(root),
 for (const filename of files.filter((name) => name.endsWith('.js'))) {
   const source = fs.readFileSync(path.join(root, filename), 'utf8');
   // Source modules deliberately use static relative imports. Catch broken packaging before signing.
-  const imports = source.matchAll(/(?:import|export)\s+(?:[^;'"]*?\s+from\s*)?['"]([^'"]+)['"]/g);
+  const imports = source.matchAll(
+    /(?:\b(?:import|export)\s+(?:[^;'"]*?\s+from\s*)?|\bimport\s*\(\s*)['"]([^'"]+)['"]/g,
+  );
   for (const match of imports) {
     const dependency = path.posix.normalize(
       path.posix.join(path.posix.dirname(filename), match[1]),

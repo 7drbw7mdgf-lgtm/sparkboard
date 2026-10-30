@@ -1,4 +1,19 @@
 export const icons = {
+  close: '<path d="m7 7 10 10M17 7 7 17"/>',
+  undo: '<path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 6 6v3"/>',
+  redo: '<path d="m15 5 5 5-5 5m5-5H10a6 6 0 0 0-6 6v3"/>',
+  grid: '<circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/>',
+  snap: '<path d="M8 3v18M16 3v18M3 8h18M3 16h18"/><rect x="8" y="8" width="8" height="8" rx="1"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1-1.5 3m0 3h.01"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+  scenes: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v14m5-10 4 3-4 3Z"/>',
+  templates:
+    '<rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  export: '<path d="M12 16V3m-5 5 5-5 5 5M4 14v7h16v-7"/>',
+  embed: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m10 8 6 4-6 4Z"/>',
+  map: '<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Zm6-3v15m6-12v15"/>',
+  pdf: '<path d="M5 3h9l5 5v13H5Zm9 0v6h5M8 13h8m-8 4h6"/>',
+
   select: '<path d="m5 3 14 10-7 1-4 7Z"/>',
   hand: '<path d="M8 11V5a2 2 0 0 1 4 0v6-7a2 2 0 0 1 4 0v7-5a2 2 0 0 1 4 0v9c0 5-3 7-7 7-3 0-5-2-7-5l-3-4a2 2 0 0 1 3-3l2 2"/>',
   sticky: '<path d="M4 4h16v11l-5 5H4Z M15 20v-5h5"/>',
@@ -38,5 +53,6 @@ export const labels = {
   pen: 'Draw · P',
   media: 'Images & PDFs',
   link: 'Link card · L',
+  embed: 'Embed PDF, map or video',
 };
 export const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[k]}</svg>`;

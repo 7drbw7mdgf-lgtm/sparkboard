@@ -149,3 +149,15 @@ Google Fonts are optional; system fonts are used when unavailable.
 ## License
 
 [MIT](LICENSE), copyright 2026 Sparkboard contributors. The desktop bundle includes Node.js's separate license.
+
+### Embedded content
+
+The toolbar’s Embed menu adds YouTube/Vimeo videos, maps by place or full Google Maps link, and remote PDF links. Local PDFs use the file picker and render on the board with page navigation and a download option. Activate a card to interact with it; drag its heading or resize its corner to arrange it. External content loads only when activated, and remote PDF hosts may restrict embedding. Image/PDF exports show embed titles and addresses; editable JSON backups preserve embeds and local attachments.
+
+The bundled local PDF viewer uses Mozilla PDF.js 6.4.299 (Apache-2.0); upstream license notices are retained in `assets/pdfjs/`. Its browser and worker files, character maps, standard fonts, and image decoders are served locally. No PDF bytes are uploaded for rendering.
+
+### Workspace controls
+
+The floating strip contains only open board tabs. Use the library button to reopen saved boards, the plus button for a new board, and each tab’s close button to close its view. Closing a tab preserves its board and attachments. Open tabs persist across reloads. Double-click a tab name, or focus it and press F2, to rename the board.
+
+Board actions live in the floating pill at the top right. Undo, redo, grid, and help sit above zoom at the bottom right. The single grid button toggles both the visible grid and snapping together.

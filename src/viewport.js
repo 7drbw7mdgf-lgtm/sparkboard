@@ -8,7 +8,14 @@ export function applyView() {
   $('#canvas').style.backgroundPosition = `${state.view.x}px ${state.view.y}px`;
   $('#canvas').classList.toggle('no-grid', state.board?.grid === false);
   $('#grid-toggle').setAttribute('aria-pressed', String(state.board?.grid !== false));
-  $('#snap-toggle').setAttribute('aria-pressed', String(!!state.board?.snap));
+  const gridLabel =
+    state.board?.grid === false
+      ? 'Grid and snapping off'
+      : state.board?.snap
+        ? 'Grid and snapping on'
+        : 'Grid on, snapping off';
+  $('#grid-toggle').setAttribute('aria-label', gridLabel);
+  $('#grid-toggle').title = gridLabel + ' · Toggle grid and snapping';
   $('#zoom-level').textContent = Math.round(state.view.z * 100) + '%';
 }
 export function point(e) {
@@ -74,6 +81,7 @@ export function setupViewport() {
   $('#canvas').addEventListener(
     'wheel',
     (e) => {
+      if (e.target.closest('.pdf-viewer') && !e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       if (e.ctrlKey || e.metaKey)
         zoom(

@@ -51,10 +51,19 @@ export async function insertFiles(files, p = centerPoint()) {
       } else if (file.type === 'application/pdf') {
         let src = await readFile(file);
         items.push(
-          node('file', p.x + index * 28, p.y + index * 28, 300, 150, file.name, '#ffffff', {
-            src,
-            size: file.size,
-          }),
+          node(
+            'file',
+            p.x - 210 + index * 28,
+            p.y - 240 + index * 28,
+            420,
+            480,
+            file.name,
+            '#ffffff',
+            {
+              src,
+              size: file.size,
+            },
+          ),
         );
       } else toast(`${file.name}: use PNG, JPEG, WebP, GIF or PDF`);
     } catch {

@@ -1,3 +1,4 @@
+import { setupEmbeds } from './src/embeds.js';
 import { init } from './src/boards.js';
 import { setupTools } from './src/tools.js';
 import { setupCanvas } from './src/canvas.js';
@@ -13,6 +14,7 @@ setupTools();
 setupCanvas();
 setupViewport();
 setupMedia();
+setupEmbeds();
 setupClipboard();
 setupScenes();
 setupDialogs();

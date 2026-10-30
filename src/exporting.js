@@ -54,16 +54,21 @@ export function exportSVG() {
         if (M.shapes.includes(n.type))
           visual = shapeSvg(n).replace('class="shape-body"', `width="${w}" height="${h}"`);
         else if (n.type !== 'text')
-          visual = `<rect width="${w}" height="${h}" fill="${n.color || colors[0]}" rx="${['file', 'link'].includes(n.type) ? 10 : 2}"/>`;
+          visual = `<rect width="${w}" height="${h}" fill="${n.color || colors[0]}" rx="${['file', 'link', 'embed'].includes(n.type) ? 10 : 2}"/>`;
         let font = n.fontSize || (n.type === 'text' ? 22 : n.type === 'frame' ? 12 : 17),
-          card = ['link', 'file'].includes(n.type),
+          card = ['link', 'file', 'embed'].includes(n.type),
           text =
             n.text +
             (n.type === 'link'
               ? '\n' + new URL(n.url).hostname
               : n.type === 'file'
                 ? '\nPDF document'
-                : ''),
+                : n.type === 'embed'
+                  ? '\n' +
+                    ({ video: 'Video', map: 'Map', pdf: 'PDF document' }[n.embedKind] || 'Embed') +
+                    '\n' +
+                    n.url
+                  : ''),
           wrapped = wrapText(text, w - 36, font),
           align = n.align || (n.type === 'text' || n.type === 'frame' || card ? 'left' : 'center'),
           tx = align === 'left' ? 18 : align === 'right' ? w - 18 : w / 2,

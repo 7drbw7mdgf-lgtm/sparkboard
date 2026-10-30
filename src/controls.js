@@ -1,3 +1,4 @@
+import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
 import { linkDialog } from './links.js';
 import { selectVisual } from './rendering.js';
@@ -11,20 +12,34 @@ import { applyView, fit, zoom } from './viewport.js';
 import { toggleScenes } from './scenes.js';
 import { modal, searchBoard, showBoards, showHelp } from './dialogs.js';
 import { toast } from './notifications.js';
-import { createBoard, save, scheduleSave, flushSaves } from './boards.js';
+import { createBoard, save, flushSaves } from './boards.js';
 import { state } from './state.js';
 import { $, M } from './core.js';
 export function setupControls() {
+  for (const [id, icon] of Object.entries({
+    undo: 'undo',
+    redo: 'redo',
+    'grid-toggle': 'grid',
+    boards: 'templates',
+    help: 'help',
+    'search-board': 'search',
+    scenes: 'scenes',
+    templates: 'templates',
+    export: 'export',
+    fit: 'frame',
+  })) {
+    const button = $('#' + id);
+    button.setAttribute('aria-label', button.getAttribute('aria-label') || button.title);
+    button.innerHTML =
+      svgIcon(icon) +
+      (button.classList.contains('quiet')
+        ? `<span>${{ search: 'Find', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
+        : '');
+  }
   $('#canvas').setAttribute('aria-busy', 'true');
   $('#close-dialog').onclick = () => $('#dialog').close();
   $('#dialog').onclick = (e) => {
     if (e.target === $('#dialog')) $('#dialog').close();
-  };
-  $('#title').oninput = (e) => {
-    if (state.board) {
-      state.board.title = e.target.value;
-      scheduleSave();
-    }
   };
   $('#new-board').onclick = async () => {
     try {
@@ -36,6 +51,7 @@ export function setupControls() {
     }
   };
   $('#boards').onclick = showBoards;
+  $('#open-library').onclick = showBoards;
   $('#search-board').onclick = searchBoard;
   $('#scenes').onclick = toggleScenes;
   $('#close-scenes').onclick = () => {
@@ -86,15 +102,12 @@ export function setupControls() {
   $('#zoom-level').onclick = () => zoom(1);
   $('#fit').onclick = fit;
   $('#grid-toggle').onclick = () => {
-    state.board.grid = !state.board.grid;
+    const enabled = state.board.grid === false;
+    state.board.grid = enabled;
+    state.board.snap = enabled;
     applyView();
     save();
-  };
-  $('#snap-toggle').onclick = () => {
-    state.board.snap = !state.board.snap;
-    applyView();
-    save();
-    toast(state.board.snap ? 'Snap to grid on' : 'Snap to grid off');
+    toast(enabled ? 'Grid and snapping on' : 'Grid and snapping off');
   };
   $('#delete').onclick = deleteSelected;
   $('#duplicate').onclick = duplicate;
@@ -176,7 +189,13 @@ export function setupControls() {
       selectVisual();
       return;
     }
-    if (activeEditor() || $('#dialog').open || !state.board) return;
+    if (
+      activeEditor() ||
+      $('#dialog').open ||
+      !state.board ||
+      document.body.classList.contains('workspace-empty')
+    )
+      return;
     const mod = e.metaKey || e.ctrlKey,
       key = e.key.toLowerCase();
     if (e.code === 'Space') {

@@ -4,3 +4,4 @@ package-lock.json
 *.dmg
 *.app/
 build/
+assets/pdfjs/

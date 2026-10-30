@@ -1,3 +1,4 @@
+import { renderBoardTabs } from './tabs.js';
 import { $, uid } from './core.js';
 import { state } from './state.js';
 import { BoardRepository, boardSummary } from './storage/repository.js';
@@ -65,7 +66,8 @@ function mountBoard(board) {
   state.view = { x: 0, y: 0, z: 1 };
   state.scenePanelOpen = false;
   $('#scenes-panel').hidden = true;
-  $('#title').value = board.title;
+  document.body.classList.remove('workspace-empty');
+  $('#empty-workspace').hidden = true;
   $('#board-type').textContent =
     {
       studio: 'Creative workspace',
@@ -74,6 +76,7 @@ function mountBoard(board) {
       mindmap: 'Mind map',
       brainstorm: 'Brainstorm',
     }[board.kind] || 'Whiteboard';
+  renderBoardTabs({ reveal: true, openActive: true });
   repository.retainMediaFor(board);
   render();
   fit();
@@ -164,6 +167,7 @@ export function deleteBoard(id) {
         });
       }
     }
+    renderBoardTabs();
     reportSaveStatus('saved');
   });
 }

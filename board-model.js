@@ -1,3 +1,4 @@
+import { resolveEmbed } from './src/embed-model.js';
 const shapes = [
   'shape',
   'circle',
@@ -9,7 +10,7 @@ const shapes = [
   'bubble',
   'frame',
 ];
-const types = ['sticky', 'text', ...shapes, 'path', 'connector', 'image', 'link', 'file'];
+const types = ['sticky', 'text', ...shapes, 'path', 'connector', 'image', 'link', 'file', 'embed'];
 const polygons = {
   triangle: '50,3 98,97 2,97',
   diamond: '50,1 99,50 50,99 1,50',
@@ -198,6 +199,7 @@ function validateBoard(value) {
       throw Error('Invalid image');
     if (n.type === 'file' && !/^data:application\/pdf;base64,[a-z0-9+/=]+$/i.test(n.src))
       throw Error('Invalid PDF');
+    if (n.type === 'embed' && !resolveEmbed(n.embedKind, n.url)) throw Error('Invalid embed');
     if (n.type === 'link' && !safeUrl(n.url)) throw Error('Invalid link');
   }
   for (const n of value.objects.filter((n) => n.type === 'connector'))

@@ -1,3 +1,5 @@
+import { disposePDFViewers } from './pdf-viewer.js';
+import { embedContents } from './embeds.js';
 import { properties } from './inspector.js';
 import { updateHistory } from './history.js';
 import { renderScenes } from './scenes.js';
@@ -16,13 +18,12 @@ export function shapeSvg(n) {
   return `<svg class="shape-body" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" fill="${fill}" stroke="${stroke}" stroke-width="${width}" ${n.type === 'frame' ? 'stroke-dasharray="3 2"' : ''}>${geometry}</svg>`;
 }
 export function objectContents(n) {
+  if (n.type === 'embed' || n.type === 'file') return embedContents(n);
   if (n.type === 'image') return `<img src="${esc(n.src)}" alt="${esc(n.text)}" draggable="false">`;
   if (n.type === 'link') {
     let url = M.safeUrl(n.url);
     return `<div class="link-art">↗<span>LINK</span></div><div class="card-copy"><b>${esc(n.text || 'Web link')}</b><span>${esc(url ? new URL(url).hostname : 'Invalid link')}</span>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" data-open="true">Open link ↗</a>` : ''}</div>`;
   }
-  if (n.type === 'file')
-    return `<div class="file-art">PDF</div><div class="card-copy"><b>${esc(n.text)}</b><span>PDF document · ${Math.round((n.size || 0) / 1024)} KB</span><a href="${esc(n.src)}" download="${esc(n.text)}" data-open="true">Download PDF ↓</a></div>`;
   return `${M.shapes.includes(n.type) ? shapeSvg(n) : ''}<span class="object-text">${esc(n.text)}</span>`;
 }
 export function objectStyle(n) {
@@ -30,6 +31,7 @@ export function objectStyle(n) {
 }
 export function render() {
   if (!state.board) return;
+  disposePDFViewers();
   $('#objects').replaceChildren();
   for (const n of state.board.objects.filter((n) => !['connector', 'path'].includes(n.type))) {
     const el = document.createElement('div');

@@ -50,6 +50,15 @@ test('a clean checkout builds a complete sandbox without publisher secrets or ig
   assert.ok(files.has('src/storage/repository.js'));
   assert.ok(files.has('src/editor.js'));
   assert.ok(files.has('assets/moodboard-study.png'));
+  for (const filename of [
+    'assets/pdfjs/pdf.mjs',
+    'assets/pdfjs/pdf-worker.mjs',
+    'assets/pdfjs/LICENSE.txt',
+    'assets/pdfjs/cmaps/Adobe-Japan1-UCS2.bcmap',
+    'assets/pdfjs/standard_fonts/LiberationSans-Regular.ttf',
+    'assets/pdfjs/wasm/openjpeg.wasm',
+  ])
+    assert.ok(files.has(filename), filename);
   assert.throws(() => verifyPackage(bundle, originalKey, next), /signature/);
   assert.equal(
     run(checkout, 'scripts/build.cjs').status,
@@ -78,6 +87,10 @@ test('the build catches an omitted module before creating a release', (t) => {
 test('static serving permits frontend modules but never exposes backend code or private state', () => {
   assert.equal(safeFile('src/storage/repository.js'), true);
   assert.equal(safeFile('assets/moodboard-study.png'), true);
+  assert.equal(safeFile('assets/pdfjs/pdf-worker.mjs'), true);
+  assert.equal(safeFile('assets/pdfjs/wasm/openjpeg.wasm'), true);
+  assert.equal(safeFile('assets/unrelated.mjs'), false);
+  assert.equal(safeFile('assets/pdfjs/../../server.cjs'), false);
   for (const name of [
     'src/../../updater.cjs',
     'lib/updates/files.cjs',
