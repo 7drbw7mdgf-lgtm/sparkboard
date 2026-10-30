@@ -5,7 +5,7 @@ const http = require('node:http'),
   crypto = require('node:crypto');
 const { Updater, safeFile } = require('./updater.cjs');
 function createServer(root = __dirname, options = {}) {
-  const updater = options.updater || new Updater(root),
+  const updater = options.updater || new Updater(root, { defaultSource: 'github' }),
     csrfToken = crypto.randomBytes(32).toString('hex');
   const types = {
     '.html': 'text/html; charset=utf-8',
@@ -91,6 +91,9 @@ function createServer(root = __dirname, options = {}) {
         switch (url.pathname) {
           case '/api/updates/configure':
             info = updater.configure(body);
+            break;
+          case '/api/updates/preferences':
+            info = updater.preferences(body);
             break;
           case '/api/updates/check':
             info = await updater.check();

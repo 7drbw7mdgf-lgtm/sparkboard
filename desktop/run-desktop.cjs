@@ -21,7 +21,7 @@ if (fs.existsSync(testRelease)) {
 }
 const { Updater } = require('../updater.cjs'),
   { createServer } = require('../server.cjs');
-const updater = new Updater(root, { dataDir }),
+const updater = new Updater(root, { dataDir, defaultSource: 'github' }),
   { server } = createServer(root, { updater, healthToken });
 server.on('error', (error) => {
   console.error(

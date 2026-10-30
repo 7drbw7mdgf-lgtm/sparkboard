@@ -15,23 +15,27 @@ const {
   compareVersions,
   signPackage,
 } = require('./lib/updates/package.cjs');
+const DEFAULT_REPOSITORY = '7drbw7mdgf-lgtm/sparkboard';
 class Updater {
-  constructor(root, { fetcher = fetchBytes, dataDir } = {}) {
+  constructor(root, { fetcher = fetchBytes, dataDir, defaultSource = 'sandbox' } = {}) {
     this.root = root;
     this.dir = dataDir || path.join(root, '.sparkboard');
     this.file = path.join(this.dir, 'update-state.json');
     this.baseVersion = JSON.parse(fs.readFileSync(path.join(root, 'package.json'))).version;
     this.fetcher = fetcher;
     this.settings = {
-      source: 'sandbox',
-      repository: '',
+      source: defaultSource,
+      repository: DEFAULT_REPOSITORY,
+      autoDownload: true,
       active: null,
       previous: null,
       hasRollback: false,
       lastChecked: null,
       ...readJSON(this.file, {}),
     };
-    if (!['sandbox', 'github'].includes(this.settings.source)) this.settings.source = 'sandbox';
+    if (!['sandbox', 'github'].includes(this.settings.source)) this.settings.source = defaultSource;
+    if (!this.settings.repository) this.settings.repository = DEFAULT_REPOSITORY;
+    if (typeof this.settings.autoDownload !== 'boolean') this.settings.autoDownload = true;
     this.candidate = null;
     this.staged = null;
     this.phase = 'idle';
@@ -111,11 +115,14 @@ class Updater {
       baseVersion: this.baseVersion,
       source: this.settings.source,
       repository: this.settings.repository,
+      defaultRepository: DEFAULT_REPOSITORY,
+      autoDownload: this.settings.autoDownload !== false,
       phase: this.phase,
       error: this.error,
       progress: this.progress,
       busy: this.busy,
       lastChecked: this.settings.lastChecked,
+      availableVersion: this.candidate?.version || null,
       available: this.candidate
         ? {
             version: this.candidate.version,
@@ -134,13 +141,31 @@ class Updater {
       sandboxReady: fs.existsSync(path.join(this.dir, 'sandbox', 'sparkboard-update.json')),
     };
   }
-  configure({ source, repository }) {
+  preferences({ autoDownload } = {}) {
+    if (typeof autoDownload !== 'boolean') throw Error('Specify autoDownload as true or false.');
+    const old = this.settings;
+    this.settings = { ...this.settings, autoDownload };
+    try {
+      this.persist();
+    } catch (error) {
+      this.settings = old;
+      throw error;
+    }
+    return this.info();
+  }
+  configure({ source, repository, autoDownload } = {}) {
     if (this.busy) throw Error('An update is already in progress.');
+    if (source === undefined && typeof autoDownload === 'boolean')
+      return this.preferences({ autoDownload });
     if (!['sandbox', 'github'].includes(source)) throw Error('Choose Sandbox or GitHub.');
     const next = {
         ...this.settings,
         source,
-        repository: source === 'github' ? repoName(repository) : this.settings.repository,
+        repository:
+          source === 'github'
+            ? repoName(repository || DEFAULT_REPOSITORY)
+            : this.settings.repository,
+        autoDownload: typeof autoDownload === 'boolean' ? autoDownload : this.settings.autoDownload,
       },
       old = this.settings;
     this.settings = next;

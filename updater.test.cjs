@@ -369,3 +369,25 @@ test('a newer bundled app takes precedence over an older installed web release',
   assert.equal(restarted.publicRoot(), fixture.root);
   assert.equal(restarted.info().hasRollback, false);
 });
+
+test('desktop updater defaults to GitHub releases for 7drbw7mdgf-lgtm/sparkboard with auto-download preferences', async (t) => {
+  const fixture = setup(t),
+    updater = new Updater(fixture.root, { defaultSource: 'github' }),
+    { server } = createServer(fixture.root, { updater });
+  let info = (await request(server)).json();
+  assert.equal(info.source, 'github');
+  assert.equal(info.repository, '7drbw7mdgf-lgtm/sparkboard');
+  assert.equal(info.autoDownload, true);
+  let pref = await request(server, {
+    method: 'POST',
+    url: '/api/updates/preferences',
+    headers: {
+      'content-type': 'application/json',
+      'x-sparkboard-token': info.csrfToken,
+      origin: 'http://localhost:3000',
+    },
+    body: { autoDownload: false },
+  });
+  assert.equal(pref.status, 200);
+  assert.equal(pref.json().autoDownload, false);
+});
