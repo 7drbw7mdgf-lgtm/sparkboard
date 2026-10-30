@@ -1,7 +1,7 @@
 import { embedDialog } from './embeds.js';
 import { modal } from './dialogs.js';
 import { save, scheduleSave } from './boards.js';
-import { $, esc } from './core.js';
+import { $, esc, M } from './core.js';
 import { render, selectVisual } from './rendering.js';
 import { commit, snapshot } from './history.js';
 import { linkDialog } from './links.js';
@@ -27,7 +27,7 @@ export function startEdit(id) {
         const text = $('#connector-label-input').value.trim();
         if (text) n.text = text;
         else delete n.text;
-        n.route = $('#connector-route-select').value;
+        M.setLineRoute(n, $('#connector-route-select').value);
         n.lineStyle = $('#connector-style-select').value;
         n.startArrow = $('#connector-start-arrow').value;
         n.endArrow = $('#connector-end-arrow').value;

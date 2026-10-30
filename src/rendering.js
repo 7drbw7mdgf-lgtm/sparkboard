@@ -1,3 +1,4 @@
+import { CONNECTION_LAYER, objectLayer } from './layers.js';
 import { disposePDFViewers } from './pdf-viewer.js';
 import { embedContents } from './embeds.js';
 import { properties } from './inspector.js';
@@ -60,7 +61,7 @@ export function objectContents(n) {
 }
 
 export function objectStyle(n) {
-  return `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;transform:rotate(${n.rotation || 0}deg);z-index:${n.z ?? (n.type === 'frame' ? -10 : 0)};--fill:${n.color || colors[0]};--text-color:${n.textColor || (n.type === 'text' ? n.color : '#3c4234')};font-size:${n.fontSize || (n.type === 'text' ? 22 : n.type === 'frame' ? 12 : 17)}px;font-weight:${n.fontWeight || (n.type === 'text' || n.type === 'frame' ? 700 : 400)};text-align:${n.align || (n.type === 'text' || n.type === 'frame' ? 'left' : 'center')}`;
+  return `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;transform:rotate(${n.rotation || 0}deg);z-index:${objectLayer(n)};--fill:${n.color || colors[0]};--text-color:${n.textColor || (n.type === 'text' ? n.color : '#3c4234')};font-size:${n.fontSize || (n.type === 'text' ? 22 : n.type === 'frame' ? 12 : 17)}px;font-weight:${n.fontWeight || (n.type === 'text' || n.type === 'frame' ? 700 : 400)};text-align:${n.align || (n.type === 'text' || n.type === 'frame' ? 'left' : 'center')}`;
 }
 
 export function render() {
@@ -134,6 +135,7 @@ export function connectorGeometry(n) {
 
 export function renderLines() {
   if (!state.board) return;
+  $('#connections').style.zIndex = CONNECTION_LAYER;
   M.dedupeConnectors(state.board.objects);
   const lines = state.board.objects
     .filter((n) => ['connector', 'line', 'path'].includes(n.type))
@@ -175,12 +177,21 @@ export function renderLines() {
             return `<g class="connector-label" data-id="${n.id}" transform="translate(${route.labelX},${route.labelY})"><rect x="${-w / 2}" y="-12" width="${w}" height="24" rx="12" fill="#ffffffee" stroke="${selected ? '#ed7959' : '#d5dbd0'}" stroke-width="1.2"/><text text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="600" fill="#3c4234">${esc(n.text)}</text></g>`;
           })()
         : '';
+      const curveControls =
+        n.type === 'line' && selected && !n.locked
+          ? M.lineControls(n)
+              .map((point, index) => {
+                const anchor = index === 0 ? route.start : route.end;
+                return `<line class="curve-guide" x1="${anchor.x}" y1="${anchor.y}" x2="${point.x}" y2="${point.y}"/><circle class="path-vertex curve-handle" data-id="${n.id}" data-line-control="${index}" cx="${point.x}" cy="${point.y}" r="6"><title>Drag curve handle ${index + 1} to bend this line</title></circle>`;
+              })
+              .join('')
+          : '';
       const handles = selected
         ? n.type === 'line' && !n.locked
           ? `<circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="0" cx="${route.start.x}" cy="${route.start.y}" r="5.5"/><circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="${n.points.length - 1}" cx="${route.end.x}" cy="${route.end.y}" r="5.5"/>`
           : `<circle class="connector-endpoint" data-id="${n.id}" cx="${route.start.x}" cy="${route.start.y}" r="4.5"/><circle class="connector-endpoint" data-id="${n.id}" cx="${route.end.x}" cy="${route.end.y}" r="4.5"/>`
         : '';
-      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${handles}</g>`;
+      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${curveControls}${handles}</g>`;
     })
     .join('');
   const draft = state.connectorDraft

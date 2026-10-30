@@ -1,3 +1,6 @@
+import { BoardSessions } from './board-sessions.js';
+import { download } from './exporting.js';
+import { modal } from './dialogs.js';
 import { endPointer } from './canvas.js';
 import { renderBoardTabs } from './tabs.js';
 import { $, uid } from './core.js';
@@ -11,6 +14,9 @@ import { setTool } from './tools.js';
 import { sample } from './templates.js';
 import { toast } from './notifications.js';
 
+const sessions = new BoardSessions();
+export const forgetBoardSession = (id) => sessions.forget(id);
+let conflictShown = false;
 let repository;
 let saves;
 let transition = Promise.resolve();
@@ -24,6 +30,38 @@ function reportSaveStatus(status, error) {
   };
   $('#saved').textContent = text[status];
   if (error) toast(error.message);
+  if (error?.code === 'BOARD_CONFLICT' && !conflictShown && !$('#dialog').open) {
+    conflictShown = true;
+    modal(
+      'This board changed in another window.',
+      '<p>Your edits are still here. Save them as a separate board to keep both versions, or download an editable backup.</p><div class="modal-actions"><button class="primary" id="conflict-copy">Save my edits as a new board</button><button id="conflict-export">Download my backup</button></div>',
+      'EDITS PRESERVED',
+    );
+    $('#conflict-copy').onclick = async () => {
+      try {
+        await saves.running?.catch(() => {});
+        finishEdit();
+        const oldId = state.board.id;
+        const copy = {
+          ...structuredClone(state.board),
+          id: uid(),
+          title: state.board.title + ' (copy)',
+          updated: Date.now(),
+        };
+        await repository.saveBoard(copy);
+        saves.pending.delete(oldId);
+        await repository.setActiveBoard(copy.id);
+        state.boards = await repository.listBoards();
+        mountBoard(await repository.loadBoard(copy.id));
+        $('#dialog').close();
+        reportSaveStatus('saved');
+        toast('Your edits were saved as a separate board.');
+      } catch (error) {
+        toast(error.message);
+      }
+    };
+    $('#conflict-export').onclick = () => download('json');
+  }
 }
 
 function updateSummary(board) {
@@ -57,17 +95,20 @@ export async function flushSaves() {
 }
 
 function mountBoard(board) {
+  sessions.remember(state);
+  const session = sessions.restore(board);
+  conflictShown = false;
   state.board = board;
   state.board.scenes ??= [];
   state.board.grid ??= true;
   state.board.snap ??= false;
-  state.history = [];
-  state.future = [];
+  state.history = session?.history || [];
+  state.future = session?.future || [];
   state.selected.clear();
   state.reshapeId = null;
   state.connectorStart = null;
   state.connectorDraft = null;
-  state.view = { x: 0, y: 0, z: 1 };
+  state.view = session ? { ...session.view } : { x: 0, y: 0, z: 1 };
   state.scenePanelOpen = false;
   $('#scenes-panel').hidden = true;
   document.body.classList.remove('workspace-empty');
@@ -83,7 +124,7 @@ function mountBoard(board) {
   renderBoardTabs({ reveal: true, openActive: true });
   repository.retainMediaFor(board);
   render();
-  fit();
+  if (!session) fit();
 }
 
 function switchSafely(action) {
@@ -153,6 +194,7 @@ export function importBoard(parsed) {
 export function deleteBoard(id) {
   return switchSafely(async () => {
     await repository.deleteBoard(id);
+    sessions.forget(id);
     state.boards = await repository.listBoards();
     if (state.board?.id === id) {
       if (state.boards.length) {
@@ -182,6 +224,7 @@ export async function init() {
   saves = new SaveScheduler(
     async (snapshot, original) => {
       const stored = await repository.saveBoard(snapshot);
+      original.revision = stored.revision;
       // Retain fast media references without applying stale text/geometry to live edits.
       for (const item of stored.objects.filter((item) => item.mediaId)) {
         const live = original.objects.find((object) => object.id === item.id);

@@ -71,3 +71,11 @@ npm run build:mac     # Build build/macos/Sparkboard.app (Apple Silicon, macOS 1
 ## License
 
 [MIT](LICENSE), copyright 2026 Sparkboard contributors. The macOS bundle includes the Node.js runtime license, and the local PDF viewer uses bundled Mozilla PDF.js (Apache-2.0) in `assets/pdfjs/`.
+
+## Editing and recovery
+
+Each open board keeps its own Undo/Redo history and zoom/pan view for the current session. Closing a tab releases its session history. Copying a frame includes its nested contents and internal connectors; exports preserve the canvas’s stacking order.
+
+New lines show two curve handles automatically when selected. Drag either handle to bend the line; endpoint handles move the ends. Curves are preserved in backups, copied lines, Undo/Redo, and exports.
+
+Concurrent windows use revision-protected saves. If a board has changed elsewhere, Sparkboard keeps the local edits and offers to save a separate board or download an editable backup. Conflicting recovery drafts become separate boards. Storage version 3 closes older editor connections before enabling this protection; refresh any older open Sparkboard windows. Older releases cannot open an upgraded workspace until updated.

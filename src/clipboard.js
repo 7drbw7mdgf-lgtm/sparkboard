@@ -2,7 +2,6 @@ import { centerPoint } from './viewport.js';
 import { commit } from './history.js';
 import { insertFiles } from './media.js';
 import { toast } from './notifications.js';
-import { selectedNodes } from './selection.js';
 import { state } from './state.js';
 import { $, M, colors, node, uid } from './core.js';
 import { activeEditor } from './editor.js';
@@ -16,9 +15,7 @@ export function setupClipboard() {
       !state.selected.size
     )
       return;
-    const nodes = selectedNodes().map(M.clone),
-      ids = new Set(nodes.map((n) => n.id)),
-      valid = nodes.filter((n) => n.type !== 'connector' || (ids.has(n.from) && ids.has(n.to)));
+    const valid = M.copySelection(state.board.objects, state.selected).map(M.clone);
     state.clipboard = valid;
     e.clipboardData.setData('text/plain', 'sparkboard-objects:' + JSON.stringify(valid));
     e.preventDefault();

@@ -1,6 +1,6 @@
 import { finishEdit } from './editor.js';
 import { state } from './state.js';
-import { openBoard, flushSaves, scheduleSave } from './boards.js';
+import { openBoard, flushSaves, scheduleSave, forgetBoardSession } from './boards.js';
 import { $, esc } from './core.js';
 import { toast } from './notifications.js';
 import { modal, showBoards } from './dialogs.js';
@@ -67,9 +67,12 @@ async function closeBoardTab(id) {
         document.body.classList.add('workspace-empty');
         $('#empty-workspace').hidden = false;
         state.selected.clear();
+        state.history = [];
+        state.future = [];
         showBoards();
       }
     }
+    forgetBoardSession(id);
     persist();
     renderBoardTabs({ reveal: true });
   } catch (error) {

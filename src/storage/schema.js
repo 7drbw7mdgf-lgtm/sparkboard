@@ -1,5 +1,6 @@
 export const DATABASE_NAME = 'sparkboard-workspace';
-export const DATABASE_VERSION = 2;
+// Version 3 closes older editor connections before revision-protected writes begin.
+export const DATABASE_VERSION = 3;
 export const WRITE_STORES = ['boards', 'summaries', 'media', 'mediaRefs'];
 
 export function openDatabase(factory = globalThis.indexedDB, name = DATABASE_NAME) {

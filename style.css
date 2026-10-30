@@ -2373,3 +2373,23 @@ body.is-panning #canvas {
   color: #dd6945;
   border-color: #edac96;
 }
+#connections .curve-guide {
+  stroke: #ed997b;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+#connections .curve-handle {
+  fill: #fff6ef;
+  stroke: #e4805c;
+  stroke-width: 2;
+  cursor: grab;
+  pointer-events: all;
+}
+#connections .curve-handle:hover {
+  fill: #f3b295;
+  stroke: #d6633c;
+}
+#connections .curve-handle:active {
+  cursor: grabbing;
+}

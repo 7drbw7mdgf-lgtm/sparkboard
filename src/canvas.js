@@ -219,6 +219,7 @@ export function endPointer(e) {
         points: pts,
         ...d.opts,
       };
+      created.controls = M.lineControls(created);
       state.board.objects.push(created);
       state.selected = new Set([created.id]);
     });
@@ -353,6 +354,17 @@ export function setupCanvas() {
         changed: true,
       };
       render();
+      capture(e);
+      return;
+    }
+    const curveEl = e.target.closest('.curve-handle');
+    if (curveEl && n?.type === 'line' && !n.locked) {
+      state.drag = {
+        type: 'line-control',
+        id: n.id,
+        index: Number(curveEl.dataset.lineControl),
+        changed: false,
+      };
       capture(e);
       return;
     }
@@ -704,6 +716,18 @@ export function setupCanvas() {
       renderFast();
       return;
     }
+    if (state.drag.type === 'line-control') {
+      if (!state.drag.changed) {
+        snapshot();
+        state.drag.changed = true;
+        n.controls = M.lineControls(n);
+      }
+      n.controls[state.drag.index] = roundPt(p);
+      n.curveEdited = true;
+      n.route = 'curved';
+      renderLines();
+      return;
+    }
     if (state.drag.type === 'line-vertex') {
       if (!state.drag.changed) {
         snapshot();
@@ -711,7 +735,7 @@ export function setupCanvas() {
       }
       const otherIdx = state.drag.index === 0 ? n.points.length - 1 : 0;
       const target = e.shiftKey ? snapLinePoint(n.points[otherIdx], p) : p;
-      n.points[state.drag.index] = { x: Math.round(target.x), y: Math.round(target.y) };
+      M.moveLineEndpoint(n, state.drag.index, { x: Math.round(target.x), y: Math.round(target.y) });
       renderLines();
       return;
     }

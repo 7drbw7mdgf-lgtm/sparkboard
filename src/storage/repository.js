@@ -27,6 +27,8 @@ export class BoardRepository {
     this.localStorage = localStorage;
     this.mediaCache = new Map();
     this.sources = new Map();
+    this.revisions = new Map();
+    this.writer = crypto.randomUUID();
   }
 
   static async open({ indexedDB, name, localStorage = browserStorage() } = {}) {
@@ -77,14 +79,27 @@ export class BoardRepository {
   }
 
   /** Queue requests synchronously; awaiting inside an IDB transaction closes it. */
-  writeRecord(transaction, prepared) {
+  writeRecord(transaction, prepared, expectedRevision) {
     const { record, assets } = prepared;
     const boards = transaction.objectStore('boards');
     const media = transaction.objectStore('media');
     const refs = transaction.objectStore('mediaRefs');
     const previousRequest = boards.get(record.id);
     previousRequest.onsuccess = () => {
-      const previous = new Set(previousRequest.result?.mediaIds || []);
+      const stored = previousRequest.result;
+      if (expectedRevision !== undefined && (stored?.revision || 0) !== expectedRevision) {
+        prepared.conflict = Object.assign(
+          new Error(
+            'This board changed in another window. Your edits are kept here; save a separate copy or export a backup.',
+          ),
+          { code: 'BOARD_CONFLICT' },
+        );
+        transaction.abort();
+        return;
+      }
+      record.revision = (stored?.revision || 0) + 1;
+      record.writer = this.writer;
+      const previous = new Set(stored?.mediaIds || []);
       for (const id of record.mediaIds) {
         if (previous.has(id)) continue; // Typing never rewrites existing attachments.
         const asset = assets.get(id);
@@ -111,8 +126,13 @@ export class BoardRepository {
     const prepared = await this.prepareBoard(structuredClone(board));
     const transaction = this.db.transaction(WRITE_STORES, 'readwrite');
     const done = transactionDone(transaction);
-    this.writeRecord(transaction, prepared);
-    await done;
+    this.writeRecord(transaction, prepared, this.revisions.get(board.id) ?? 0);
+    try {
+      await done;
+    } catch (error) {
+      throw prepared.conflict || error;
+    }
+    this.revisions.set(board.id, prepared.record.revision);
     this.clearDraft(board.id, board.updated);
     return prepared.record;
   }
@@ -125,6 +145,7 @@ export class BoardRepository {
   async loadBoard(id) {
     const record = await readEntry(this.db, 'boards', id);
     if (!record) throw new Error('This board no longer exists.');
+    this.revisions.set(id, record.revision || 0);
     const { mediaIds, ...board } = record;
     for (const item of board.objects.filter(isMedia)) {
       let cached = this.mediaCache.get(item.mediaId);
@@ -254,6 +275,8 @@ export class BoardRepository {
   writeDraft(board) {
     try {
       const { mediaIds: ignored, ...record } = board;
+      record.revision = this.revisions.get(board.id) ?? board.revision ?? 0;
+      record.writer = this.writer;
       record.objects = board.objects.map((item) => {
         if (!isMedia(item)) return item;
         const cached = this.sources.get(item.src);
@@ -269,11 +292,16 @@ export class BoardRepository {
     }
   }
 
-  clearDraft(id, savedAt) {
+  clearDraft(id, savedAt, expectedWriter = this.writer, allowLegacy = false) {
     try {
       const key = `sparkboard.draft.${id}`,
         draft = JSON.parse(this.localStorage?.getItem(key) || 'null');
-      if (draft && (draft.updated || 0) <= savedAt) this.localStorage.removeItem(key);
+      if (
+        draft &&
+        ((!draft.writer && allowLegacy) || draft.writer === expectedWriter) &&
+        (draft.updated || 0) <= savedAt
+      )
+        this.localStorage.removeItem(key);
     } catch {
       /* A failed optional journal cleanup must not turn a committed save into an error. */
     }
@@ -296,8 +324,12 @@ export class BoardRepository {
       if (!draft?.id || !Array.isArray(draft.objects))
         throw new Error('A recovery draft needs attention. Its original data has been retained.');
       const existing = await readEntry(this.db, 'boards', draft.id);
-      if (existing && existing.updated >= draft.updated) {
-        this.clearDraft(draft.id, existing.updated);
+      const conflicted =
+        draft.revision === undefined
+          ? (existing?.revision || 0) > 0
+          : draft.revision !== (existing?.revision || 0) && draft.writer !== existing?.writer;
+      if (!conflicted && existing && existing.updated >= draft.updated) {
+        this.clearDraft(draft.id, existing.updated, draft.writer, true);
         continue;
       }
       for (const item of draft.objects.filter(isMedia)) {
@@ -308,7 +340,17 @@ export class BoardRepository {
           );
         item.src = await blobToDataURL(asset.blob);
       }
-      await this.saveBoard(draft);
+      if (conflicted) {
+        const originalId = draft.id;
+        draft.id = crypto.randomUUID();
+        draft.title = (draft.title || 'Board') + ' (recovered edits)';
+        await this.saveBoard(draft);
+        this.clearDraft(originalId, draft.updated, draft.writer, true);
+      } else {
+        this.revisions.set(draft.id, existing?.revision || 0);
+        await this.saveBoard(draft);
+        this.clearDraft(draft.id, draft.updated, draft.writer, true);
+      }
     }
   }
 }

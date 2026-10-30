@@ -52,7 +52,10 @@ export function setupTools() {
       linkDialog();
       return;
     }
-    if (t) setTool(t);
+    if (t) {
+      setTool(t);
+      b.blur();
+    }
   };
   $('#shape-search').oninput = (e) => {
     let visible = 0;

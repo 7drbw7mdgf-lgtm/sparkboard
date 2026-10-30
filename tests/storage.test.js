@@ -334,3 +334,66 @@ test('continuous typing still reaches disk at the maximum wait deadline', async 
   assert.equal(writes.length, 1);
   assert.equal(writes[0].objects[0].text, 'Edit 19');
 });
+
+test('stale windows cannot overwrite newer saves or resurrect deleted boards', async (t) => {
+  const { factory, storage, repository: a } = await setup(t);
+  const b = await BoardRepository.open({ indexedDB: factory, localStorage: storage });
+  t.after(() => b.close());
+  await a.saveBoard(board());
+  const originalA = await a.loadBoard('board-a'),
+    staleB = await b.loadBoard('board-a');
+  originalA.objects[0].text = 'Window A edit';
+  originalA.updated = 2;
+  await a.saveBoard(originalA);
+  staleB.title = 'Window B title';
+  staleB.updated = 3;
+  await assert.rejects(b.saveBoard(staleB), (error) => error.code === 'BOARD_CONFLICT');
+  assert.equal((await a.loadBoard('board-a')).objects[0].text, 'Window A edit');
+  await b.loadBoard('board-a');
+  await a.deleteBoard('board-a');
+  await assert.rejects(b.saveBoard(staleB), (error) => error.code === 'BOARD_CONFLICT');
+  assert.deepEqual(await a.listBoards(), []);
+});
+
+test('conflicting crash journals recover into a separate board, preserving both versions', async (t) => {
+  const { factory, storage, repository: a } = await setup(t);
+  const b = await BoardRepository.open({ indexedDB: factory, localStorage: storage });
+  t.after(() => b.close());
+  await a.saveBoard(board());
+  const first = await a.loadBoard('board-a'),
+    second = await b.loadBoard('board-a');
+  second.objects[0].text = 'Unsaved B';
+  second.updated = 3;
+  b.writeDraft(second);
+  first.objects[0].text = 'Saved A';
+  first.updated = 4;
+  await a.saveBoard(first);
+  // Another window's save must not erase B's journal.
+  assert.ok(storage.getItem('sparkboard.draft.board-a'));
+  const recovered = await BoardRepository.open({ indexedDB: factory, localStorage: storage });
+  t.after(() => recovered.close());
+  assert.equal((await recovered.loadBoard('board-a')).objects[0].text, 'Saved A');
+  const copy = (await recovered.listBoards()).find((item) => item.id !== 'board-a');
+  assert.ok(copy);
+  assert.equal((await recovered.loadBoard(copy.id)).objects[0].text, 'Unsaved B');
+});
+
+test('legacy journals survive unrelated saves and recover as separate boards', async (t) => {
+  const { factory, storage, repository } = await setup(t);
+  const original = board();
+  await repository.saveBoard(original);
+  const draft = board();
+  draft.updated = 3;
+  draft.objects[0].text = 'Legacy unsaved edits';
+  storage.setItem('sparkboard.draft.board-a', JSON.stringify(draft));
+  original.updated = 4;
+  original.objects[0].text = 'New saved edits';
+  await repository.saveBoard(original);
+  assert.ok(storage.getItem('sparkboard.draft.board-a'));
+  const recovered = await BoardRepository.open({ indexedDB: factory, localStorage: storage });
+  t.after(() => recovered.close());
+  assert.equal((await recovered.loadBoard('board-a')).objects[0].text, 'New saved edits');
+  const copy = (await recovered.listBoards()).find((item) => item.id !== 'board-a');
+  assert.equal((await recovered.loadBoard(copy.id)).objects[0].text, 'Legacy unsaved edits');
+  assert.equal(storage.getItem('sparkboard.draft.board-a'), null);
+});

@@ -1,3 +1,4 @@
+import { isNativeControl } from './keyboard.js';
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
 import { linkDialog } from './links.js';
@@ -150,7 +151,7 @@ export function setupControls() {
       commit(() =>
         editableNodes()
           .filter((n) => ['connector', 'line'].includes(n.type))
-          .forEach((n) => (n.route = b.dataset.route)),
+          .forEach((n) => M.setLineRoute(n, b.dataset.route)),
       );
     if (b.dataset.lineStyle)
       commit(() => editableNodes().forEach((n) => (n.lineStyle = b.dataset.lineStyle)));
@@ -171,6 +172,8 @@ export function setupControls() {
       if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
         n.type = value;
         delete n.vertices;
+      } else if (prop === 'route') {
+        M.setLineRoute(n, value);
       } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
         n.color = value;
       } else if (prop === 'text' && ['connector', 'line'].includes(n.type)) {
@@ -220,7 +223,9 @@ export function setupControls() {
       const targets = editableNodes().filter((n) => ['line', 'connector'].includes(n.type));
       if (!targets.length) return;
       const val = prop === 'strokeWidth' ? Number(e.target.value) || 2 : e.target.value;
-      commit(() => targets.forEach((n) => (n[prop] = val)));
+      commit(() =>
+        targets.forEach((n) => (prop === 'route' ? M.setLineRoute(n, val) : (n[prop] = val))),
+      );
     };
   }
   const drawOptsPanel = $('#drawing-options');
@@ -232,7 +237,9 @@ export function setupControls() {
       const targets = editableNodes().filter((n) => n.type === 'path');
       if (!targets.length) return;
       const val = prop === 'strokeWidth' ? Number(e.target.value) || 4 : e.target.value;
-      commit(() => targets.forEach((n) => (n[prop] = val)));
+      commit(() =>
+        targets.forEach((n) => (prop === 'route' ? M.setLineRoute(n, val) : (n[prop] = val))),
+      );
     };
   }
   document.addEventListener('pointerdown', (e) => {
@@ -269,6 +276,7 @@ export function setupControls() {
     }
     if (
       activeEditor() ||
+      isNativeControl(e.target) ||
       $('#dialog').open ||
       !state.board ||
       document.body.classList.contains('workspace-empty')

@@ -201,6 +201,57 @@ function autoPorts(a, b, fromPort, toPort) {
   return [portPoint(a, fp), portPoint(b, tp)];
 }
 
+function lineControls(n) {
+  if (Array.isArray(n.controls) && n.controls.length === 2)
+    return n.controls.map((p) => ({ ...p }));
+  const start = n.points[0],
+    end = n.points.at(-1),
+    dx = end.x - start.x,
+    dy = end.y - start.y;
+  if (n.route !== 'curved')
+    return [
+      { x: start.x + dx / 3, y: start.y + dy / 3 },
+      { x: end.x - dx / 3, y: end.y - dy / 3 },
+    ];
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const bow = Math.abs(dy) < 16 ? -Math.max(24, Math.min(64, Math.abs(dx) * 0.24)) : 0;
+    return [
+      { x: start.x + dx * 0.45, y: start.y + bow },
+      { x: end.x - dx * 0.45, y: end.y + bow },
+    ];
+  }
+  const bow = Math.abs(dx) < 16 ? Math.max(24, Math.min(64, Math.abs(dy) * 0.24)) : 0;
+  return [
+    { x: start.x + bow, y: start.y + dy * 0.45 },
+    { x: end.x + bow, y: end.y - dy * 0.45 },
+  ];
+}
+function setLineRoute(n, route) {
+  if (n.type === 'line' && route === 'curved' && !n.curveEdited) {
+    const start = n.points[0],
+      end = n.points.at(-1),
+      dx = end.x - start.x,
+      dy = end.y - start.y;
+    const collinear =
+      !n.controls ||
+      n.controls.every((p) => Math.abs((p.x - start.x) * dy - (p.y - start.y) * dx) < 0.001);
+    if (collinear) n.controls = lineControls({ ...n, route: 'curved', controls: undefined });
+  }
+  n.route = route;
+}
+function moveLineEndpoint(n, index, target) {
+  const before = n.points[index];
+  if (n.controls) {
+    const control =
+      index === 0 ? n.controls[0] : index === n.points.length - 1 ? n.controls[1] : null;
+    if (control) {
+      control.x += target.x - before.x;
+      control.y += target.y - before.y;
+    }
+  }
+  n.points[index] = { ...target };
+}
+
 function lineRoute(n) {
   if (!Array.isArray(n?.points) || n.points.length < 2) {
     return { d: '', labelX: 0, labelY: 0, start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
@@ -272,20 +323,11 @@ function lineRoute(n) {
       end,
     };
   }
-  let c1x, c1y, c2x, c2y;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    const bow = Math.abs(dy) < 16 ? -Math.max(24, Math.min(64, Math.abs(dx) * 0.24)) : 0;
-    c1x = x1 + dx * 0.45;
-    c1y = y1 + bow;
-    c2x = x2 - dx * 0.45;
-    c2y = y2 + bow;
-  } else {
-    const bow = Math.abs(dx) < 16 ? Math.max(24, Math.min(64, Math.abs(dy) * 0.24)) : 0;
-    c1x = x1 + bow;
-    c1y = y1 + dy * 0.45;
-    c2x = x2 + bow;
-    c2y = y2 - dy * 0.45;
-  }
+  const [first, second] = lineControls(n);
+  const c1x = first.x,
+    c1y = first.y,
+    c2x = second.x,
+    c2y = second.y;
   return {
     d: `M${x1},${y1} C${c1x},${c1y} ${c2x},${c2y} ${x2},${y2}`,
     labelX: 0.125 * x1 + 0.375 * c1x + 0.375 * c2x + 0.125 * x2,
@@ -478,8 +520,10 @@ function pathHitsPoint(pathNode, point, radius = 12) {
 
 function bounds(n, objects = []) {
   if (n.type === 'path' || n.type === 'line') {
-    const xs = n.points.map((p) => p.x),
-      ys = n.points.map((p) => p.y);
+    const points =
+      n.type === 'line' && n.route === 'curved' ? [...n.points, ...lineControls(n)] : n.points;
+    const xs = points.map((p) => p.x),
+      ys = points.map((p) => p.y);
     return {
       x: Math.min(...xs),
       y: Math.min(...ys),
@@ -649,12 +693,11 @@ function enclosing(nodes, objects = nodes) {
 }
 function translate(n, dx, dy) {
   if (n.locked) return;
-  if (n.type === 'path' || n.type === 'line')
-    n.points = n.points.map((p) => ({
-      x: p.x + dx,
-      y: p.y + dy,
-    }));
-  else if (n.type !== 'connector') {
+  if (n.type === 'path' || n.type === 'line') {
+    n.points = n.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+    if (n.type === 'line' && n.controls)
+      n.controls = n.controls.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+  } else if (n.type !== 'connector') {
     n.x += dx;
     n.y += dy;
   }
@@ -702,6 +745,42 @@ function distribute(nodes, axis) {
     cursor += b[dim] + gap;
   }
 }
+function copySelection(objects, ids) {
+  const expanded = new Set(ids);
+  const frames = objects.filter((n) => n.type === 'frame' && expanded.has(n.id));
+  const visited = new Set();
+  while (frames.length) {
+    const frame = frames.pop();
+    if (visited.has(frame.id)) continue;
+    visited.add(frame.id);
+    for (const item of objects) {
+      if (item.id === frame.id || item.type === 'connector') continue;
+      const b = bounds(item, objects),
+        x = b.x + b.w / 2,
+        y = b.y + b.h / 2;
+      const contained =
+        item.type === 'frame'
+          ? b.x >= frame.x &&
+            b.y >= frame.y &&
+            b.x + b.w <= frame.x + frame.w &&
+            b.y + b.h <= frame.y + frame.h
+          : x >= frame.x && x <= frame.x + frame.w && y >= frame.y && y <= frame.y + frame.h;
+      if (contained) {
+        expanded.add(item.id);
+        if (item.type === 'frame' && !visited.has(item.id)) frames.push(item);
+      }
+    }
+  }
+  for (const item of objects)
+    if (item.type === 'connector' && expanded.has(item.from) && expanded.has(item.to))
+      expanded.add(item.id);
+  return objects.filter(
+    (n) =>
+      expanded.has(n.id) &&
+      (n.type !== 'connector' || (expanded.has(n.from) && expanded.has(n.to))),
+  );
+}
+
 function duplicate(objects, ids, newId) {
   let chosen = objects.filter((n) => ids.has(n.id) && !n.locked),
     map = new Map(chosen.map((n) => [n.id, newId()])),
@@ -778,6 +857,14 @@ function validateBoard(value) {
       typeof n.text !== 'string'
     )
       throw Error('Invalid geometry');
+    if (
+      n.controls !== undefined &&
+      (n.type !== 'line' ||
+        !Array.isArray(n.controls) ||
+        n.controls.length !== 2 ||
+        !n.controls.every((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y)))
+    )
+      throw Error('Invalid line controls');
     if (n.lineStyle !== undefined && !lineStyles.includes(n.lineStyle))
       throw Error('Invalid line style');
     if (n.startArrow !== undefined && !arrowHeads.includes(n.startArrow))
@@ -850,6 +937,9 @@ export {
   removeVertex,
   portPoint,
   lineRoute,
+  lineControls,
+  setLineRoute,
+  moveLineEndpoint,
   connectorRoute,
   dedupeConnectors,
   smoothPath,
@@ -865,6 +955,7 @@ export {
   align,
   distribute,
   duplicate,
+  copySelection,
   safeUrl,
   validateBoard,
 };
