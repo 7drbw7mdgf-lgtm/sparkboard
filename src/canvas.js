@@ -147,11 +147,13 @@ export function addAt(type, p) {
 }
 
 export function capture(e) {
+  if (state.drag) state.drag.pointerId = e.pointerId;
   $('#canvas').setPointerCapture(e.pointerId);
 }
 
 export function endPointer(e) {
   if (!state.drag) return;
+  if (e && state.drag.pointerId !== undefined && e.pointerId !== state.drag.pointerId) return;
   const d = state.drag;
   state.drag = null;
   state.guides = [];
@@ -163,8 +165,9 @@ export function endPointer(e) {
         ? 'default'
         : 'crosshair';
   $('#selection-box').hidden = true;
-  if (e && $('#canvas').hasPointerCapture(e.pointerId))
-    $('#canvas').releasePointerCapture(e.pointerId);
+  const pointerId = d.pointerId ?? e?.pointerId;
+  if (pointerId !== undefined && $('#canvas').hasPointerCapture(pointerId))
+    $('#canvas').releasePointerCapture(pointerId);
   if (d.type === 'pan') return;
   if (d.type === 'connect-port') {
     const draft = state.connectorDraft;
@@ -255,9 +258,11 @@ export function endPointer(e) {
 
 export function setupCanvas() {
   $('#canvas').addEventListener('pointerdown', (e) => {
-    if (!state.board || (e.button !== 0 && e.button !== 1) || e.target.closest('[data-open]'))
-      return;
-    if (state.editing && e.target.closest('[contenteditable]')) return;
+    if (!state.board || state.drag || (e.button !== 0 && e.button !== 1)) return;
+    const panning = state.space || state.tool === 'hand' || e.button === 1;
+    // Media buttons remain clickable, but navigation gestures take priority.
+    if (!panning && e.target.closest('[data-open]')) return;
+    if (!panning && state.editing && e.target.closest('[contenteditable]')) return;
     e.preventDefault();
     finishEdit();
     if (
@@ -270,7 +275,7 @@ export function setupCanvas() {
     const p = point(e),
       el = e.target.closest('[data-id]');
     let n = el && state.board.objects.find((n) => n.id === el.dataset.id);
-    if (state.space || state.tool === 'hand' || e.button === 1) {
+    if (panning) {
       e.preventDefault();
       document.body.classList.add('is-panning');
       $('#canvas').style.cursor = 'grabbing';
@@ -568,7 +573,8 @@ export function setupCanvas() {
   });
 
   $('#canvas').addEventListener('pointermove', (e) => {
-    if (!state.drag) return;
+    if (!state.drag || (state.drag.pointerId !== undefined && e.pointerId !== state.drag.pointerId))
+      return;
     const p = point(e);
     if (state.drag.type === 'pan') {
       state.view.x = state.drag.x + e.clientX - state.drag.cx;
@@ -788,8 +794,9 @@ export function setupCanvas() {
 
   $('#canvas').addEventListener('pointerup', endPointer);
   $('#canvas').addEventListener('pointercancel', endPointer);
+  $('#canvas').addEventListener('lostpointercapture', endPointer);
   $('#canvas').addEventListener('dblclick', (e) => {
-    if (e.target.closest('[data-open]')) return;
+    if (state.space || state.tool !== 'select' || e.target.closest('[data-open]')) return;
     let id = e.target.closest('[data-id]')?.dataset.id;
     if (id) startEdit(id);
     else if (state.tool === 'select') addAt('sticky', point(e));

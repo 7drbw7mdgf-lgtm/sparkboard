@@ -8,7 +8,14 @@ import { $, M, colors, node, uid } from './core.js';
 import { activeEditor } from './editor.js';
 export function setupClipboard() {
   document.addEventListener('copy', (e) => {
-    if (activeEditor() || $('#dialog').open || !state.selected.size) return;
+    if (
+      !state.board ||
+      document.body.classList.contains('workspace-empty') ||
+      activeEditor() ||
+      $('#dialog').open ||
+      !state.selected.size
+    )
+      return;
     const nodes = selectedNodes().map(M.clone),
       ids = new Set(nodes.map((n) => n.id)),
       valid = nodes.filter((n) => n.type !== 'connector' || (ids.has(n.from) && ids.has(n.to)));
@@ -18,7 +25,13 @@ export function setupClipboard() {
     toast(`${valid.length} items copied`);
   });
   document.addEventListener('paste', (e) => {
-    if (activeEditor() || $('#dialog').open) return;
+    if (
+      !state.board ||
+      document.body.classList.contains('workspace-empty') ||
+      activeEditor() ||
+      $('#dialog').open
+    )
+      return;
     if (e.clipboardData.files.length) {
       e.preventDefault();
       insertFiles(e.clipboardData.files);

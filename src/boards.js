@@ -1,3 +1,4 @@
+import { endPointer } from './canvas.js';
 import { renderBoardTabs } from './tabs.js';
 import { $, uid } from './core.js';
 import { state } from './state.js';
@@ -63,6 +64,9 @@ function mountBoard(board) {
   state.history = [];
   state.future = [];
   state.selected.clear();
+  state.reshapeId = null;
+  state.connectorStart = null;
+  state.connectorDraft = null;
   state.view = { x: 0, y: 0, z: 1 };
   state.scenePanelOpen = false;
   $('#scenes-panel').hidden = true;
@@ -86,6 +90,7 @@ function switchSafely(action) {
   transition = transition
     .catch(() => {})
     .then(async () => {
+      endPointer();
       finishEdit();
       await flushSaves();
       return action();
