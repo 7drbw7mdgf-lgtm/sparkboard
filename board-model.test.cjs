@@ -181,3 +181,54 @@ test('Illustrator-style shape vertex editing moves, inserts, removes and validat
   const validated = M.validateBoard({ objects: [shape] });
   assert.equal(validated.objects[0].vertices.length, 3);
 });
+test('expanded shape library, standalone lines, arrowheads, dash styles and connector deduplication', () => {
+  assert.equal(M.shapes.length, 18);
+  for (const type of M.shapes) {
+    assert.ok(M.defaultVertices(type).length >= 3, `Expected vertices for ${type}`);
+  }
+  const line = {
+    id: 'line-1',
+    type: 'line',
+    points: [
+      { x: 10, y: 20 },
+      { x: 210, y: 120 },
+    ],
+    route: 'elbow',
+    lineStyle: 'dotted',
+    startArrow: 'circle',
+    endArrow: 'filled',
+    color: '#626e56',
+    strokeWidth: 3,
+    text: 'Flow',
+  };
+  const routed = M.lineRoute(line);
+  assert.match(routed.d, /^M10,20 L110,20 L110,120 L210,120$/);
+  M.translate(line, 5, -5);
+  assert.deepEqual(line.points[0], { x: 15, y: 15 });
+  const objects = [
+    n('a', 100, 100),
+    n('b', 100, 230),
+    { id: 'c1', type: 'connector', from: 'a', to: 'b', route: 'straight' },
+    {
+      id: 'c2',
+      type: 'connector',
+      from: 'a',
+      to: 'b',
+      route: 'elbow',
+      lineStyle: 'dashed',
+      startArrow: 'diamond',
+      endArrow: 'arrow',
+    },
+    line,
+  ];
+  M.dedupeConnectors(objects);
+  assert.equal(objects.filter((o) => o.type === 'connector').length, 1);
+  assert.equal(objects.find((o) => o.type === 'connector').id, 'c2');
+  const alignedElbow = M.connectorRoute(
+    objects.find((o) => o.type === 'connector'),
+    objects,
+  );
+  assert.match(alignedElbow.d, /^M[\d.-]+,[\d.-]+ L[\d.-]+,[\d.-]+$/);
+  const validated = M.validateBoard({ objects });
+  assert.equal(validated.objects.length, 4);
+});

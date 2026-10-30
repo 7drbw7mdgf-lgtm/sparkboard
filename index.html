@@ -63,16 +63,16 @@
       ><button id="reshape" title="Reshape anchor points (A)" hidden>◇</button
       ><button id="duplicate" title="Duplicate (⌘D)">⧉</button
       ><button id="lock" title="Lock or unlock">♙</button
-      ><button id="inspect" title="Formatting and arrangement" aria-expanded="false">☷</button
+      ><button id="inspect" title="Format" aria-label="Format" aria-expanded="false">☷</button
       ><button id="delete" title="Delete selected">⌫</button>
     </div>
-    <aside id="inspector" hidden aria-label="Object inspector">
+    <aside id="inspector" hidden aria-label="Format">
       <div class="panel-heading">
         <div>
-          <span class="eyebrow">MAKE IT YOURS</span>
-          <h3>Style & arrange</h3>
+          <span class="eyebrow" id="inspector-eyebrow">SELECTION</span>
+          <h3>Format</h3>
         </div>
-        <button id="close-inspector" aria-label="Close inspector">×</button>
+        <button id="close-inspector" aria-label="Close format panel">×</button>
       </div>
       <div id="inspector-body"></div>
     </aside>
@@ -97,6 +97,50 @@
           <option value="4" selected>Medium</option>
           <option value="8">Bold</option>
           <option value="16">Marker</option>
+        </select></label
+      >
+    </div>
+    <div id="line-options" hidden>
+      <span class="eyebrow" id="line-options-label">LINE</span
+      ><label
+        >Type
+        <select id="line-route" aria-label="Line type">
+          <option value="straight">Straight</option>
+          <option value="curved">Curved</option>
+          <option value="elbow">Elbow</option>
+        </select></label
+      ><label
+        >Style
+        <select id="line-style" aria-label="Line style">
+          <option value="solid">Solid</option>
+          <option value="dashed">Dashed</option>
+          <option value="dotted">Dotted</option>
+        </select></label
+      ><label
+        >Start
+        <select id="line-start-arrow" aria-label="Start arrowhead">
+          <option value="none" selected>None</option>
+          <option value="arrow">Open arrow</option>
+          <option value="filled">Filled arrow</option>
+          <option value="circle">Circle</option>
+          <option value="diamond">Diamond</option>
+        </select></label
+      ><label
+        >End
+        <select id="line-end-arrow" aria-label="End arrowhead">
+          <option value="none">None</option>
+          <option value="arrow" selected>Open arrow</option>
+          <option value="filled">Filled arrow</option>
+          <option value="circle">Circle</option>
+          <option value="diamond">Diamond</option>
+        </select></label
+      ><input id="line-color" type="color" value="#626e56" aria-label="Line color" /><label
+        >Width
+        <select id="line-width" aria-label="Line width">
+          <option value="1">Thin</option>
+          <option value="2" selected>Medium</option>
+          <option value="4">Bold</option>
+          <option value="6">Heavy</option>
         </select></label
       >
     </div>

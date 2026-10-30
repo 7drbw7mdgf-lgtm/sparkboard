@@ -179,7 +179,6 @@ header {
   border-color: transparent transparent #00000012 transparent;
 }
 .object.shape {
-  border: 2px solid #b0b8a6;
   border-radius: 12px;
   font-size: 17px;
   text-align: center;
@@ -198,7 +197,6 @@ header {
   padding: 4px;
 }
 .object.frame {
-  border: 1.5px dashed #c7cdc1;
   border-radius: 16px;
   align-items: flex-start;
   justify-content: flex-start;
@@ -1103,8 +1101,12 @@ button:disabled:hover {
   border-radius: 4px;
 }
 .inspector-section {
-  padding: 15px 0;
+  padding: 12px 0;
   border-top: 1px solid #edf0e6;
+}
+.inspector-section:first-child {
+  padding-top: 4px;
+  border-top: 0;
 }
 .field-label {
   display: flex;
@@ -1114,7 +1116,7 @@ button:disabled:hover {
   letter-spacing: 1.2px;
   color: #8f9981;
   font-weight: 700;
-  margin-bottom: 13px;
+  margin-bottom: 10px;
 }
 .field-label span {
   font-size: 10px;
@@ -1133,16 +1135,31 @@ button:disabled:hover {
   font-size: 10px;
   color: #8c977e;
 }
-.form-row input[type='number'] {
+.form-row input[type='number'],
+.form-row select,
+.stack-field input,
+.stack-field select {
   display: block;
   width: 100%;
   border: 1px solid #e4e9db;
   border-radius: 5px;
-  padding: 8px 9px;
-  margin-top: 7px;
-  font-size: 12px;
+  padding: 7px 8px;
+  margin-top: 6px;
+  font-size: 11.5px;
   background: #fcfdf9;
   color: #4e5d40;
+}
+.stack-field {
+  display: block;
+  font-size: 10px;
+  color: #8c977e;
+  margin-bottom: 10px;
+}
+.form-row input[type='range'] {
+  display: block;
+  width: 100%;
+  margin-top: 11px;
+  accent-color: #ed7959;
 }
 .form-row input[type='color'] {
   display: block;
@@ -1159,13 +1176,14 @@ button:disabled:hover {
   display: flex;
   border: 1px solid #e4e9db;
   border-radius: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 11px;
   overflow: hidden;
 }
 .segmented button {
   flex: 1;
-  height: 31px;
-  font-size: 16px;
+  height: 30px;
+  font-size: 11.5px;
+  font-weight: 500;
 }
 .segmented button.active,
 .action-button.active {
@@ -1178,6 +1196,7 @@ button:disabled:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 10px;
 }
 .wide-field input {
   width: 130px;
@@ -1188,7 +1207,7 @@ button:disabled:hover {
   background: #fff;
   border-radius: 6px;
   font-size: 10px;
-  padding: 9px 4px;
+  padding: 8px 4px;
   flex: 1;
   white-space: nowrap;
 }
@@ -1217,8 +1236,7 @@ button:disabled:hover {
 }
 .panel-footnote {
   font-size: 10px;
-  padding-top: 8px;
-  border-top: 1px solid #edf0e6;
+  margin: 6px 0 0;
 }
 .empty-scenes {
   padding: 28px 0 10px;
@@ -1284,39 +1302,46 @@ button:disabled:hover {
   margin: 6px 0 10px;
   font-size: 11px;
 }
-#drawing-options {
+#drawing-options,
+#line-options {
   position: absolute;
-  top: 105px;
+  top: 82px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
   border: 1px solid #e4e9db;
   border-radius: 9px;
-  padding: 9px 14px;
+  padding: 8px 13px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   box-shadow: 0 3px 12px #222d1710;
   z-index: 33;
 }
-#drawing-options input[type='color'] {
+#drawing-options input[type='color'],
+#line-options input[type='color'] {
   border: 0;
   background: none;
   padding: 0;
   width: 26px;
   height: 25px;
+  cursor: pointer;
 }
-#drawing-options label {
+#drawing-options label,
+#line-options label {
   font-size: 10px;
   color: #8b967f;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 6px;
+  white-space: nowrap;
 }
-#drawing-options select {
+#drawing-options select,
+#line-options select {
   font: inherit;
+  font-size: 11px;
   border: 1px solid #e5e9dd;
-  padding: 4px;
+  padding: 4px 6px;
   border-radius: 5px;
   color: #586647;
   background: #fff;
@@ -2330,6 +2355,12 @@ header .divider {
   stroke-width: 2px;
   cursor: move;
   pointer-events: all;
+}
+#connections .connector-endpoint {
+  fill: #fff;
+  stroke: #ed7959;
+  stroke-width: 2px;
+  pointer-events: none;
 }
 #connections .connector-label {
   pointer-events: all;

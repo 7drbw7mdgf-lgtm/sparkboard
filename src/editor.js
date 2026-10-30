@@ -11,12 +11,15 @@ export function startEdit(id) {
   finishEdit();
   const n = state.board.objects.find((n) => n.id === id);
   if (!n || n.locked || ['path', 'image', 'file'].includes(n.type)) return;
-  if (n.type === 'connector') {
-    const route = n.route || 'straight';
+  if (n.type === 'connector' || n.type === 'line') {
+    const route = n.route || 'straight',
+      lineStyle = n.lineStyle || 'solid',
+      startArrow = n.startArrow || 'none',
+      endArrow = n.endArrow || (n.type === 'connector' ? 'arrow' : 'none');
     modal(
-      'Label or style this connector.',
-      `<form id="connector-form" class="modal-form"><label>Connector label <span class="optional">(optional)</span><input id="connector-label-input" maxlength="160" placeholder="e.g. leads to, depends on, next step" value="${esc(n.text || '')}" autofocus></label><label>Routing style<select id="connector-route-select"><option value="straight" ${route === 'straight' ? 'selected' : ''}>Straight line</option><option value="curved" ${route === 'curved' ? 'selected' : ''}>Curved Bezier</option><option value="elbow" ${route === 'elbow' ? 'selected' : ''}>Orthogonal elbow</option></select></label><button class="primary" type="submit">Save connector</button></form>`,
-      'CONNECTOR',
+      `Format this ${n.type}.`,
+      `<form id="connector-form" class="modal-form"><label>Label <span class="optional">(optional)</span><input id="connector-label-input" maxlength="160" placeholder="e.g. leads to, depends on, next step" value="${esc(n.text || '')}" autofocus></label><div class="form-row"><label>Line type<select id="connector-route-select"><option value="straight" ${route === 'straight' ? 'selected' : ''}>Straight</option><option value="curved" ${route === 'curved' ? 'selected' : ''}>Curved</option><option value="elbow" ${route === 'elbow' ? 'selected' : ''}>Elbow</option></select></label><label>Stroke style<select id="connector-style-select"><option value="solid" ${lineStyle === 'solid' ? 'selected' : ''}>Solid</option><option value="dashed" ${lineStyle === 'dashed' ? 'selected' : ''}>Dashed</option><option value="dotted" ${lineStyle === 'dotted' ? 'selected' : ''}>Dotted</option></select></label></div><div class="form-row"><label>Start cap<select id="connector-start-arrow"><option value="none" ${startArrow === 'none' ? 'selected' : ''}>None</option><option value="arrow" ${startArrow === 'arrow' ? 'selected' : ''}>Open arrow</option><option value="filled" ${startArrow === 'filled' ? 'selected' : ''}>Filled arrow</option><option value="circle" ${startArrow === 'circle' ? 'selected' : ''}>Circle</option><option value="diamond" ${startArrow === 'diamond' ? 'selected' : ''}>Diamond</option></select></label><label>End cap<select id="connector-end-arrow"><option value="none" ${endArrow === 'none' ? 'selected' : ''}>None</option><option value="arrow" ${endArrow === 'arrow' ? 'selected' : ''}>Open arrow</option><option value="filled" ${endArrow === 'filled' ? 'selected' : ''}>Filled arrow</option><option value="circle" ${endArrow === 'circle' ? 'selected' : ''}>Circle</option><option value="diamond" ${endArrow === 'diamond' ? 'selected' : ''}>Diamond</option></select></label></div><button class="primary" type="submit">Save format</button></form>`,
+      'FORMAT',
     );
     $('#connector-form').onsubmit = (e) => {
       e.preventDefault();
@@ -25,6 +28,9 @@ export function startEdit(id) {
         if (text) n.text = text;
         else delete n.text;
         n.route = $('#connector-route-select').value;
+        n.lineStyle = $('#connector-style-select').value;
+        n.startArrow = $('#connector-start-arrow').value;
+        n.endArrow = $('#connector-end-arrow').value;
       });
       render();
       $('#dialog').close();

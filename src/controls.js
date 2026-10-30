@@ -144,9 +144,11 @@ export function setupControls() {
     if (b.dataset.route)
       commit(() =>
         editableNodes()
-          .filter((n) => n.type === 'connector')
+          .filter((n) => ['connector', 'line'].includes(n.type))
           .forEach((n) => (n.route = b.dataset.route)),
       );
+    if (b.dataset.lineStyle)
+      commit(() => editableNodes().forEach((n) => (n.lineStyle = b.dataset.lineStyle)));
     if (b.dataset.alignText)
       commit(() => editableNodes().forEach((n) => (n.align = b.dataset.alignText)));
     if (b.dataset.align) commit(() => M.align(editableNodes(), b.dataset.align));
@@ -164,8 +166,12 @@ export function setupControls() {
     }
     commit(() =>
       editableNodes().forEach((n) => {
-        if (prop === 'stroke' && ['path', 'connector'].includes(n.type)) n.color = value;
-        else if (prop === 'text' && n.type === 'connector') {
+        if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
+          n.type = value;
+          delete n.vertices;
+        } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
+          n.color = value;
+        } else if (prop === 'text' && ['connector', 'line'].includes(n.type)) {
           const trimmed = String(value || '').trim();
           if (trimmed) n.text = trimmed;
           else delete n.text;
@@ -287,12 +293,13 @@ export function setupControls() {
       r: 'shape',
       o: 'circle',
       f: 'frame',
+      l: 'line',
       c: 'connector',
       p: 'pen',
       e: 'eraser',
     };
     if (key === 'a' && state.selected.size === 1) toggleReshape();
-    else if (key === 'l') linkDialog();
+    else if (key === 'k') linkDialog();
     else if (map[key]) setTool(map[key]);
   });
   window.addEventListener('keyup', (e) => {

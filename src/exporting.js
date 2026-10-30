@@ -1,6 +1,6 @@
 import { toast } from './notifications.js';
 import { finishEdit } from './editor.js';
-import { shapeSvg } from './rendering.js';
+import { lineDashAttr, markerAttrs, markerDefs, shapeSvg } from './rendering.js';
 import { state } from './state.js';
 import { M, colors, esc } from './core.js';
 export function wrapText(text, maxWidth, fontSize) {
@@ -21,30 +21,34 @@ export function wrapText(text, maxWidth, fontSize) {
   return result;
 }
 export function exportSVG() {
+  M.dedupeConnectors(state.board.objects);
   const b = M.enclosing(
       state.board.objects.filter((n) => n.type !== 'connector'),
       state.board.objects,
     ),
     pad = 40;
   const lines = state.board.objects
-    .filter((n) => ['path', 'connector'].includes(n.type))
+    .filter((n) => ['path', 'line', 'connector'].includes(n.type))
     .map((n) => {
       if (n.type === 'path') {
         const d = M.smoothPath(n.points);
-        return `<path d="${d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 4}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+        return `<path d="${d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 4}" fill="none" stroke-linecap="round" stroke-linejoin="round"${lineDashAttr(n.lineStyle, n.strokeWidth || 4)}/>`;
       }
-      const route = M.connectorRoute(n, state.board.objects);
+      const route = n.type === 'line' ? M.lineRoute(n) : M.connectorRoute(n, state.board.objects),
+        width = n.strokeWidth || 2,
+        dash = lineDashAttr(n.lineStyle || 'solid', width),
+        markers = markerAttrs(n, 'export-');
       const label = n.text
         ? (() => {
             const w = Math.max(44, Math.min(240, n.text.length * 7.4 + 20));
             return `<g transform="translate(${route.labelX},${route.labelY})"><rect x="${-w / 2}" y="-12" width="${w}" height="24" rx="12" fill="#ffffff" stroke="#d5dbd0" stroke-width="1.2"/><text text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#3c4234">${esc(n.text)}</text></g>`;
           })()
         : '';
-      return `<path d="${route.d}" stroke="${n.color || '#86917b'}" stroke-width="${n.strokeWidth || 2}" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#export-arrow)"/>${label}`;
+      return `<path d="${route.d}" stroke="${n.color || '#86917b'}" stroke-width="${width}" fill="none" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}`;
     })
     .join('');
   const objects = state.board.objects
-    .filter((n) => !['path', 'connector'].includes(n.type))
+    .filter((n) => !['path', 'line', 'connector'].includes(n.type))
     .slice()
     .sort(
       (a, b) => (a.z ?? (a.type === 'frame' ? -10 : 0)) - (b.z ?? (b.type === 'frame' ? -10 : 0)),
@@ -91,7 +95,7 @@ export function exportSVG() {
       return `<g transform="translate(${x} ${y}) rotate(${n.rotation || 0} ${w / 2} ${h / 2})">${visual}</g>`;
     })
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${b.w + pad * 2}" height="${b.h + pad * 2}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}"><title>${esc(state.board.title)}</title><defs><marker id="export-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8" fill="none" stroke="context-stroke" stroke-width="1.4"/></marker></defs><rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f9faf7"/>${lines}${objects}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${b.w + pad * 2}" height="${b.h + pad * 2}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}"><title>${esc(state.board.title)}</title>${markerDefs('export-')}<rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f9faf7"/>${lines}${objects}</svg>`;
 }
 export function downloadBlob(content, type, extension) {
   const blob =

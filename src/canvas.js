@@ -9,6 +9,48 @@ import { state } from './state.js';
 import { commit, snapshot } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
 
+function currentLineOptions(defaultRoute = 'straight') {
+  return {
+    route: $('#line-route')?.value || defaultRoute,
+    lineStyle: $('#line-style')?.value || 'solid',
+    startArrow: $('#line-start-arrow')?.value || 'none',
+    endArrow: $('#line-end-arrow')?.value || 'arrow',
+    color: $('#line-color')?.value || '#86917b',
+    strokeWidth: Number($('#line-width')?.value) || 2,
+  };
+}
+
+function snapLinePoint(start, end) {
+  const dx = end.x - start.x,
+    dy = end.y - start.y,
+    dist = Math.hypot(dx, dy),
+    angle = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+  return {
+    x: Math.round(start.x + Math.cos(angle) * dist),
+    y: Math.round(start.y + Math.sin(angle) * dist),
+  };
+}
+
+function upsertConnector(props) {
+  const existing = state.board.objects.find(
+    (o) =>
+      o.type === 'connector' &&
+      ((o.from === props.from && o.to === props.to) ||
+        (o.from === props.to && o.to === props.from)),
+  );
+  if (existing) {
+    Object.assign(existing, props);
+    if (!props.fromPort) delete existing.fromPort;
+    if (!props.toPort) delete existing.toPort;
+    M.dedupeConnectors(state.board.objects);
+    return existing.id;
+  }
+  const created = { id: uid(), type: 'connector', ...props };
+  state.board.objects.push(created);
+  M.dedupeConnectors(state.board.objects);
+  return created.id;
+}
+
 function localShapePoint(n, p) {
   const cx = n.x + n.w / 2,
     cy = n.y + n.h / 2,
@@ -109,23 +151,47 @@ export function endPointer(e) {
     state.connectorDraft = null;
     if (draft?.to && draft.to !== d.from) {
       commit(() => {
-        const created = {
-          id: uid(),
-          type: 'connector',
+        const opts = currentLineOptions('curved');
+        const id = upsertConnector({
           from: d.from,
           to: draft.to,
           fromPort: d.fromPort,
           toPort: draft.toPort,
-          route: 'curved',
-          color: '#86917b',
-          strokeWidth: 2,
-        };
-        state.board.objects.push(created);
-        state.selected = new Set([created.id]);
+          ...opts,
+        });
+        state.selected = new Set([id]);
       });
     } else {
       renderLines();
     }
+    return;
+  }
+  if (d.type === 'draw-line') {
+    state.connectorDraft = null;
+    const start = d.start,
+      rawEnd = d.end || d.start,
+      dist = Math.hypot(rawEnd.x - start.x, rawEnd.y - start.y),
+      pts =
+        dist < 8
+          ? [
+              { x: Math.round(start.x - 90), y: Math.round(start.y) },
+              { x: Math.round(start.x + 90), y: Math.round(start.y) },
+            ]
+          : [
+              { x: Math.round(start.x), y: Math.round(start.y) },
+              { x: Math.round(rawEnd.x), y: Math.round(rawEnd.y) },
+            ];
+    commit(() => {
+      const created = {
+        id: uid(),
+        type: 'line',
+        points: pts,
+        ...d.opts,
+      };
+      state.board.objects.push(created);
+      state.selected = new Set([created.id]);
+    });
+    setTool('select');
     return;
   }
   if (d.type === 'draw') {
@@ -178,19 +244,22 @@ export function setupCanvas() {
       return;
     }
     const portEl = e.target.closest('.port');
-    if (portEl && n && !['path', 'connector', 'frame'].includes(n.type)) {
+    if (portEl && n && !['path', 'line', 'connector', 'frame'].includes(n.type)) {
       const fromPort = portEl.dataset.port,
-        startPt = M.portPoint(n, fromPort);
+        startPt = M.portPoint(n, fromPort),
+        opts = currentLineOptions('curved');
       state.connectorDraft = {
         from: n.id,
         fromPort,
         d: `M${startPt.x},${startPt.y} L${p.x},${p.y}`,
+        ...opts,
       };
       state.drag = {
         type: 'connect-port',
         from: n.id,
         fromPort,
         startPt,
+        opts,
       };
       capture(e);
       renderLines();
@@ -232,6 +301,18 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    const lineVertEl = e.target.closest('.line-vertex');
+    if (lineVertEl && n && n.type === 'line' && !n.locked) {
+      const idx = Number(lineVertEl.dataset.lineVertex);
+      state.drag = {
+        type: 'line-vertex',
+        id: n.id,
+        index: idx,
+        changed: false,
+      };
+      capture(e);
+      return;
+    }
     const pathVertEl = e.target.closest('.path-vertex');
     if (pathVertEl && n && n.type === 'path' && !n.locked) {
       const idx = Number(pathVertEl.dataset.pathVertex);
@@ -248,27 +329,42 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    if (state.tool === 'line') {
+      const opts = currentLineOptions('straight');
+      state.connectorDraft = {
+        type: 'line',
+        d: `M${p.x},${p.y} L${p.x},${p.y}`,
+        ...opts,
+      };
+      state.drag = {
+        type: 'draw-line',
+        start: p,
+        end: p,
+        opts,
+      };
+      capture(e);
+      renderLines();
+      return;
+    }
     if (state.tool === 'connector') {
-      if (!n || ['path', 'connector', 'frame'].includes(n.type)) return;
+      if (!n || ['path', 'line', 'connector', 'frame'].includes(n.type)) return;
       if (!state.connectorStart) {
         state.connectorStart = n.id;
         selectIds([n.id]);
         toast('Click another object to connect it');
       } else if (state.connectorStart !== n.id) {
-        const from = state.connectorStart;
-        commit(() =>
-          state.board.objects.push({
-            id: uid(),
-            type: 'connector',
+        const from = state.connectorStart,
+          opts = currentLineOptions('curved');
+        let createdId;
+        commit(() => {
+          createdId = upsertConnector({
             from,
             to: n.id,
-            route: 'curved',
-            color: '#86917b',
-            strokeWidth: 2,
-          }),
-        );
+            ...opts,
+          });
+        });
         setTool('select');
-        state.selected.clear();
+        state.selected = new Set([createdId]);
         selectVisual();
       }
       return;
@@ -370,9 +466,25 @@ export function setupCanvas() {
       eraseAt(p);
       return;
     }
+    if (state.drag.type === 'draw-line') {
+      const target = e.shiftKey ? snapLinePoint(state.drag.start, p) : p;
+      state.drag.end = target;
+      const preview = M.lineRoute({
+        points: [state.drag.start, target],
+        route: state.drag.opts.route,
+      });
+      state.connectorDraft = {
+        type: 'line',
+        d: preview.d,
+        ...state.drag.opts,
+      };
+      renderLines();
+      return;
+    }
     if (state.drag.type === 'connect-port') {
       const hit = nearestTargetPort(p, state.drag.from);
       const fromNode = state.board.objects.find((o) => o.id === state.drag.from);
+      const opts = state.drag.opts || currentLineOptions('curved');
       if (hit && fromNode) {
         const preview = M.connectorRoute(
           {
@@ -380,23 +492,27 @@ export function setupCanvas() {
             to: hit.node.id,
             fromPort: state.drag.fromPort,
             toPort: hit.port,
-            route: 'curved',
+            route: opts.route,
           },
           state.board.objects,
         );
         state.connectorDraft = {
+          type: 'connector',
           from: state.drag.from,
           fromPort: state.drag.fromPort,
           to: hit.node.id,
           toPort: hit.port,
           d: preview.d,
+          ...opts,
         };
       } else {
         const s = state.drag.startPt;
         state.connectorDraft = {
+          type: 'connector',
           from: state.drag.from,
           fromPort: state.drag.fromPort,
           d: `M${s.x},${s.y} L${p.x},${p.y}`,
+          ...opts,
         };
       }
       renderLines();
@@ -441,6 +557,17 @@ export function setupCanvas() {
       const local = localShapePoint(n, p);
       M.moveVertex(n, state.drag.index, local);
       render();
+      return;
+    }
+    if (state.drag.type === 'line-vertex') {
+      if (!state.drag.changed) {
+        snapshot();
+        state.drag.changed = true;
+      }
+      const otherIdx = state.drag.index === 0 ? n.points.length - 1 : 0;
+      const target = e.shiftKey ? snapLinePoint(n.points[otherIdx], p) : p;
+      n.points[state.drag.index] = { x: Math.round(target.x), y: Math.round(target.y) };
+      renderLines();
       return;
     }
     if (state.drag.type === 'path-vertex') {
