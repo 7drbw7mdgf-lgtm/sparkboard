@@ -157,8 +157,10 @@ export function selectVisual() {
   if (state.reshapeId && (!state.selected.has(state.reshapeId) || state.selected.size !== 1)) {
     state.reshapeId = null;
   }
-  $$('#objects .object').forEach((el) => {
-    const n = state.board.objects.find((n) => n.id === el.dataset.id);
+  // Index once rather than scanning the entire board for every rendered element.
+  const objectsById = new Map(state.board.objects.map((item) => [item.id, item]));
+  $('#objects .object').forEach((el) => {
+    const n = objectsById.get(el.dataset.id);
     if (!n) return;
     const isSelected = state.selected.has(n.id);
     const isReshaping = isSelected && state.reshapeId === n.id && M.shapes.includes(n.type);

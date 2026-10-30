@@ -199,6 +199,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       decisionHandler(.allow)
       return
     }
+    // Embedded videos/maps must navigate inside their own frame. Only external
+    // top-level navigations are handed off to the system browser.
+    if navigationAction.targetFrame?.isMainFrame == false,
+      ["https", "http"].contains(url.scheme ?? "") {
+      decisionHandler(.allow)
+      return
+    }
     if ["https", "http"].contains(url.scheme ?? "") { NSWorkspace.shared.open(url) }
     decisionHandler(.cancel)
   }
