@@ -1,6 +1,6 @@
 {
   "name": "sparkboard",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "private": true,
   "description": "A local-first visual whiteboard inspired by Lucidspark",
   "scripts": {
