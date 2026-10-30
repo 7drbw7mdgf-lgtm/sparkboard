@@ -27,6 +27,15 @@
         >
           <span>Find</span>
         </button>
+        <button
+          class="quiet"
+          id="inspect"
+          title="Format panel"
+          aria-label="Format"
+          aria-expanded="false"
+        >
+          <span>Format</span>
+        </button>
         <button class="quiet" id="scenes" title="Saved scenes" aria-label="Saved scenes">
           <span>Scenes</span>
         </button>
@@ -56,16 +65,6 @@
       <span id="board-type">Brainstorm</span>
     </div>
     <nav id="tools" aria-label="Whiteboard tools"></nav>
-    <div id="properties" hidden>
-      <span id="selection-count">1 item</span>
-      <div id="swatches"></div>
-      <span class="separator"></span><button id="edit" title="Edit text (Enter)">✎</button
-      ><button id="reshape" title="Reshape anchor points (A)" hidden>◇</button
-      ><button id="duplicate" title="Duplicate (⌘D)">⧉</button
-      ><button id="lock" title="Lock or unlock">♙</button
-      ><button id="inspect" title="Format" aria-label="Format" aria-expanded="false">☷</button
-      ><button id="delete" title="Delete selected">⌫</button>
-    </div>
     <aside id="inspector" hidden aria-label="Format">
       <div class="panel-heading">
         <div>
@@ -73,6 +72,19 @@
           <h3>Format</h3>
         </div>
         <button id="close-inspector" aria-label="Close format panel">×</button>
+      </div>
+      <div id="properties" hidden>
+        <div class="inspector-quick-bar">
+          <span id="selection-count">1 item</span>
+          <div class="inspector-quick-actions">
+            <button id="edit" title="Edit text (Enter)">✎</button
+            ><button id="reshape" title="Reshape anchor points (A)" hidden>◇</button
+            ><button id="duplicate" title="Duplicate (⌘D)">⧉</button
+            ><button id="lock" title="Lock or unlock">♙</button
+            ><button id="delete" title="Delete selected">⌫</button>
+          </div>
+        </div>
+        <div id="swatches" aria-label="Color presets"></div>
       </div>
       <div id="inspector-body"></div>
     </aside>
@@ -88,62 +100,94 @@
       <button class="primary" id="save-scene">＋ Save current view</button>
       <div id="scene-list"></div>
     </aside>
-    <div id="drawing-options" hidden>
-      <span class="eyebrow">DRAW</span
-      ><input id="pen-color" type="color" value="#626e56" aria-label="Pen color" /><label
-        >Width
-        <select id="pen-width" aria-label="Pen width">
-          <option value="2">Fine</option>
-          <option value="4" selected>Medium</option>
-          <option value="8">Bold</option>
-          <option value="16">Marker</option>
-        </select></label
-      >
-    </div>
-    <div id="line-options" hidden>
-      <span class="eyebrow" id="line-options-label">LINE</span
-      ><label
-        >Type
-        <select id="line-route" aria-label="Line type">
-          <option value="straight">Straight</option>
-          <option value="curved">Curved</option>
-          <option value="elbow">Elbow</option>
-        </select></label
-      ><label
-        >Style
-        <select id="line-style" aria-label="Line style">
-          <option value="solid">Solid</option>
-          <option value="dashed">Dashed</option>
-          <option value="dotted">Dotted</option>
-        </select></label
-      ><label
-        >Start
-        <select id="line-start-arrow" aria-label="Start arrowhead">
-          <option value="none" selected>None</option>
-          <option value="arrow">Open arrow</option>
-          <option value="filled">Filled arrow</option>
-          <option value="circle">Circle</option>
-          <option value="diamond">Diamond</option>
-        </select></label
-      ><label
-        >End
-        <select id="line-end-arrow" aria-label="End arrowhead">
-          <option value="none">None</option>
-          <option value="arrow" selected>Open arrow</option>
-          <option value="filled">Filled arrow</option>
-          <option value="circle">Circle</option>
-          <option value="diamond">Diamond</option>
-        </select></label
-      ><input id="line-color" type="color" value="#626e56" aria-label="Line color" /><label
-        >Width
-        <select id="line-width" aria-label="Line width">
-          <option value="1">Thin</option>
-          <option value="2" selected>Medium</option>
-          <option value="4">Bold</option>
-          <option value="6">Heavy</option>
-        </select></label
-      >
-    </div>
+    <aside id="drawing-options" class="side-options-panel" aria-label="Draw format" hidden>
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">DRAW TOOL</span>
+          <h3>Format</h3>
+        </div>
+      </div>
+      <div class="inspector-section">
+        <label class="field-label">STROKE <span>Freehand pen</span></label>
+        <div class="form-row">
+          <label
+            >Color<input id="pen-color" type="color" value="#626e56" aria-label="Pen color"
+          /></label>
+          <label
+            >Width
+            <select id="pen-width" aria-label="Pen width">
+              <option value="2">Fine (2px)</option>
+              <option value="4" selected>Medium (4px)</option>
+              <option value="8">Bold (8px)</option>
+              <option value="16">Marker (16px)</option>
+            </select></label
+          >
+        </div>
+      </div>
+    </aside>
+    <aside id="line-options" class="side-options-panel" aria-label="Line format" hidden>
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow" id="line-options-label">LINE</span>
+          <h3>Format</h3>
+        </div>
+      </div>
+      <div class="inspector-section">
+        <label class="field-label">LINE &amp; CONNECTOR <span>Defaults</span></label>
+        <div class="form-row">
+          <label
+            >Type
+            <select id="line-route" aria-label="Line type">
+              <option value="straight">Straight</option>
+              <option value="curved">Curved</option>
+              <option value="elbow">Elbow</option>
+            </select></label
+          ><label
+            >Style
+            <select id="line-style" aria-label="Line style">
+              <option value="solid">Solid</option>
+              <option value="dashed">Dashed</option>
+              <option value="dotted">Dotted</option>
+            </select></label
+          >
+        </div>
+        <div class="form-row">
+          <label
+            >Start cap
+            <select id="line-start-arrow" aria-label="Start arrowhead">
+              <option value="none" selected>None</option>
+              <option value="arrow">Open arrow</option>
+              <option value="filled">Filled arrow</option>
+              <option value="circle">Circle</option>
+              <option value="diamond">Diamond</option>
+            </select></label
+          ><label
+            >End cap
+            <select id="line-end-arrow" aria-label="End arrowhead">
+              <option value="none">None</option>
+              <option value="arrow" selected>Open arrow</option>
+              <option value="filled">Filled arrow</option>
+              <option value="circle">Circle</option>
+              <option value="diamond">Diamond</option>
+            </select></label
+          >
+        </div>
+        <div class="form-row">
+          <label
+            >Color<input id="line-color" type="color" value="#626e56" aria-label="Line color"
+          /></label>
+          <label
+            >Width
+            <select id="line-width" aria-label="Line width">
+              <option value="1">Thin (1px)</option>
+              <option value="2" selected>Medium (2px)</option>
+              <option value="4">Bold (4px)</option>
+              <option value="6">Heavy (6px)</option>
+            </select></label
+          >
+        </div>
+      </div>
+    </aside>
     <div id="selection-box" hidden></div>
     <div id="drop-hint" hidden>Drop images or PDFs onto your canvas</div>
     <aside class="welcome" id="welcome">

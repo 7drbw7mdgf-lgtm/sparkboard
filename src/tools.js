@@ -2,6 +2,7 @@ import { embedDialog } from './embeds.js';
 import { state } from './state.js';
 import { finishEdit } from './editor.js';
 import { linkDialog } from './links.js';
+import { properties } from './inspector.js';
 import { labels, shapeNames, svgIcon } from './icons.js';
 import { $, $$, M } from './core.js';
 export function setupTools() {
@@ -79,16 +80,22 @@ export function setTool(t) {
   if (lineOpts) {
     lineOpts.hidden = t !== 'line' && t !== 'connector';
     const label = $('#line-options-label');
-    if (label) label.textContent = t === 'connector' ? 'CONNECTOR' : 'LINE';
+    if (label) label.textContent = t === 'connector' ? 'CONNECTOR TOOL' : 'LINE TOOL';
   }
+  if (['pen', 'line', 'connector'].includes(t)) {
+    state.scenePanelOpen = false;
+    const scenesPanel = $('#scenes-panel');
+    if (scenesPanel) scenesPanel.hidden = true;
+  }
+  properties();
   $('#canvas').style.cursor = t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
   $('#hint').textContent =
     t === 'line'
-      ? 'Drag on the canvas to draw a line · Choose line type & style above'
+      ? 'Drag on the canvas to draw a line · Format options on the right'
       : t === 'connector'
-        ? 'Click or drag between two objects to connect them · Choose style above'
+        ? 'Click or drag between two objects to connect them · Format options on the right'
         : t === 'pen'
-          ? 'Draw smooth strokes on the canvas · Choose your pen above'
+          ? 'Draw smooth strokes on the canvas · Pen format on the right'
           : t === 'eraser'
             ? 'Drag across drawn strokes to erase them'
             : t === 'select'

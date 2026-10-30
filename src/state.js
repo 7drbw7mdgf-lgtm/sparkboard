@@ -14,7 +14,7 @@ export const state = {
   history: [],
   future: [],
   connectorStart: null,
-  inspectorOpen: false,
+  inspectorOpen: true,
   scenePanelOpen: false,
   toastTimer: null,
   clipboard: [],

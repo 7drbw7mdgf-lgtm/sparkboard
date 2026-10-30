@@ -6,6 +6,8 @@ export const icons = {
   snap: '<path d="M8 3v18M16 3v18M3 8h18M3 16h18"/><rect x="8" y="8" width="8" height="8" rx="1"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1-1.5 3m0 3h.01"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+  format:
+    '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/>',
   scenes: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v14m5-10 4 3-4 3Z"/>',
   templates:
     '<rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',

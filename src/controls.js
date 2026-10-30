@@ -23,6 +23,7 @@ export function setupControls() {
     boards: 'templates',
     help: 'help',
     'search-board': 'search',
+    inspect: 'format',
     scenes: 'scenes',
     templates: 'templates',
     export: 'export',
@@ -33,7 +34,7 @@ export function setupControls() {
     button.innerHTML =
       svgIcon(icon) +
       (button.classList.contains('quiet')
-        ? `<span>${{ search: 'Find', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
+        ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
         : '');
   }
   $('#canvas').setAttribute('aria-busy', 'true');
@@ -128,6 +129,10 @@ export function setupControls() {
       );
   };
   $('#inspect').onclick = () => {
+    if (!state.selected.size && !['pen', 'line', 'connector'].includes(state.tool)) {
+      toast('Select an item on the board to format it');
+      return;
+    }
     state.inspectorOpen = !state.inspectorOpen;
     state.scenePanelOpen = false;
     $('#scenes-panel').hidden = true;

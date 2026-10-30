@@ -11,13 +11,27 @@ const arrowOptions = [
   ['diamond', 'Diamond'],
 ];
 
+let lastSelectionKey = '';
+
 export function properties() {
   const ns = selectedNodes(),
+    selectionKey = ns.map((n) => n.id).join(','),
     first = ns[0],
     hasUnlocked = ns.some((n) => !n.locked),
     canText = ns.length === 1 && !['path', 'image', 'file'].includes(first?.type),
     canReshape =
-      ns.length === 1 && hasUnlocked && (M.shapes.includes(first?.type) || first?.type === 'path');
+      ns.length === 1 && hasUnlocked && (M.shapes.includes(first?.type) || first?.type === 'path'),
+    toolSidePanel = ['pen', 'line', 'connector'].includes(state.tool);
+  if (selectionKey !== lastSelectionKey) {
+    lastSelectionKey = selectionKey;
+    if (ns.length) {
+      state.inspectorOpen = true;
+      state.scenePanelOpen = false;
+      const scenesPanel = $('#scenes-panel');
+      if (scenesPanel) scenesPanel.hidden = true;
+    }
+  }
+  const showInspector = state.inspectorOpen && !!ns.length && !toolSidePanel;
   $('#properties').hidden = !ns.length;
   $('#selection-count').textContent =
     ns.length === 1
@@ -48,9 +62,9 @@ export function properties() {
   $('#delete').disabled = !hasUnlocked;
   $('#lock').textContent = ns.length && ns.every((n) => n.locked) ? '▣' : '♙';
   $('#lock').title = ns.every((n) => n.locked) ? 'Unlock selection' : 'Lock selection';
-  $('#inspector').hidden = !state.inspectorOpen || !ns.length;
-  $('#inspect').setAttribute('aria-expanded', String(state.inspectorOpen && !!ns.length));
-  if (state.inspectorOpen && ns.length) renderInspector();
+  $('#inspector').hidden = !showInspector;
+  $('#inspect').setAttribute('aria-expanded', String(showInspector));
+  if (showInspector) renderInspector();
 }
 
 export function renderInspector() {
