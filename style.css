@@ -2393,3 +2393,61 @@ body.is-panning #canvas {
 #connections .curve-handle:active {
   cursor: grabbing;
 }
+
+/* Fit all twelve tool buttons without clipping the link tool or its popovers. */
+#tools {
+  --tool-size: clamp(20px, calc((100dvh - 218px) / 12), 42px);
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: none;
+  gap: 2px;
+  padding: 6px;
+}
+#tools > button,
+#tools > .shape-picker > #shape-toggle {
+  width: var(--tool-size);
+  height: var(--tool-size);
+  flex: 0 0 var(--tool-size);
+}
+#tools > .shape-picker {
+  height: var(--tool-size);
+  flex: 0 0 var(--tool-size);
+}
+#tools > .tool-sep {
+  height: 1px;
+  margin: 3px 4px;
+}
+#tools svg {
+  width: min(22px, calc(var(--tool-size) - 10px));
+  height: min(22px, calc(var(--tool-size) - 10px));
+}
+#tools > button::after,
+#shape-toggle::after {
+  left: calc(100% + 12px);
+}
+@media (max-width: 650px) {
+  #tools {
+    --tool-size: clamp(20px, calc((100dvh - 218px) / 12), 33px);
+  }
+}
+@media (max-height: 460px) {
+  #tools {
+    --tool-size: 28px;
+    display: grid;
+    grid-template-columns: repeat(2, var(--tool-size));
+    top: 80px;
+    transform: none;
+  }
+  #tools > .tool-sep {
+    grid-column: 1 / -1;
+  }
+  #tools > .shape-picker {
+    position: static;
+  }
+  #tools #shape-menu {
+    left: calc(100% + 12px);
+    top: 0;
+    max-height: calc(100dvh - 92px);
+    overflow-y: auto;
+  }
+}

@@ -49,7 +49,7 @@ export const icons = {
     '<rect x="3" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><path d="M7 5h10M19 7v10M17 19H7M5 17V7"/>',
   media:
     '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="2"/><path d="m3 18 6-6 4 4 3-3 5 5"/>',
-  link: '<path d="m10 14 4-4M9 16l-2 2a4 4 0 0 1-5-5l5-5a4 4 0 0 1 5 0m0 0 2-2a4 4 0 0 1 5 5l-5 5a4 4 0 0 1-5 0"/>',
+  link: '<path d="m10 8 3-3a4 4 0 0 1 6 6l-3 3M14 16l-3 3a4 4 0 0 1-6-6l3-3M9 15l6-6"/>',
 };
 export const shapeNames = {
   sticky: 'Sticky note',
