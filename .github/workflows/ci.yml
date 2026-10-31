@@ -18,6 +18,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Show canonical formatting for mobile changes
+        run: |
+          npx prettier --write src/mobile-gestures.js src/viewport.js style.css tests/mobile-gestures.test.js >/dev/null
+          for f in src/mobile-gestures.js src/viewport.js style.css tests/mobile-gestures.test.js; do
+            echo "SPARKBOARD_FORMAT_START:$f"
+            cat "$f"
+            echo "SPARKBOARD_FORMAT_END:$f"
+          done
       - run: npm run format:check
       - run: npm test
       - run: npm run build
