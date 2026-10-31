@@ -10,10 +10,12 @@ import { setupDialogs, modal } from './src/dialogs.js';
 import { setupImporting } from './src/importing.js';
 import { setupControls } from './src/controls.js';
 import { setupAuth } from './src/auth.js';
+import { setupMobileGestures } from './src/mobile-gestures.js';
 
 setupTools();
 setupCanvas();
 setupViewport();
+setupMobileGestures();
 setupMedia();
 setupEmbeds();
 setupClipboard();

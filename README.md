@@ -24,6 +24,12 @@ npm start
 
 Then open [http://localhost:3000](http://localhost:3000).
 
+### Use Sparkboard on a phone
+
+The same hosted editor at [sparkboard.co.uk](https://sparkboard.co.uk/) uses a mobile layout on narrow/touch screens. Swipe sideways through the bottom tool dock, tap a tool and then the canvas to add an item, use two fingers to pinch/zoom or move around the board, and use **Fit** to recenter. The board library, formatting, templates and export actions remain available from the top controls. Work is still saved locally in that browser; signing in does not yet sync boards between devices.
+
+The source website is deployed from `main` when the Fasthosts GitHub Actions environment is configured. For deployment details see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Features
 
 - **Notes, 18 shapes & vector reshaping:** Sticky notes, editable text, and a searchable 18-shape library. Press `A` or click **Reshape points** (`◇`) to drag, add, or remove vector anchor points on any shape or stroke just like Illustrator.

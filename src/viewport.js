@@ -47,14 +47,21 @@ export function zoom(z, cx = innerWidth / 2, cy = $('#canvas').clientHeight / 2)
 }
 export function focusBounds(box) {
   finishEdit();
-  const availW = Math.max(170, innerWidth - (state.inspectorOpen ? 410 : 200)),
-    availH = Math.max(160, $('#canvas').clientHeight - 160);
+  const canvas = $('#canvas');
+  const mobile = matchMedia(
+    '(max-width: 650px), (max-height: 500px) and (pointer: coarse)',
+  ).matches;
+  const availW = Math.max(
+      170,
+      canvas.clientWidth - (mobile ? 32 : state.inspectorOpen ? 410 : 200),
+    ),
+    availH = Math.max(160, canvas.clientHeight - (mobile ? 32 : 160));
   state.view.z = Math.max(
     0.1,
     Math.min(1.3, availW / Math.max(box.w, 1), availH / Math.max(box.h, 1)),
   );
   state.view.x =
-    (innerWidth - (state.inspectorOpen ? 260 : 0) - box.w * state.view.z) / 2 -
+    (canvas.clientWidth - (mobile ? 0 : state.inspectorOpen ? 260 : 0) - box.w * state.view.z) / 2 -
     box.x * state.view.z;
   state.view.y = ($('#canvas').clientHeight - box.h * state.view.z) / 2 - box.y * state.view.z;
   applyView();
