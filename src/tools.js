@@ -2,9 +2,35 @@ import { embedDialog } from './embeds.js';
 import { state } from './state.js';
 import { finishEdit } from './editor.js';
 import { linkDialog } from './links.js';
+import { modal } from './dialogs.js';
 import { properties } from './inspector.js';
 import { labels, shapeNames, svgIcon } from './icons.js';
 import { $, $$, M } from './core.js';
+function showMobileShapePicker() {
+  modal(
+    'Choose a shape.',
+    `<div class="mobile-shapes">
+      <input id="mobile-shape-search" type="search" placeholder="Search shapes…" aria-label="Search shapes" />
+      <div id="mobile-shape-grid" role="group" aria-label="Shape library">
+        ${M.shapes.map((kind) => `<button type="button" data-mobile-shape="${kind}" aria-label="${shapeNames[kind]}">${svgIcon(kind)}<span>${shapeNames[kind]}</span></button>`).join('')}
+      </div>
+    </div>`,
+    'SHAPE LIBRARY',
+  );
+  $('#mobile-shape-search').oninput = (event) => {
+    const term = event.target.value.trim().toLowerCase();
+    $('#mobile-shape-grid button').forEach((button) => {
+      button.hidden = !shapeNames[button.dataset.mobileShape].toLowerCase().includes(term);
+    });
+  };
+  $('#mobile-shape-grid').onclick = (event) => {
+    const button = event.target.closest('[data-mobile-shape]');
+    if (!button) return;
+    $('#dialog').close();
+    setTool(button.dataset.mobileShape);
+  };
+}
+
 export function setupTools() {
   $('#tools').innerHTML = [
     'select',
@@ -32,6 +58,10 @@ export function setupTools() {
     const b = e.target.closest('button');
     if (!b) return;
     if (b.id === 'shape-toggle') {
+      if (matchMedia('(max-width: 650px), (max-height: 500px) and (pointer: coarse)').matches) {
+        showMobileShapePicker();
+        return;
+      }
       let open = $('#shape-menu').hidden;
       $('#shape-menu').hidden = !open;
       b.setAttribute('aria-expanded', String(open));
