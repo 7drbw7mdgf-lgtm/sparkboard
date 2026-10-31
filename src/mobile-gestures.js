@@ -29,11 +29,7 @@ export function setupMobileGestures() {
   canvas.addEventListener(
     'pointerdown',
     (event) => {
-      if (
-        event.pointerType !== 'touch' ||
-        event.target.closest('.pdf-viewer, [data-open]')
-      )
-        return;
+      if (event.pointerType !== 'touch' || event.target.closest('.pdf-viewer, [data-open]')) return;
 
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       if (pointers.size === 2) {
