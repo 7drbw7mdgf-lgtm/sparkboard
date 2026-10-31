@@ -9,6 +9,7 @@ import { setupScenes } from './src/scenes.js';
 import { setupDialogs, modal } from './src/dialogs.js';
 import { setupImporting } from './src/importing.js';
 import { setupControls } from './src/controls.js';
+import { setupAuth } from './src/auth.js';
 
 setupTools();
 setupCanvas();
@@ -21,9 +22,11 @@ setupDialogs();
 setupImporting();
 setupControls();
 
-init().catch((error) => {
-  document.querySelector('#saved').textContent = 'Storage could not be opened';
-  document.querySelector('#canvas').removeAttribute('aria-busy');
-  modal('Your saved data is safe.', `<p id="storage-error"></p>`, 'STORAGE UNAVAILABLE');
-  document.querySelector('#storage-error').textContent = error.message;
-});
+init()
+  .then(setupAuth)
+  .catch((error) => {
+    document.querySelector('#saved').textContent = 'Storage could not be opened';
+    document.querySelector('#canvas').removeAttribute('aria-busy');
+    modal('Your saved data is safe.', `<p id="storage-error"></p>`, 'STORAGE UNAVAILABLE');
+    document.querySelector('#storage-error').textContent = error.message;
+  });

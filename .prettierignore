@@ -5,3 +5,4 @@ package-lock.json
 *.app/
 build/
 assets/pdfjs/
+src/vendor/

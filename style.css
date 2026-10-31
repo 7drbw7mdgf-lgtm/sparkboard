@@ -1797,6 +1797,87 @@ header .divider {
 .header-actions .quiet:hover {
   background: #edf1e4;
 }
+.account-button {
+  min-width: 36px;
+  height: 34px;
+  margin-left: 3px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 18px;
+  background: #edf1e4;
+  color: #3b4c30;
+  font-size: 12px;
+  font-weight: 600;
+}
+.account-button[hidden] {
+  display: none;
+}
+.account-providers {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+.account-provider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #dfe5d7;
+  border-radius: 12px;
+  background: #fff;
+  font-weight: 600;
+}
+.account-provider:hover {
+  background: #f5f7f0;
+}
+.account-provider b {
+  font-size: 22px;
+}
+.account-provider.google b {
+  color: #4285f4;
+}
+.account-provider.facebook {
+  background: #1877f2;
+  color: #fff;
+  border-color: #1877f2;
+}
+.account-provider.facebook:hover {
+  background: #1466d1;
+}
+.account-provider.apple {
+  background: #171717;
+  color: #fff;
+  border-color: #171717;
+}
+.account-provider.apple:hover {
+  background: #333;
+}
+.account-provider.azure {
+  color: #242424;
+  border-color: #9a9a9a;
+}
+.account-provider:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.account-note {
+  color: #6d7865;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 22px;
+}
+.account-intro {
+  color: #6d7865;
+}
+.account-name {
+  font-weight: 600;
+}
+#account-error {
+  color: #b0442f;
+  font-size: 13px;
+}
 .header-actions svg,
 .library-button svg,
 .tab-close svg,

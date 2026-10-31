@@ -70,6 +70,10 @@ npm run build:mac     # Build build/macos/Sparkboard.app (Apple Silicon, macOS 1
 
 ## License
 
+Website publishing: [DEPLOYMENT.md](DEPLOYMENT.md). Pushes to `main` can deploy automatically to Fasthosts once its GitHub Actions environment secret is configured.
+
+Optional Google, Facebook, Apple and Microsoft account setup: [AUTH-SETUP.md](AUTH-SETUP.md). Accounts identify users; boards remain stored on this browser until cloud sync is implemented.
+
 [MIT](LICENSE), copyright 2026 Sparkboard contributors. The macOS bundle includes the Node.js runtime license, and the local PDF viewer uses bundled Mozilla PDF.js (Apache-2.0) in `assets/pdfjs/`.
 
 ## Editing and recovery

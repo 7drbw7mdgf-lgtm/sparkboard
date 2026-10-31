@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.cjs",
     "check": "node scripts/check.cjs",
+    "vendor:auth": "node scripts/vendor-auth.cjs",
+    "website:build": "node scripts/build-website.cjs",
     "test": "node --test board-model.test.cjs updater.test.cjs tests/*.test.js tests/*.test.cjs",
     "sandbox:prepare": "node scripts/release.cjs --sandbox",
     "release:build": "node scripts/release.cjs",
@@ -16,6 +18,8 @@
     "build:mac": "python3 scripts/build-macos.py"
   },
   "devDependencies": {
+    "@supabase/auth-js": "2.118.0",
+    "esbuild": "0.28.2",
     "fake-indexeddb": "^6.2.6",
     "prettier": "^3.9.10"
   },

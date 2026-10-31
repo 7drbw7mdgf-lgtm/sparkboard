@@ -1,0 +1,76 @@
+name: Deploy website to Fasthosts
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fasthosts-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: fasthosts-production
+      url: https://sparkboard.co.uk/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build dependencies
+        run: npm ci
+      - name: Check and test
+        run: |
+          npm run check
+          npm run format:check
+          npm test
+          python3 -m unittest discover -s tests -p 'test_deploy_website.py'
+          npm run build
+      - name: Build the public website
+        env:
+          WEBSITE_REVISION: ${{ github.sha }}
+        run: npm run website:build
+      - name: Install SFTP client
+        run: python3 -m pip install --disable-pip-version-check -r deploy/requirements.txt
+      - name: Skip superseded commits
+        id: current
+        shell: bash
+        run: |
+          latest="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'A newer commit is already on main; skipping this deployment.'
+          fi
+      - name: Upload and publish
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          FASTHOSTS_SFTP_PASSWORD: ${{ secrets.FASTHOSTS_SFTP_PASSWORD }}
+        run: python3 scripts/deploy-website.py
+      - name: Verify the public website
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 10 --retry-all-errors \
+            "https://sparkboard.co.uk/?deployment=$EXPECTED_REVISION" -o /tmp/sparkboard-live.html
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          marker = 'name="sparkboard-build" content="' + os.environ['EXPECTED_REVISION'] + '"'
+          if marker not in Path('/tmp/sparkboard-live.html').read_text():
+              raise SystemExit('The public website is not serving this revision yet. Check DNS and hosting caches.')
+          print('HTTPS website is serving the deployed revision.')
+          PY

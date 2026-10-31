@@ -1,0 +1,12 @@
+DirectoryIndex index.html
+Options -Indexes
+<IfModule mod_mime.c>
+  AddType text/javascript .js .mjs
+  AddType application/wasm .wasm
+</IfModule>
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  <FilesMatch "\.(html|css|js|mjs)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
