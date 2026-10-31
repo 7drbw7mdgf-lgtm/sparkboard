@@ -1,4 +1,14 @@
 import { resolveEmbed } from './src/embed-model.js';
+import {
+  edgePoint,
+  anchorToward,
+  shapeContains,
+  obstacleBoxes,
+  routeSamples,
+  pathBlocked,
+  avoidObstacles,
+  routedPath,
+} from './src/connector-model.js';
 const shapes = [
   'shape',
   'pill',
@@ -146,29 +156,103 @@ function removeVertex(n, index) {
 }
 
 function portPoint(n, port = 'e') {
-  const cx = n.x + n.w / 2,
-    cy = n.y + n.h / 2;
-  const local =
-    port === 'n'
-      ? { x: 0, y: -n.h / 2, nx: 0, ny: -1 }
-      : port === 's'
-        ? { x: 0, y: n.h / 2, nx: 0, ny: 1 }
-        : port === 'w'
-          ? { x: -n.w / 2, y: 0, nx: -1, ny: 0 }
-          : { x: n.w / 2, y: 0, nx: 1, ny: 0 };
-  const angle = ((n.rotation || 0) * Math.PI) / 180;
-  if (!angle) {
-    return { x: cx + local.x, y: cy + local.y, nx: local.nx, ny: local.ny, port };
+  const anchor = {
+    n: { x: 0.5, y: 0 },
+    e: { x: 1, y: 0.5 },
+    s: { x: 0.5, y: 1 },
+    w: { x: 0, y: 0.5 },
+  }[port] || { x: 1, y: 0.5 };
+  return { ...bindingPoint(n, anchor), port };
+}
+
+function roundedBindingVertices(x, y, w, h, r) {
+  return [
+    [x + w - r, y + r, -90],
+    [x + w - r, y + h - r, 0],
+    [x + r, y + h - r, 90],
+    [x + r, y + r, 180],
+  ].flatMap(([cx, cy, start]) =>
+    Array.from({ length: 9 }, (_, i) => {
+      const angle = ((start + (i * 90) / 8) * Math.PI) / 180;
+      return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+    }),
+  );
+}
+const roundedShapeBinding = roundedBindingVertices(1, 1, 98, 98, 6);
+const pillBinding = roundedBindingVertices(2, 8, 96, 84, 42);
+const cylinderBinding = [
+  ...Array.from({ length: 17 }, (_, i) => {
+    const t = i / 16,
+      s = 1 - t;
+    return {
+      x: 4 * s * s * s + 12 * s * s * t + 288 * s * t * t + 96 * t * t * t,
+      y: 18 * s * s * s + 18 * s * s * t + 18 * s * t * t + 18 * t * t * t,
+    };
+  }),
+  ...Array.from({ length: 17 }, (_, i) => {
+    const t = i / 16,
+      s = 1 - t;
+    return {
+      x: 96 * s * s * s + 288 * s * s * t + 12 * s * t * t + 4 * t * t * t,
+      y: 82 * s * s * s + 282 * s * s * t + 282 * s * t * t + 82 * t * t * t,
+    };
+  }),
+];
+
+function bindingVertices(n) {
+  if (n.vertices || polygons[n.type]) return shapeVertices(n);
+  if (n.type === 'pill') return pillBinding;
+  if (n.type === 'cylinder') return cylinderBinding;
+  return shapes.includes(n.type)
+    ? roundedShapeBinding
+    : [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+        { x: 100, y: 100 },
+        { x: 0, y: 100 },
+      ];
+}
+
+function bindingPoint(n, anchor) {
+  return edgePoint(n, anchorToward(n, anchor), bindingVertices(n));
+}
+
+/** Screen-scaled proximity and an existing-target bias avoid snapping flicker between nearby notes. */
+function nearestBinding(objects, p, excludeId, radius = 24, previousId, fromPoint = p) {
+  let best = null,
+    score = Infinity;
+  for (const n of [...objects].reverse()) {
+    if (n.id === excludeId || ['line', 'path', 'connector', 'frame'].includes(n.type)) continue;
+    const vertices = bindingVertices(n),
+      inside = shapeContains(n, p, vertices);
+    const toward = Math.hypot(p.x - n.x - n.w / 2, p.y - n.y - n.h / 2) < 1 ? fromPoint : p;
+    let point = edgePoint(n, toward, vertices),
+      port;
+    let distance = Math.hypot(p.x - point.x, p.y - point.y);
+    if (!inside && distance > radius * (n.id === previousId ? 1.3 : 1)) continue;
+    let portDistance = radius * 0.45;
+    for (const candidate of ports) {
+      const fixed = portPoint(n, candidate),
+        d = Math.hypot(p.x - fixed.x, p.y - fixed.y);
+      if (d < portDistance) {
+        point = fixed;
+        port = candidate;
+        portDistance = d;
+      }
+    }
+    const candidateScore = (inside ? -radius : distance) - (n.id === previousId ? radius * 0.2 : 0);
+    if (candidateScore < score) {
+      score = candidateScore;
+      best = {
+        node: n,
+        port,
+        anchor: port || (inside && distance > radius) ? undefined : point.anchor,
+        x: point.x,
+        y: point.y,
+      };
+    }
   }
-  const cos = Math.cos(angle),
-    sin = Math.sin(angle);
-  return {
-    x: cx + local.x * cos - local.y * sin,
-    y: cy + local.x * sin + local.y * cos,
-    nx: local.nx * cos - local.ny * sin,
-    ny: local.nx * sin + local.ny * cos,
-    port,
-  };
+  return best;
 }
 
 function autoPorts(a, b, fromPort, toPort) {
@@ -337,13 +421,13 @@ function lineRoute(n) {
   };
 }
 
-function connectorRoute(n, objects = []) {
+function basicConnectorRoute(n, objects = [], endpoints) {
   if (n?.type === 'line') return lineRoute(n);
   const a = objects.find((o) => o.id === n.from),
     b = objects.find((o) => o.id === n.to);
   if (!a || !b) return { d: '', labelX: 0, labelY: 0, start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
   const route = routes.includes(n.route) ? n.route : 'straight';
-  if (route === 'straight' && !n.fromPort && !n.toPort) {
+  if (route === 'straight' && !n.fromPort && !n.toPort && !endpoints) {
     const ax = a.x + a.w / 2,
       ay = a.y + a.h / 2,
       bx = b.x + b.w / 2,
@@ -366,7 +450,7 @@ function connectorRoute(n, objects = []) {
       end: { x: x2, y: y2 },
     };
   }
-  const [p1, p2] = autoPorts(a, b, n.fromPort, n.toPort);
+  const [p1, p2] = endpoints || autoPorts(a, b, n.fromPort, n.toPort);
   const x1 = p1.x + p1.nx * 6,
     y1 = p1.y + p1.ny * 6,
     x2 = p2.x + p2.nx * 6,
@@ -466,6 +550,50 @@ function connectorRoute(n, objects = []) {
   };
 }
 
+function connectorRoute(n, objects = [], context) {
+  if (n?.type === 'line') return lineRoute(n);
+  const a = objects.find((o) => o.id === n.from),
+    b = objects.find((o) => o.id === n.to);
+  if (!a || !b) return basicConnectorRoute(n, objects);
+  const resolve = (node, other, side) =>
+    n[side + 'Anchor']
+      ? bindingPoint(node, n[side + 'Anchor'])
+      : n[side + 'Port']
+        ? portPoint(node, n[side + 'Port'])
+        : edgePoint(
+            node,
+            { x: other.x + other.w / 2, y: other.y + other.h / 2 },
+            bindingVertices(node),
+          );
+  const first = resolve(a, b, 'from'),
+    last = resolve(b, a, 'to');
+  const candidate = basicConnectorRoute(n, objects, [first, last]);
+  if (n.avoidObstacles === false) return candidate;
+  const boxes = context || obstacleBoxes(objects),
+    others = boxes.filter((box) => box.id !== a.id && box.id !== b.id);
+  const samples = routeSamples(candidate);
+  const endpointPenetration = samples
+    .slice(1, -1)
+    .some(
+      (point) =>
+        shapeContains(a, point, bindingVertices(a)) || shapeContains(b, point, bindingVertices(b)),
+    );
+  const exitsOutward =
+    samples.length > 1 &&
+    (samples[1].x - samples[0].x) * first.nx + (samples[1].y - samples[0].y) * first.ny >= -0.01;
+  const entersInward =
+    samples.length > 1 &&
+    (samples.at(-2).x - samples.at(-1).x) * last.nx +
+      (samples.at(-2).y - samples.at(-1).y) * last.ny >=
+      -0.01;
+  if (!endpointPenetration && !pathBlocked(samples, others) && exitsOutward && entersInward)
+    return candidate;
+  const points = avoidObstacles(candidate.start, candidate.end, first, last, boxes, a.id, b.id);
+  return points
+    ? { ...routedPath(points, n.route === 'curved'), rerouted: true }
+    : { ...candidate, obstructed: true };
+}
+
 function dedupeConnectors(objects = []) {
   const seenPairs = new Map();
   for (let i = objects.length - 1; i >= 0; i--) {
@@ -532,20 +660,21 @@ function bounds(n, objects = []) {
     };
   }
   if (n.type === 'connector') {
-    let a = objects.find((o) => o.id === n.from),
-      b = objects.find((o) => o.id === n.to);
-    if (!a || !b)
-      return {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0,
-      };
+    const route = connectorRoute(n, objects),
+      points = route.points || routeSamples(route);
+    if (!points.length) return { x: 0, y: 0, w: 0, h: 0 };
+    const xs = points.map((p) => p.x),
+      ys = points.map((p) => p.y);
+    if (n.text) {
+      const halfWidth = Math.max(44, Math.min(240, n.text.length * 7.4 + 20)) / 2;
+      xs.push(route.labelX - halfWidth, route.labelX + halfWidth);
+      ys.push(route.labelY - 12, route.labelY + 12);
+    }
     return {
-      x: Math.min(a.x + a.w / 2, b.x + b.w / 2),
-      y: Math.min(a.y + a.h / 2, b.y + b.h / 2),
-      w: Math.abs(a.x + a.w / 2 - b.x - b.w / 2),
-      h: Math.abs(a.y + a.h / 2 - b.y - b.h / 2),
+      x: Math.min(...xs),
+      y: Math.min(...ys),
+      w: Math.max(...xs) - Math.min(...xs),
+      h: Math.max(...ys) - Math.min(...ys),
     };
   }
   const angle = ((n.rotation || 0) * Math.PI) / 180,
@@ -848,6 +977,22 @@ function validateBoard(value) {
         throw Error('Invalid connector port');
       if (n.toPort !== undefined && !ports.includes(n.toPort))
         throw Error('Invalid connector port');
+      for (const field of ['fromAnchor', 'toAnchor']) {
+        const anchor = n[field];
+        if (
+          anchor !== undefined &&
+          (!anchor ||
+            !Number.isFinite(anchor.x) ||
+            !Number.isFinite(anchor.y) ||
+            anchor.x < -0.25 ||
+            anchor.x > 1.25 ||
+            anchor.y < -0.25 ||
+            anchor.y > 1.25)
+        )
+          throw Error('Invalid connector anchor');
+      }
+      if (n.avoidObstacles !== undefined && typeof n.avoidObstacles !== 'boolean')
+        throw Error('Invalid connector routing');
       if (n.text !== undefined && (typeof n.text !== 'string' || n.text.length > 500))
         throw Error('Invalid connector label');
     } else if (
@@ -936,6 +1081,9 @@ export {
   insertVertex,
   removeVertex,
   portPoint,
+  bindingPoint,
+  nearestBinding,
+  obstacleBoxes,
   lineRoute,
   lineControls,
   setLineRoute,

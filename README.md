@@ -88,4 +88,8 @@ Each open board keeps its own Undo/Redo history and zoom/pan view for the curren
 
 New lines show two curve handles automatically when selected. Drag either handle to bend the line; endpoint handles move the ends. Curves are preserved in backups, copied lines, Undo/Redo, and exports.
 
+Connectors snap to shape edges as well as the four visible ports. Use **Connector (C)** or drag a shape's port to another shape; the highlighted target and magnetic marker show the binding. Edge anchors follow notes through movement, resizing and rotation. Select a connector and drag either blue endpoint to reattach it to a different shape. Undo/Redo and editable backups preserve these bindings.
+
+Connectors avoid intervening objects by default. Straight and elbow routes use clear segments; curved routes round their detours. **Format → Smart routing → Direct route** turns avoidance off for a selected connector. Routing uses shape outlines for attachment and padded rotated bounds for clearance, with a bounded search on dense boards. Overlapping or completely blocked anchors may need the shapes moved apart. Exports and Fit include the routed path and its label.
+
 Concurrent windows use revision-protected saves. If a board has changed elsewhere, Sparkboard keeps the local edits and offers to save a separate board or download an editable backup. Conflicting recovery drafts become separate boards. Storage version 3 closes older editor connections before enabling this protection; refresh any older open Sparkboard windows. Older releases cannot open an upgraded workspace until updated.

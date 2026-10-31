@@ -84,6 +84,9 @@ export function renderInspector() {
       lineStyle = n.lineStyle || 'solid',
       startArrow = n.startArrow || 'none',
       endArrow = n.endArrow || (n.type === 'connector' ? 'arrow' : 'none');
+    const routingControl = ns.every((item) => item.type === 'connector')
+      ? `<label class="stack-field">Smart routing<select data-prop="avoidObstacles" aria-label="Avoid shapes" ${disabled}><option value="true" ${n.avoidObstacles !== false ? 'selected' : ''}>Avoid shapes</option><option value="false" ${n.avoidObstacles === false ? 'selected' : ''}>Direct route</option></select></label>`
+      : '';
     $('#inspector-body').innerHTML =
       `<div class="inspector-section"><label class="field-label">LINE TYPE <span>Routing</span></label><div class="segmented">${[
         ['straight', 'Straight'],
@@ -96,7 +99,7 @@ export function renderInspector() {
         )
         .join(
           '',
-        )}</div><label class="field-label">STROKE STYLE <span>Pattern</span></label><div class="segmented">${[
+        )}</div>${routingControl}<label class="field-label">STROKE STYLE <span>Pattern</span></label><div class="segmented">${[
         ['solid', 'Solid'],
         ['dashed', 'Dashed'],
         ['dotted', 'Dotted'],

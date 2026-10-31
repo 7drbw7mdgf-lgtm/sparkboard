@@ -162,6 +162,7 @@ export function setupControls() {
   };
   const applyInspectorProp = (prop, rawValue) => {
     let value = rawValue;
+    if (prop === 'avoidObstacles') value = rawValue === 'true';
     if (['fontSize', 'rotation', 'strokeWidth'].includes(prop)) {
       value = Number(value);
       if (!Number.isFinite(value)) return false;

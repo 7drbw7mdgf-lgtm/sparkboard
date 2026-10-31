@@ -44,6 +44,9 @@ function snapLinePoint(start, end) {
 }
 
 function upsertConnector(props) {
+  props = { ...props };
+  for (const field of ['fromPort', 'toPort', 'fromAnchor', 'toAnchor'])
+    if (!props[field]) delete props[field];
   const existing = state.board.objects.find(
     (o) =>
       o.type === 'connector' &&
@@ -54,6 +57,8 @@ function upsertConnector(props) {
     Object.assign(existing, props);
     if (!props.fromPort) delete existing.fromPort;
     if (!props.toPort) delete existing.toPort;
+    if (!props.fromAnchor) delete existing.fromAnchor;
+    if (!props.toAnchor) delete existing.toAnchor;
     M.dedupeConnectors(state.board.objects);
     return existing.id;
   }
@@ -78,25 +83,14 @@ function localShapePoint(n, p) {
 }
 
 function nearestTargetPort(p, excludeId) {
-  let best = null,
-    bestDist = 36 / state.view.z;
-  for (const n of state.board.objects) {
-    if (n.id === excludeId || ['path', 'connector', 'frame'].includes(n.type)) continue;
-    for (const port of M.ports) {
-      const pp = M.portPoint(n, port),
-        d = Math.hypot(p.x - pp.x, p.y - pp.y);
-      if (d < bestDist) {
-        bestDist = d;
-        best = { node: n, port, x: pp.x, y: pp.y };
-      }
-    }
-    if (!best && p.x >= n.x && p.x <= n.x + n.w && p.y >= n.y && p.y <= n.y + n.h) {
-      const ports = M.ports.map((port) => ({ port, ...M.portPoint(n, port) }));
-      ports.sort((a, b) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(p.x - b.x, p.y - b.y));
-      best = { node: n, port: ports[0].port, x: ports[0].x, y: ports[0].y };
-    }
-  }
-  return best;
+  return M.nearestBinding(
+    state.board.objects,
+    p,
+    excludeId,
+    26 / state.view.z,
+    state.connectorDraft?.binding?.nodeId,
+    state.drag?.startPt || p,
+  );
 }
 
 function eraseAt(p) {
@@ -169,9 +163,32 @@ export function endPointer(e) {
   if (pointerId !== undefined && $('#canvas').hasPointerCapture(pointerId))
     $('#canvas').releasePointerCapture(pointerId);
   if (d.type === 'pan') return;
+  if (d.type === 'rebind-connector') {
+    const draft = state.connectorDraft;
+    state.connectorDraft = null;
+    if (draft?.binding && e?.type === 'pointerup') {
+      const connector = state.board.objects.find((n) => n.id === d.id),
+        side = d.side;
+      if (connector)
+        commit(() => {
+          connector[side] = draft.binding.nodeId;
+          delete connector[side + 'Port'];
+          delete connector[side + 'Anchor'];
+          if (draft.binding.port) connector[side + 'Port'] = draft.binding.port;
+          else if (draft.binding.anchor) connector[side + 'Anchor'] = draft.binding.anchor;
+        });
+    }
+    renderLines();
+    return;
+  }
   if (d.type === 'connect-port') {
     const draft = state.connectorDraft;
     state.connectorDraft = null;
+    if (e?.type !== 'pointerup') {
+      state.connectorStart = null;
+      renderLines();
+      return;
+    }
     if (draft?.to && draft.to !== d.from) {
       let createdId;
       commit(() => {
@@ -181,6 +198,8 @@ export function endPointer(e) {
           to: draft.to,
           fromPort: d.fromPort,
           toPort: draft.toPort,
+          fromAnchor: d.fromAnchor,
+          toAnchor: draft.toAnchor,
           ...opts,
         });
         state.selected = new Set([createdId]);
@@ -297,6 +316,15 @@ export function setupCanvas() {
       };
       eraseAt(p);
       capture(e);
+      return;
+    }
+    const bindingHandle = e.target.closest('[data-connector-end]');
+    if (bindingHandle && n?.type === 'connector' && !n.locked) {
+      const side = bindingHandle.dataset.connectorEnd,
+        other = side === 'from' ? 'to' : 'from';
+      state.drag = { type: 'rebind-connector', id: n.id, side, excludeId: n[other], startPt: p };
+      capture(e);
+      e.preventDefault();
       return;
     }
     const portEl = e.target.closest('.port');
@@ -438,6 +466,7 @@ export function setupCanvas() {
       }
       const opts = currentLineOptions('curved'),
         startPt = { x: Math.round(n.x + n.w / 2), y: Math.round(n.y + n.h / 2) };
+      const sourceBinding = M.nearestBinding([n], p, null, 26 / state.view.z);
       state.connectorStart = n.id;
       selectIds([n.id]);
       state.connectorDraft = {
@@ -449,6 +478,7 @@ export function setupCanvas() {
         type: 'connect-port',
         from: n.id,
         fromPort: null,
+        fromAnchor: sourceBinding?.anchor,
         startPt,
         opts,
         fromTool: true,
@@ -634,6 +664,45 @@ export function setupCanvas() {
       renderFast();
       return;
     }
+    if (state.drag.type === 'rebind-connector') {
+      const drag = state.drag,
+        connector = state.board.objects.find((n) => n.id === drag.id);
+      const hit = nearestTargetPort(p, drag.excludeId);
+      if (!connector) return;
+      const temporary = { ...connector },
+        side = drag.side;
+      delete temporary[side + 'Port'];
+      delete temporary[side + 'Anchor'];
+      if (hit) {
+        temporary[side] = hit.node.id;
+        if (hit.port) temporary[side + 'Port'] = hit.port;
+        else if (hit.anchor) temporary[side + 'Anchor'] = hit.anchor;
+        const preview = M.connectorRoute(temporary, state.board.objects);
+        state.connectorDraft = {
+          ...temporary,
+          d: preview.d,
+          binding: {
+            nodeId: hit.node.id,
+            port: hit.port,
+            anchor: hit.anchor,
+            x: hit.port || hit.anchor ? hit.x : side === 'from' ? preview.start.x : preview.end.x,
+            y: hit.port || hit.anchor ? hit.y : side === 'from' ? preview.start.y : preview.end.y,
+          },
+        };
+      } else {
+        const route = M.connectorRoute(connector, state.board.objects),
+          fixed = side === 'from' ? route.end : route.start;
+        state.connectorDraft = {
+          ...temporary,
+          d:
+            side === 'from'
+              ? `M${p.x},${p.y} L${fixed.x},${fixed.y}`
+              : `M${fixed.x},${fixed.y} L${p.x},${p.y}`,
+        };
+      }
+      renderLines();
+      return;
+    }
     if (state.drag.type === 'connect-port') {
       const hit = nearestTargetPort(p, state.drag.from);
       const fromNode = state.board.objects.find((o) => o.id === state.drag.from);
@@ -645,6 +714,8 @@ export function setupCanvas() {
             to: hit.node.id,
             fromPort: state.drag.fromPort,
             toPort: hit.port,
+            fromAnchor: state.drag.fromAnchor,
+            toAnchor: hit.anchor,
             route: opts.route,
           },
           state.board.objects,
@@ -655,6 +726,15 @@ export function setupCanvas() {
           fromPort: state.drag.fromPort,
           to: hit.node.id,
           toPort: hit.port,
+          fromAnchor: state.drag.fromAnchor,
+          toAnchor: hit.anchor,
+          binding: {
+            nodeId: hit.node.id,
+            port: hit.port,
+            anchor: hit.anchor,
+            x: hit.port || hit.anchor ? hit.x : preview.end.x,
+            y: hit.port || hit.anchor ? hit.y : preview.end.y,
+          },
           d: preview.d,
           ...opts,
         };

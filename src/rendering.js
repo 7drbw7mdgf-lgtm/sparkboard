@@ -83,6 +83,7 @@ export function render() {
         pEl.className = `port port-${port}`;
         pEl.dataset.port = port;
         pEl.title = `Drag to connect (${port.toUpperCase()})`;
+        positionPort(pEl, n, port);
         el.append(pEl);
       }
     }
@@ -103,6 +104,7 @@ export function renderFast() {
     const n = objectsById.get(el.dataset.id);
     if (!n) return;
     el.style.cssText = objectStyle(n);
+    el.querySelectorAll('.port').forEach((port) => positionPort(port, n, port.dataset.port));
     if (M.shapes.includes(n.type)) {
       const svg = el.querySelector('.shape-body');
       if (svg) svg.outerHTML = shapeSvg(n);
@@ -129,6 +131,16 @@ export function renderFast() {
   renderLines();
 }
 
+function positionPort(element, n, port) {
+  const point = M.portPoint({ ...n, rotation: 0 }, port);
+  element.style.left = `${point.x - n.x + point.nx * 10}px`;
+  element.style.top = `${point.y - n.y + point.ny * 10}px`;
+  // Keep the center aligned when the mobile layout enlarges the port.
+  element.style.translate = '-50% -50%';
+  element.style.right = 'auto';
+  element.style.bottom = 'auto';
+}
+
 export function connectorGeometry(n) {
   return M.connectorRoute(n, state.board?.objects || []).d;
 }
@@ -137,8 +149,13 @@ export function renderLines() {
   if (!state.board) return;
   $('#connections').style.zIndex = CONNECTION_LAYER;
   M.dedupeConnectors(state.board.objects);
+  const obstacles = M.obstacleBoxes(state.board.objects);
   const lines = state.board.objects
-    .filter((n) => ['connector', 'line', 'path'].includes(n.type))
+    .filter(
+      (n) =>
+        ['connector', 'line', 'path'].includes(n.type) &&
+        !(state.drag?.type === 'rebind-connector' && state.drag.id === n.id),
+    )
     .slice()
     .sort((a, b) => (a.z ?? 0) - (b.z ?? 0))
     .map((n) => {
@@ -162,7 +179,8 @@ export function renderLines() {
               : '';
         return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="path-hit" data-id="${n.id}" d="${d}" fill="none" stroke="transparent" stroke-width="${Math.max(14, width + 10)}" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${d}" fill="none" stroke="${n.color || '#86917b'}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${lineDashAttr(n.lineStyle, width)}/>${anchors}</g>`;
       }
-      const route = n.type === 'line' ? M.lineRoute(n) : M.connectorRoute(n, state.board.objects);
+      const route =
+        n.type === 'line' ? M.lineRoute(n) : M.connectorRoute(n, state.board.objects, obstacles);
       if (!route.d) return '';
       const stroke = n.color || '#86917b',
         width = n.strokeWidth || 2,
@@ -189,7 +207,7 @@ export function renderLines() {
       const handles = selected
         ? n.type === 'line' && !n.locked
           ? `<circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="0" cx="${route.start.x}" cy="${route.start.y}" r="5.5"/><circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="${n.points.length - 1}" cx="${route.end.x}" cy="${route.end.y}" r="5.5"/>`
-          : `<circle class="connector-endpoint" data-id="${n.id}" cx="${route.start.x}" cy="${route.start.y}" r="4.5"/><circle class="connector-endpoint" data-id="${n.id}" cx="${route.end.x}" cy="${route.end.y}" r="4.5"/>`
+          : `<circle class="connector-endpoint ${n.locked ? '' : 'connector-binding'}" ${n.locked ? '' : 'data-connector-end="from"'} data-id="${n.id}" cx="${route.start.x}" cy="${route.start.y}" r="${6 / state.view.z}"/><circle class="connector-endpoint ${n.locked ? '' : 'connector-binding'}" ${n.locked ? '' : 'data-connector-end="to"'} data-id="${n.id}" cx="${route.end.x}" cy="${route.end.y}" r="${6 / state.view.z}"/>`
         : '';
       return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${curveControls}${handles}</g>`;
     })
@@ -204,7 +222,14 @@ export function renderLines() {
         : `<line class="smart-guide" x1="${g.from}" y1="${g.pos}" x2="${g.to}" y2="${g.pos}"/>`,
     )
     .join('');
-  $('#connections').innerHTML = markerDefs('') + lines + draft + guides;
+  const binding = state.connectorDraft?.binding;
+  const magnet = binding
+    ? `<circle class="magnetic-anchor-halo" cx="${binding.x}" cy="${binding.y}" r="${13 / state.view.z}"/><circle class="magnetic-anchor-point" cx="${binding.x}" cy="${binding.y}" r="${4 / state.view.z}"/>`
+    : '';
+  $$('#objects .object').forEach((el) =>
+    el.classList.toggle('connect-target', el.dataset.id === binding?.nodeId),
+  );
+  $('#connections').innerHTML = markerDefs('') + lines + draft + magnet + guides;
 }
 
 export function selectVisual() {

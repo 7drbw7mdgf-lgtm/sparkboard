@@ -2342,6 +2342,35 @@ header .divider {
   border-color: #ed7959;
   transform: scale(1.28);
 }
+.object.connect-target {
+  outline: 2px solid #7d946b;
+  outline-offset: 4px;
+}
+#connections .connector-endpoint.connector-binding {
+  pointer-events: all;
+  cursor: crosshair;
+  fill: white;
+  stroke: #3b76cf;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+#connections .connector-endpoint.connector-binding:hover {
+  fill: #edf4ff;
+}
+.magnetic-anchor-halo {
+  fill: #8ca57d30;
+  stroke: #7d946b;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+.magnetic-anchor-point {
+  fill: #ed7959;
+  stroke: white;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
 .object .port-n {
   top: -15px;
   left: calc(50% - 5px);
