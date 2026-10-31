@@ -2532,3 +2532,361 @@ body.is-panning #canvas {
     overflow-y: auto;
   }
 }
+
+
+/* Mobile editor: full-width touch controls without hiding desktop functionality. */
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  html,
+  body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  .workspace-header {
+    height: calc(116px + env(safe-area-inset-top));
+    padding: 0;
+    background: #fafbf8;
+    border-bottom-color: #e9ece4;
+  }
+  .board-tab-bar {
+    position: absolute;
+    top: calc(9px + env(safe-area-inset-top));
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    height: 46px;
+    padding: 4px;
+    box-shadow: 0 2px 12px #27341c0d;
+  }
+  #board-tabs {
+    flex: 1;
+    min-width: 0;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .board-tab {
+    min-width: 120px;
+    max-width: 205px;
+    height: 36px;
+  }
+  .tab-open {
+    font-size: 13px;
+  }
+  .library-button,
+  #new-board {
+    width: 42px;
+    height: 40px;
+  }
+  .header-actions {
+    position: absolute;
+    top: calc(62px + env(safe-area-inset-top));
+    left: 10px;
+    right: 10px;
+    width: auto;
+    height: 46px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 2px 4px;
+  }
+  .workspace-header .header-actions .quiet,
+  .workspace-header .header-actions #search-board,
+  .workspace-header .header-actions #inspect,
+  .workspace-header .header-actions #scenes,
+  .workspace-header .header-actions #templates,
+  .workspace-header .header-actions #export {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 42px;
+    padding: 9px;
+    background: #fff;
+    border: 1px solid #e5e9df;
+    border-radius: 13px;
+    flex-shrink: 0;
+  }
+  .workspace-header .header-actions .quiet span {
+    display: none;
+  }
+  .account-button {
+    height: 42px;
+    min-width: 62px;
+    margin: 0;
+    font-size: 12px;
+    border-radius: 13px;
+  }
+  #canvas {
+    inset: calc(116px + env(safe-area-inset-top)) 0
+      calc(133px + env(safe-area-inset-bottom)) 0;
+  }
+  #tools {
+    --tool-size: 46px;
+    position: fixed;
+    top: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    right: 10px;
+    width: auto;
+    height: 66px;
+    max-height: none;
+    transform: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    border-radius: 19px;
+    box-shadow: 0 8px 30px #28381926;
+    z-index: 20;
+  }
+  #tools::-webkit-scrollbar {
+    display: none;
+  }
+  #tools > button,
+  #tools > .shape-picker,
+  #tools > .shape-picker > #shape-toggle {
+    width: var(--tool-size);
+    height: var(--tool-size);
+    min-width: var(--tool-size);
+    flex: 0 0 var(--tool-size);
+  }
+  #tools > .shape-picker {
+    position: relative;
+  }
+  #tools > .tool-sep {
+    width: 1px;
+    height: 32px;
+    flex: 0 0 1px;
+    margin: 0 3px;
+  }
+  #tools svg {
+    width: 23px;
+    height: 23px;
+  }
+  #tools > button::after,
+  #shape-toggle::after {
+    display: none !important;
+  }
+  #tools #shape-menu {
+    position: fixed;
+    top: auto;
+    bottom: calc(83px + env(safe-area-inset-bottom));
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    max-height: min(56dvh, 470px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px;
+    border-radius: 17px;
+    box-shadow: 0 10px 38px #27341c35;
+    z-index: 24;
+  }
+  #tools #shape-grid button {
+    min-height: 72px;
+  }
+  #tools #shape-search {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .bottom-left,
+  .zoom {
+    position: fixed;
+    top: auto;
+    bottom: calc(86px + env(safe-area-inset-bottom));
+    height: 42px;
+    padding: 3px;
+    box-shadow: 0 3px 14px #28381919;
+    z-index: 14;
+    border-radius: 12px;
+    gap: 1px;
+  }
+  .bottom-left {
+    left: 10px;
+    right: auto;
+  }
+  .zoom {
+    right: 10px;
+    left: auto;
+  }
+  .bottom-left button,
+  .zoom button {
+    width: 32px;
+    min-width: 32px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+  }
+  .zoom #zoom-level {
+    min-width: 42px;
+    width: 42px;
+    font-size: 11px;
+  }
+  .bottom-left > span,
+  .zoom > span {
+    height: 18px;
+    margin: 0 2px;
+  }
+  #inspector,
+  #scenes-panel,
+  #drawing-options,
+  #line-options {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: calc(79px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-height: min(60dvh, 500px);
+    overflow: auto;
+    padding: 20px 18px;
+    border-radius: 21px 21px 0 0;
+    box-shadow: 0 -8px 45px #27341c26;
+    overscroll-behavior: contain;
+    z-index: 22;
+  }
+  #inspector button,
+  #scenes-panel button,
+  #drawing-options button,
+  #line-options button {
+    min-height: 40px;
+  }
+  #properties {
+    gap: 10px;
+  }
+  #swatches .swatch {
+    width: 25px;
+    height: 25px;
+  }
+  #selection-count {
+    display: inline;
+  }
+  .board-badge,
+  .bottom-hint {
+    display: none;
+  }
+  #toast {
+    bottom: calc(145px + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 28px);
+    text-align: center;
+    z-index: 60;
+  }
+  dialog {
+    width: calc(100vw - 20px);
+    max-width: 460px;
+    max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 20px;
+    border-radius: 20px;
+    overscroll-behavior: contain;
+  }
+  dialog .modal-head h2 {
+    font-size: 21px;
+  }
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-form input,
+  .modal-form textarea,
+  .modal-form select,
+  .search-input,
+  [contenteditable='true'] {
+    font-size: 16px;
+  }
+  .export-option,
+  .template-card,
+  .board-row button,
+  .search-result {
+    min-height: 48px;
+  }
+  .object.selected .port {
+    width: 17px;
+    height: 17px;
+  }
+  .object .resize,
+  .object .vertex-handle,
+  .object .edge-handle,
+  .object .rotate-handle {
+    min-width: 18px;
+    min-height: 18px;
+  }
+  .object .resize.nw,
+  .object .resize.sw {
+    left: -9px;
+  }
+  .object .resize.ne,
+  .object .resize.se {
+    right: -9px;
+  }
+  .object .rotate-handle {
+    top: -32px;
+  }
+  #connections .path-vertex,
+  #connections .curve-handle {
+    stroke-width: 4px;
+  }
+  #empty-workspace {
+    padding: 16px;
+  }
+}
+@media (max-width: 375px) {
+  .bottom-left button,
+  .zoom button {
+    width: 29px;
+    min-width: 29px;
+  }
+  .zoom #zoom-level {
+    min-width: 37px;
+    width: 37px;
+  }
+  .bottom-left > span,
+  .zoom > span {
+    margin: 0 1px;
+  }
+  .header-actions {
+    gap: 3px;
+  }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  .workspace-header {
+    height: calc(74px + env(safe-area-inset-top));
+  }
+  .board-tab-bar {
+    top: calc(8px + env(safe-area-inset-top));
+    right: auto;
+    width: 42%;
+  }
+  .header-actions {
+    top: calc(8px + env(safe-area-inset-top));
+    left: auto;
+    right: 10px;
+    width: 54%;
+  }
+  #canvas {
+    inset: calc(74px + env(safe-area-inset-top)) 0
+      calc(79px + env(safe-area-inset-bottom)) 0;
+  }
+  .bottom-left,
+  .zoom {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+  #tools {
+    height: 60px;
+    --tool-size: 42px;
+  }
+}
