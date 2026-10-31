@@ -2533,7 +2533,6 @@ body.is-panning #canvas {
   }
 }
 
-
 /* Mobile editor: full-width touch controls without hiding desktop functionality. */
 @media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
   html,
@@ -2623,8 +2622,7 @@ body.is-panning #canvas {
     border-radius: 13px;
   }
   #canvas {
-    inset: calc(116px + env(safe-area-inset-top)) 0
-      calc(133px + env(safe-area-inset-bottom)) 0;
+    inset: calc(116px + env(safe-area-inset-top)) 0 calc(133px + env(safe-area-inset-bottom)) 0;
   }
   #tools {
     --tool-size: 46px;
@@ -2878,8 +2876,7 @@ body.is-panning #canvas {
     width: 54%;
   }
   #canvas {
-    inset: calc(74px + env(safe-area-inset-top)) 0
-      calc(79px + env(safe-area-inset-bottom)) 0;
+    inset: calc(74px + env(safe-area-inset-top)) 0 calc(79px + env(safe-area-inset-bottom)) 0;
   }
   .bottom-left,
   .zoom {
@@ -2889,51 +2886,4 @@ body.is-panning #canvas {
     height: 60px;
     --tool-size: 42px;
   }
-}
-
-
-/* The shape picker uses a dialog on touch screens, avoiding clipped popovers. */
-.mobile-shapes {
-  display: grid;
-  gap: 14px;
-}
-#mobile-shape-search {
-  width: 100%;
-  min-height: 46px;
-  padding: 11px 14px;
-  border: 1px solid #dfe5d7;
-  border-radius: 12px;
-  background: #fff;
-  font-size: 16px;
-}
-#mobile-shape-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 9px;
-  max-height: 55dvh;
-  overflow: auto;
-}
-#mobile-shape-grid button {
-  min-width: 0;
-  min-height: 82px;
-  padding: 12px 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #f9faf6;
-  border: 1px solid #e4e8dc;
-  border-radius: 12px;
-  font-size: 11px;
-}
-#mobile-shape-grid svg {
-  width: 28px;
-  height: 28px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6px;
-}
-#mobile-shape-grid button:active {
-  background: #fff0e9;
 }
