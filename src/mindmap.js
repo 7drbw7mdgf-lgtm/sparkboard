@@ -183,7 +183,6 @@ function syncActionButtons() {
   if (!bar || !state.board) return;
   const selected = chosenTopic();
   const index = indexMindmap(state.board.objects);
-  const hasChildren = Boolean(selected && index.children.get(selected.id)?.length);
   bar.querySelector('[data-mm-action="sibling"]').disabled = !selected;
   const fold = bar.querySelector('[data-mm-action="collapse"]');
   fold.disabled = !selected;
@@ -204,7 +203,6 @@ function drawFoldToggles() {
   const mindmapMode = ['mindmap', 'outline'].includes(state.diagramMode);
   const sides = mindSides(state.board.objects, index);
   for (const topic of index.nodes) {
-    const kids = index.children.get(topic.id) || [];
     // Outside mind-map mode, only collapsed topics need their toggle visible.
     if (!mindmapMode && !topic.mindCollapsed) continue;
     const el = host.querySelector(`.object[data-id="${CSS.escape(topic.id)}"]`);
@@ -253,7 +251,7 @@ function drawOutline() {
         .map(
           ({ id, depth, node: topic, childCount }) =>
             `<div class="mmw-row" style="padding-left:${Math.min(depth, 12) * 13}px" data-mm-row="${esc(id)}">
-        <button type="button" class="mmw-toggle" data-mm-toggle="${esc(id)}" aria-label="${topic.mindCollapsed ? 'Expand' : 'Collapse'} topic" ${''}>${topic.mindCollapsed ? '▸' : '▾'}</button>
+        <button type="button" class="mmw-toggle" data-mm-toggle="${esc(id)}" aria-label="${topic.mindCollapsed ? 'Expand' : 'Collapse'} topic">${topic.mindCollapsed ? '▸' : '▾'}</button>
         <button type="button" class="mmw-focus" data-mm-focus="${esc(id)}" aria-current="${state.selected.has(id)}" title="Select on canvas">◎</button>
         <input data-mm-text="${esc(id)}" aria-label="Topic text" value="${esc(topic.text || '')}" maxlength="240">
       </div>`,
