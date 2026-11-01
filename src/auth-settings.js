@@ -26,10 +26,12 @@ export function authSettings(config) {
   }
   if (!publicKey)
     throw Error('Use a public Supabase publishable key, never a secret or service-role key.');
-  if (Array.isArray(config.providers) && config.providers.length === 0) return null;
+  const emailEnabled = config.emailEnabled === true;
+  if (Array.isArray(config.providers) && config.providers.length === 0 && !emailEnabled)
+    return null;
   const providers = [...new Set(config.providers || [])].filter((p) =>
     Object.hasOwn(authProviders, p),
   );
-  if (!providers.length) throw Error('Enable at least one sign-in provider.');
-  return { url: url.origin, publishableKey: key, providers };
+  if (!providers.length && !emailEnabled) throw Error('Enable at least one sign-in provider.');
+  return { url: url.origin, publishableKey: key, providers, emailEnabled };
 }
