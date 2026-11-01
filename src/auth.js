@@ -64,9 +64,11 @@ export async function setupAuth(startup) {
       <div class="account-sync">
         <strong>Cross-device board sync</strong>
         <p id="cloud-sync-state" role="status">${esc(cloud?.status || 'Unavailable')}</p>
-        <p class="account-note">${syncActive ?
-          'Boards sync when this account is signed in and online. Offline changes are retained locally and synced later.' :
-          'Enable sync to upload your existing local boards to this account and bring them to your other devices. Cloud setup must be completed first.'}
+        <p class="account-note">${
+          syncActive
+            ? 'Boards sync when this account is signed in and online. Offline changes are retained locally and synced later.'
+            : 'Enable sync to upload your existing local boards to this account and bring them to your other devices. Cloud setup must be completed first.'
+        }
           Conflict copies are preserved instead of silently overwriting changes. Boards cached in this browser remain accessible here after sign-out.</p>
         <button id="account-sync" class="account-provider">${syncActive ? 'Sync now' : 'Enable cloud sync on this browser'}</button>
         ${syncActive ? '<button id="account-sync-off" class="account-provider">Pause cloud sync on this browser</button>' : ''}
@@ -91,11 +93,12 @@ export async function setupAuth(startup) {
         button.disabled = false;
       }
     };
-    if ($('#account-sync-off')) $('#account-sync-off').onclick = () => {
-      cloud?.disable();
-      $('#dialog').close();
-      toast('Cloud sync paused. Local boards are still available.');
-    };
+    if ($('#account-sync-off'))
+      $('#account-sync-off').onclick = () => {
+        cloud?.disable();
+        $('#dialog').close();
+        toast('Cloud sync paused. Local boards are still available.');
+      };
     $('#account-sign-out').onclick = async (event) => {
       event.currentTarget.disabled = true;
       try {

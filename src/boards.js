@@ -23,7 +23,9 @@ let transition = Promise.resolve();
 let cloudSync = null;
 
 /** Cloud code only sees a narrow, revision-protected local board adapter. */
-export function connectCloudSync(controller) { cloudSync = controller; }
+export function connectCloudSync(controller) {
+  cloudSync = controller;
+}
 export function cloudBoardAccess() {
   return {
     list: () => repository.listBoards(),
@@ -41,7 +43,8 @@ export function cloudBoardAccess() {
     async fork(id) {
       const old = await repository.loadBoard(id);
       const copy = {
-        ...old, id: uid(),
+        ...old,
+        id: uid(),
         title: (old.title || 'Board') + ' (conflict copy)',
         updated: Date.now(),
         cloudOwner: cloudSync?.enabled ? cloudSync.userId : old.cloudOwner,
@@ -59,15 +62,21 @@ export function cloudBoardAccess() {
       state.boards = await repository.listBoards();
       if (state.board?.id === id) {
         if (state.boards.length) mountBoard(await repository.loadBoard(state.boards[0].id));
-        else await insertBoard({
-          id: uid(), title: 'Untitled board', kind: 'blank',
-          objects: [], scenes: [], grid: true, snap: false, updated: Date.now(),
-        });
+        else
+          await insertBoard({
+            id: uid(),
+            title: 'Untitled board',
+            kind: 'blank',
+            objects: [],
+            scenes: [],
+            grid: true,
+            snap: false,
+            updated: Date.now(),
+          });
       } else renderBoardTabs();
     },
   };
 }
-
 
 function reportSaveStatus(status, error) {
   const text = {

@@ -3469,7 +3469,9 @@ body.is-panning #canvas {
   color: #486447;
   font-weight: 600;
 }
-.cloud-indicator[hidden] { display: none !important; }
+.cloud-indicator[hidden] {
+  display: none !important;
+}
 .account-sync {
   margin: 15px 0;
   padding: 13px;
@@ -3477,9 +3479,24 @@ body.is-panning #canvas {
   border-radius: 11px;
   background: #f9fcf8;
 }
-.account-sync strong { display: block; font-size: 14px; color: #25452e; }
-.account-sync #cloud-sync-state { font-size: 12px; font-weight: 650; color: #49704e; }
-.account-sync .account-provider { margin-top: 7px; width: 100%; }
+.account-sync strong {
+  display: block;
+  font-size: 14px;
+  color: #25452e;
+}
+.account-sync #cloud-sync-state {
+  font-size: 12px;
+  font-weight: 650;
+  color: #49704e;
+}
+.account-sync .account-provider {
+  margin-top: 7px;
+  width: 100%;
+}
 @media (max-width: 650px) {
-  .cloud-indicator { max-width: 114px; padding: 6px; font-size: 10px; }
+  .cloud-indicator {
+    max-width: 114px;
+    padding: 6px;
+    font-size: 10px;
+  }
 }

@@ -8,7 +8,8 @@ const MAX_BOARD_BYTES = 7 * 1024 * 1024;
 const PAGE_SIZE = 200;
 
 export function syncDecision(local, remote, marker) {
-  if (remote?.deleted) return local && (!marker || local.updated > marker.updated) ? 'fork-delete' : 'delete';
+  if (remote?.deleted)
+    return local && (!marker || local.updated > marker.updated) ? 'fork-delete' : 'delete';
   if (!remote) return local ? 'insert' : 'none';
   if (!local) return 'pull';
   if (!marker) return 'fork-pull';
@@ -23,13 +24,22 @@ function portable(board, userId) {
   if (!UUID.test(clean.id) || !Array.isArray(clean.objects)) throw Error('Invalid board identity.');
   const encoded = JSON.stringify(clean);
   if (new TextEncoder().encode(encoded).length > MAX_BOARD_BYTES)
-    throw Error('A board exceeds the 7 MB cloud-sync limit. It is still saved locally; reduce large attachments or export a backup.');
+    throw Error(
+      'A board exceeds the 7 MB cloud-sync limit. It is still saved locally; reduce large attachments or export a backup.',
+    );
   return clean;
 }
 
 export class CloudSync {
-  constructor({ url, key, auth, access, storage = globalThis.localStorage,
-    request = globalThis.fetch, onStatus = () => {} }) {
+  constructor({
+    url,
+    key,
+    auth,
+    access,
+    storage = globalThis.localStorage,
+    request = globalThis.fetch,
+    onStatus = () => {},
+  }) {
     this.url = url;
     this.key = key;
     this.auth = auth;
@@ -48,9 +58,16 @@ export class CloudSync {
     this.status = 'Local only';
   }
 
-  prefKey(id) { return 'sparkboard.cloud.enabled.' + id; }
-  metaKey(id) { return 'sparkboard.cloud.meta.' + id; }
-  setStatus(message) { this.status = message; this.onStatus(message); }
+  prefKey(id) {
+    return 'sparkboard.cloud.enabled.' + id;
+  }
+  metaKey(id) {
+    return 'sparkboard.cloud.meta.' + id;
+  }
+  setStatus(message) {
+    this.status = message;
+    this.onStatus(message);
+  }
   persist() {
     if (this.userId) this.storage.setItem(this.metaKey(this.userId), JSON.stringify(this.meta));
   }
@@ -131,9 +148,14 @@ export class CloudSync {
     });
     if (!response.ok) {
       if (response.status === 404 || response.status === 401 || response.status === 403)
-        throw Error('Cloud sync is not configured or this account cannot access it. Install the Supabase sync migration and check RLS.');
-      if (response.status === 413) throw Error('Board is too large for cloud storage. It remains saved on this device.');
-      throw Error('Cloud sync request failed (HTTP ' + response.status + '). Local copies are unchanged.');
+        throw Error(
+          'Cloud sync is not configured or this account cannot access it. Install the Supabase sync migration and check RLS.',
+        );
+      if (response.status === 413)
+        throw Error('Board is too large for cloud storage. It remains saved on this device.');
+      throw Error(
+        'Cloud sync request failed (HTTP ' + response.status + '). Local copies are unchanged.',
+      );
     }
     const text = await response.text();
     return text ? JSON.parse(text) : [];
@@ -142,8 +164,15 @@ export class CloudSync {
   async rows() {
     const results = [];
     for (let offset = 0; ; offset += PAGE_SIZE) {
-      const page = await this.requestJSON('GET', '?select=board_id,payload,version,deleted&owner_id=eq.' +
-        encodeURIComponent(this.userId) + '&order=board_id.asc&limit=' + PAGE_SIZE + '&offset=' + offset);
+      const page = await this.requestJSON(
+        'GET',
+        '?select=board_id,payload,version,deleted&owner_id=eq.' +
+          encodeURIComponent(this.userId) +
+          '&order=board_id.asc&limit=' +
+          PAGE_SIZE +
+          '&offset=' +
+          offset,
+      );
       if (!Array.isArray(page)) throw Error('Unexpected cloud response.');
       results.push(...page);
       if (page.length < PAGE_SIZE) return results;
@@ -153,18 +182,26 @@ export class CloudSync {
 
   async write(local, remote) {
     const payload = portable(await this.access.load(local.id), this.userId);
-    const id = encodeURIComponent(local.id), owner = encodeURIComponent(this.userId);
+    const id = encodeURIComponent(local.id),
+      owner = encodeURIComponent(this.userId);
     let rows;
     if (!remote) {
-      rows = await this.requestJSON('POST', '?on_conflict=owner_id,board_id',
+      rows = await this.requestJSON(
+        'POST',
+        '?on_conflict=owner_id,board_id',
         { owner_id: this.userId, board_id: local.id, payload, version: 1, deleted: false },
-        'resolution=ignore-duplicates,return=representation');
+        'resolution=ignore-duplicates,return=representation',
+      );
     } else {
-      rows = await this.requestJSON('PATCH', '?owner_id=eq.' + owner + '&board_id=eq.' + id +
-        '&version=eq.' + remote.version, { payload, version: remote.version + 1, deleted: false },
-        'return=representation');
+      rows = await this.requestJSON(
+        'PATCH',
+        '?owner_id=eq.' + owner + '&board_id=eq.' + id + '&version=eq.' + remote.version,
+        { payload, version: remote.version + 1, deleted: false },
+        'return=representation',
+      );
     }
-    if (rows.length !== 1) throw Error('Cloud version changed during upload. Your local edits remain safe; sync again.');
+    if (rows.length !== 1)
+      throw Error('Cloud version changed during upload. Your local edits remain safe; sync again.');
     this.meta[local.id] = { version: rows[0].version, updated: local.updated };
     this.persist();
   }
@@ -176,13 +213,23 @@ export class CloudSync {
       return;
     }
     if (!marker?.version || remote.version !== marker.version)
-      throw Error('This board changed on another device while deletion was pending. The remote copy is preserved.');
+      throw Error(
+        'This board changed on another device while deletion was pending. The remote copy is preserved.',
+      );
     const owner = encodeURIComponent(this.userId);
-    const rows = await this.requestJSON('PATCH',
-      '?owner_id=eq.' + owner + '&board_id=eq.' + encodeURIComponent(id) +
-      '&version=eq.' + remote.version, { payload: null, deleted: true, version: remote.version + 1 },
-      'return=representation');
-    if (rows.length !== 1) throw Error('Board changed during deletion. Remote data was not deleted.');
+    const rows = await this.requestJSON(
+      'PATCH',
+      '?owner_id=eq.' +
+        owner +
+        '&board_id=eq.' +
+        encodeURIComponent(id) +
+        '&version=eq.' +
+        remote.version,
+      { payload: null, deleted: true, version: remote.version + 1 },
+      'return=representation',
+    );
+    if (rows.length !== 1)
+      throw Error('Board changed during deletion. Remote data was not deleted.');
     this.meta[id] = { version: rows[0].version, deleted: true, updated: Date.now() };
     this.persist();
   }
@@ -206,12 +253,17 @@ export class CloudSync {
     if (this.busy) return this.busy;
     if (this.access.isEditing()) return;
     const epoch = this.epoch;
-    this.busy = this.reconcile(epoch).catch((error) => {
-      if (epoch === this.epoch) this.setStatus('Cloud sync paused: ' + error.message);
-      throw error;
-    }).finally(() => {
-      if (epoch === this.epoch) { this.busy = null; this.controller = null; }
-    });
+    this.busy = this.reconcile(epoch)
+      .catch((error) => {
+        if (epoch === this.epoch) this.setStatus('Cloud sync paused: ' + error.message);
+        throw error;
+      })
+      .finally(() => {
+        if (epoch === this.epoch) {
+          this.busy = null;
+          this.controller = null;
+        }
+      });
     return this.busy;
   }
 
