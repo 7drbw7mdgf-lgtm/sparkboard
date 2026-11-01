@@ -8,7 +8,9 @@ import { createFlowStep, connectFlowNodes, isFlowNode } from './flowchart-model.
 
 function selectedFlowSource() {
   if (state.selected.size !== 1) return null;
-  return state.board?.objects.find((item) => item.id === [...state.selected][0] && isFlowNode(item) && !item.locked);
+  return state.board?.objects.find(
+    (item) => item.id === [...state.selected][0] && isFlowNode(item) && !item.locked,
+  );
 }
 
 export function addFlowStep(role = 'process', fromId) {
@@ -17,7 +19,10 @@ export function addFlowStep(role = 'process', fromId) {
   const center = centerPoint();
   commit(() => {
     const next = createFlowStep(state.board.objects, {
-      role, fromId: sourceId || null, center, makeId: uid,
+      role,
+      fromId: sourceId || null,
+      center,
+      makeId: uid,
     });
     state.selected = new Set([next.id]);
   });
@@ -29,7 +34,9 @@ export function addFlowStep(role = 'process', fromId) {
 export function startFlowLink() {
   if (!state.board) return;
   const selected = [...state.selected]
-    .map((id) => state.board.objects.find((item) => item.id === id && isFlowNode(item) && !item.locked))
+    .map((id) =>
+      state.board.objects.find((item) => item.id === id && isFlowNode(item) && !item.locked),
+    )
     .filter(Boolean);
   if (selected.length === 2 && state.selected.size === 2) {
     commit(() => {
@@ -42,7 +49,11 @@ export function startFlowLink() {
   const source = selected.length === 1 && state.selected.size === 1 ? selected[0] : null;
   setTool('connector');
   if (source) state.connectorStart = source.id;
-  toast(source ? 'Tap the destination node · Select cancels linking' : 'Tap a start node, then a destination');
+  toast(
+    source
+      ? 'Tap the destination node · Select cancels linking'
+      : 'Tap a start node, then a destination',
+  );
 }
 
 export function syncFlowchartDecorations() {
@@ -63,7 +74,9 @@ export function syncFlowchartDecorations() {
   if (mode !== 'flowchart' || state.selected.size !== 1 || state.reshapeId || state.editing) return;
   const source = selectedFlowSource();
   if (!source) return;
-  const selectedElement = [...host.querySelectorAll('.object[data-id]')].find((el) => el.dataset.id === source.id);
+  const selectedElement = [...host.querySelectorAll('.object[data-id]')].find(
+    (el) => el.dataset.id === source.id,
+  );
   if (!selectedElement) return;
   const quick = document.createElement('button');
   quick.type = 'button';
@@ -106,11 +119,15 @@ export function setupFlowchart() {
   const host = $('#objects');
   // Capture phase stops the canvas drag handler from interpreting a quick-add button as a shape drag.
   for (const type of ['pointerdown', 'mousedown', 'dblclick']) {
-    host.addEventListener(type, (event) => {
-      if (!event.target.closest?.('[data-flow-quick]')) return;
-      event.stopPropagation();
-      event.preventDefault();
-    }, true);
+    host.addEventListener(
+      type,
+      (event) => {
+        if (!event.target.closest?.('[data-flow-quick]')) return;
+        event.stopPropagation();
+        event.preventDefault();
+      },
+      true,
+    );
   }
   host.addEventListener('click', (event) => {
     const control = event.target.closest?.('[data-flow-quick]');

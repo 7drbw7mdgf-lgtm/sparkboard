@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  FLOW_STEPS, flowPosition, createFlowStep, connectFlowNodes,
+  FLOW_STEPS,
+  flowPosition,
+  createFlowStep,
+  connectFlowNodes,
 } from '../src/flowchart-model.js';
 import { mobileActionMarkup } from '../src/mobile-actions.js';
 
@@ -19,12 +22,21 @@ test('flowchart roles use recognizable process, decision, data and terminator sh
 test('creating a successor preserves existing art and connects with an elbow arrow', () => {
   counter = 0;
   const original = {
-    id: 'existing', type: 'shape', x: 100, y: 200, w: 190, h: 90, text: 'Original',
+    id: 'existing',
+    type: 'shape',
+    x: 100,
+    y: 200,
+    w: 190,
+    h: 90,
+    text: 'Original',
   };
   const old = { ...original };
   const objects = [original];
   const next = createFlowStep(objects, {
-    role: 'decision', fromId: 'existing', makeId, center: { x: 900, y: 500 },
+    role: 'decision',
+    fromId: 'existing',
+    makeId,
+    center: { x: 900, y: 500 },
   });
   assert.deepEqual(original, old);
   assert.equal(next.type, 'diamond');
@@ -47,8 +59,7 @@ test('auto placement avoids occupied whiteboard areas', () => {
   const next = flowPosition(objects, objects[0], { w: 200, h: 100 });
   assert.ok(next.x >= 0);
   const overlapping = (a, b) =>
-    a.x < b.x + b.w + 24 && a.x + a.w + 24 > b.x &&
-    a.y < b.y + b.h + 24 && a.y + a.h + 24 > b.y;
+    a.x < b.x + b.w + 24 && a.x + a.w + 24 > b.x && a.y < b.y + b.h + 24 && a.y + a.h + 24 > b.y;
   assert.equal(overlapping(next, objects[1]), false);
 });
 

@@ -4,26 +4,47 @@
 export const FLOW_STEPS = Object.freeze({
   start: { type: 'pill', label: 'Start', color: '#dcf2e8', stroke: '#409476', w: 166, h: 76 },
   process: { type: 'shape', label: 'New step', color: '#e7edff', stroke: '#687cc2', w: 204, h: 96 },
-  decision: { type: 'diamond', label: 'Decision?', color: '#fff0d3', stroke: '#c9963e', w: 214, h: 122 },
-  data: { type: 'parallelogram', label: 'Input / output', color: '#e8e6ff', stroke: '#8470ba', w: 204, h: 96 },
+  decision: {
+    type: 'diamond',
+    label: 'Decision?',
+    color: '#fff0d3',
+    stroke: '#c9963e',
+    w: 214,
+    h: 122,
+  },
+  data: {
+    type: 'parallelogram',
+    label: 'Input / output',
+    color: '#e8e6ff',
+    stroke: '#8470ba',
+    w: 204,
+    h: 96,
+  },
   end: { type: 'pill', label: 'End', color: '#fce7e8', stroke: '#ce7a86', w: 166, h: 76 },
 });
 
 export function isFlowNode(item) {
-  return item && !['connector', 'line', 'path', 'frame', 'image', 'file', 'embed'].includes(item.type);
+  return (
+    item && !['connector', 'line', 'path', 'frame', 'image', 'file', 'embed'].includes(item.type)
+  );
 }
 
 function intersects(a, b, padding = 24) {
-  return a.x < b.x + b.w + padding && a.x + a.w + padding > b.x &&
-    a.y < b.y + b.h + padding && a.y + a.h + padding > b.y;
+  return (
+    a.x < b.x + b.w + padding &&
+    a.x + a.w + padding > b.x &&
+    a.y < b.y + b.h + padding &&
+    a.y + a.h + padding > b.y
+  );
 }
 
 /** Place successors next to the source and avoid collisions with existing canvas art. */
 export function flowPosition(objects, source, dimensions, center = { x: 420, y: 280 }) {
   const originX = source ? source.x + source.w + 112 : center.x - dimensions.w / 2;
   const originY = source ? source.y + (source.h - dimensions.h) / 2 : center.y - dimensions.h / 2;
-  const occupied = objects.filter((o) => o?.w > 0 && o?.h > 0 &&
-    !['connector', 'line', 'path', 'frame'].includes(o.type));
+  const occupied = objects.filter(
+    (o) => o?.w > 0 && o?.h > 0 && !['connector', 'line', 'path', 'frame'].includes(o.type),
+  );
   for (let attempt = 0; attempt < 80; attempt++) {
     const col = Math.floor(attempt / 8);
     const row = attempt % 8;
@@ -44,13 +65,23 @@ export function connectFlowNodes(objects, fromId, toId, makeId) {
   const source = objects.find((o) => o.id === fromId && isFlowNode(o));
   const target = objects.find((o) => o.id === toId && isFlowNode(o));
   if (!source || !target) throw Error('Select two shapes to create a link.');
-  const existing = objects.find((o) => o.type === 'connector' &&
-    ((o.from === fromId && o.to === toId) || (o.from === toId && o.to === fromId)));
+  const existing = objects.find(
+    (o) =>
+      o.type === 'connector' &&
+      ((o.from === fromId && o.to === toId) || (o.from === toId && o.to === fromId)),
+  );
   if (existing) return existing;
   const edge = {
-    id: makeId(), type: 'connector', from: fromId, to: toId,
-    route: 'elbow', fromPort: 'e', toPort: 'w',
-    color: '#64748b', strokeWidth: 2.5, endArrow: 'filled',
+    id: makeId(),
+    type: 'connector',
+    from: fromId,
+    to: toId,
+    route: 'elbow',
+    fromPort: 'e',
+    toPort: 'w',
+    color: '#64748b',
+    strokeWidth: 2.5,
+    endArrow: 'filled',
     flowEdge: true,
   };
   objects.push(edge);
@@ -63,9 +94,20 @@ export function createFlowStep(objects, { role = 'process', fromId = null, makeI
   const source = objects.find((o) => o.id === fromId && isFlowNode(o));
   const position = flowPosition(objects, source, style, center);
   const created = {
-    id: makeId(), type: style.type, text: style.label, x: position.x, y: position.y,
-    w: style.w, h: style.h, color: style.color, stroke: style.stroke,
-    strokeWidth: 2, cornerRadius: 15, fontSize: 17, fontWeight: 650, flowRole: role,
+    id: makeId(),
+    type: style.type,
+    text: style.label,
+    x: position.x,
+    y: position.y,
+    w: style.w,
+    h: style.h,
+    color: style.color,
+    stroke: style.stroke,
+    strokeWidth: 2,
+    cornerRadius: 15,
+    fontSize: 17,
+    fontWeight: 650,
+    flowRole: role,
   };
   if (objects.some((o) => o.id === created.id)) throw Error('Duplicate shape ID.');
   objects.push(created);

@@ -68,19 +68,29 @@ function sheetContents(section) {
   let choices;
   if (section === 'more') {
     choices = [
-      ['Sticky', '▤', 'tool', 'sticky'], ['Text', 'T', 'tool', 'text'],
-      ['Shapes', '◇', 'picker', 'shapes'], ['Draw', '✎', 'tool', 'pen'],
-      ['Line', '╱', 'tool', 'line'], ['Erase', '⌫', 'tool', 'eraser'],
-      ['Photo / PDF', '▧', 'picker', 'media'], ['Embed', '▣', 'picker', 'embed'],
-      ['Web link', '↗', 'picker', 'link'], ['Find', '⌕', 'header', 'search-board'],
-      ['Templates', '▦', 'header', 'templates'], ['Export', '⇧', 'header', 'export'],
-      ['Scenes', '▤', 'header', 'scenes'], ['Fit', '⛶', 'header', 'fit'],
+      ['Sticky', '▤', 'tool', 'sticky'],
+      ['Text', 'T', 'tool', 'text'],
+      ['Shapes', '◇', 'picker', 'shapes'],
+      ['Draw', '✎', 'tool', 'pen'],
+      ['Line', '╱', 'tool', 'line'],
+      ['Erase', '⌫', 'tool', 'eraser'],
+      ['Photo / PDF', '▧', 'picker', 'media'],
+      ['Embed', '▣', 'picker', 'embed'],
+      ['Web link', '↗', 'picker', 'link'],
+      ['Find', '⌕', 'header', 'search-board'],
+      ['Templates', '▦', 'header', 'templates'],
+      ['Export', '⇧', 'header', 'export'],
+      ['Scenes', '▤', 'header', 'scenes'],
+      ['Fit', '⛶', 'header', 'fit'],
     ];
   } else if (current === 'flowchart') {
     choices = [
-      ['Start', '◉', 'flow', 'start'], ['Process', '▭', 'flow', 'process'],
-      ['Decision', '◇', 'flow', 'decision'], ['Input / output', '▱', 'flow', 'data'],
-      ['End', '◎', 'flow', 'end'], ['Link nodes', '↗', 'connect', ''],
+      ['Start', '◉', 'flow', 'start'],
+      ['Process', '▭', 'flow', 'process'],
+      ['Decision', '◇', 'flow', 'decision'],
+      ['Input / output', '▱', 'flow', 'data'],
+      ['End', '◎', 'flow', 'end'],
+      ['Link nodes', '↗', 'connect', ''],
     ];
   } else if (current === 'mindmap' || current === 'outline') {
     choices = [
@@ -93,13 +103,24 @@ function sheetContents(section) {
     ];
   } else {
     choices = [
-      ['Sticky note', '▤', 'tool', 'sticky'], ['Text', 'T', 'tool', 'text'],
-      ['Shapes', '◇', 'picker', 'shapes'], ['Flowchart', '↗', 'mode', 'flowchart'],
-      ['Mind map', '☷', 'mode', 'mindmap'], ['Draw', '✎', 'tool', 'pen'],
-      ['Line', '╱', 'tool', 'line'], ['Photo / PDF', '▧', 'picker', 'media'],
+      ['Sticky note', '▤', 'tool', 'sticky'],
+      ['Text', 'T', 'tool', 'text'],
+      ['Shapes', '◇', 'picker', 'shapes'],
+      ['Flowchart', '↗', 'mode', 'flowchart'],
+      ['Mind map', '☷', 'mode', 'mindmap'],
+      ['Draw', '✎', 'tool', 'pen'],
+      ['Line', '╱', 'tool', 'line'],
+      ['Photo / PDF', '▧', 'picker', 'media'],
     ];
   }
-  const label = section === 'more' ? 'All tools' : current === 'flowchart' ? 'Add a flowchart step' : current === 'mindmap' || current === 'outline' ? 'Build your mind map' : 'Add to canvas';
+  const label =
+    section === 'more'
+      ? 'All tools'
+      : current === 'flowchart'
+        ? 'Add a flowchart step'
+        : current === 'mindmap' || current === 'outline'
+          ? 'Build your mind map'
+          : 'Add to canvas';
   $('#mobile-tool-sheet').innerHTML = `
     <div class="mw-sheet-head"><h3>${label}</h3><button class="mw-close" type="button" data-mw-close aria-label="Close tools">×</button></div>
     <p>${section === 'more' ? 'Everything else stays here — the canvas is for your work.' : current === 'flowchart' ? 'Select a node first to create an automatically linked next step.' : 'Choose an item or tool to continue on your board.'}</p>
@@ -112,8 +133,14 @@ function showSheet(section) {
   sheet.dataset.section = section;
   sheetContents(section);
   sheet.hidden = false;
-  $('#mobile-workspace-dock [data-mw-action="add"]').setAttribute('aria-expanded', String(section === 'add'));
-  $('#mobile-workspace-dock [data-mw-action="more"]').setAttribute('aria-expanded', String(section === 'more'));
+  $('#mobile-workspace-dock [data-mw-action="add"]').setAttribute(
+    'aria-expanded',
+    String(section === 'add'),
+  );
+  $('#mobile-workspace-dock [data-mw-action="more"]').setAttribute(
+    'aria-expanded',
+    String(section === 'more'),
+  );
 }
 
 function syncDock() {
@@ -121,8 +148,11 @@ function syncDock() {
   const select = $('#mobile-workspace-mode select');
   if (!dock || !select || !state.board) return;
   select.value = mode();
-  dock.querySelectorAll('[data-mw-tool]').forEach((button) =>
-    button.setAttribute('aria-pressed', String(state.tool === button.dataset.mwTool)));
+  dock
+    .querySelectorAll('[data-mw-tool]')
+    .forEach((button) =>
+      button.setAttribute('aria-pressed', String(state.tool === button.dataset.mwTool)),
+    );
   if (!$('#mobile-tool-sheet').hidden) sheetContents($('#mobile-tool-sheet').dataset.section);
 }
 function choose(action, value) {
@@ -131,9 +161,10 @@ function choose(action, value) {
   else if (action === 'connect') startFlowLink();
   else if (action === 'tool') setTool(value);
   else if (action === 'picker') {
-    const trigger = value === 'shapes' ? $('#shape-toggle') : $('#tools [data-tool="' + value + '"]');
+    const trigger =
+      value === 'shapes' ? $('#shape-toggle') : $('#tools [data-tool="' + value + '"]');
     if (trigger) trigger.click();
-  } else if (action === 'header') $('#'+value)?.click();
+  } else if (action === 'header') $('#' + value)?.click();
   else if (action === 'map') {
     const control = $('#mindmap-toolbar [data-mm-action="' + value + '"]');
     if (control && !control.disabled) control.click();
@@ -170,9 +201,13 @@ export function setupMobileWorkspace() {
   dock.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button) return;
-    if (button.dataset.mwTool) { closeSheet(); setTool(button.dataset.mwTool); }
-    else if (button.dataset.mwAction === 'connect') { closeSheet(); startFlowLink(); }
-    else if (button.dataset.mwAction) showSheet(button.dataset.mwAction);
+    if (button.dataset.mwTool) {
+      closeSheet();
+      setTool(button.dataset.mwTool);
+    } else if (button.dataset.mwAction === 'connect') {
+      closeSheet();
+      startFlowLink();
+    } else if (button.dataset.mwAction) showSheet(button.dataset.mwAction);
     syncDock();
   });
   sheet.addEventListener('click', (event) => {
@@ -181,7 +216,8 @@ export function setupMobileWorkspace() {
     if (item) choose(item.dataset.mwItem, item.dataset.mwValue);
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!sheet.hidden && !sheet.contains(event.target) && !dock.contains(event.target)) closeSheet();
+    if (!sheet.hidden && !sheet.contains(event.target) && !dock.contains(event.target))
+      closeSheet();
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !sheet.hidden) closeSheet();
@@ -190,6 +226,8 @@ export function setupMobileWorkspace() {
   document.addEventListener('sparkboard:mode', syncDock);
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
-  window.addEventListener('resize', () => { if (!isCompactEditor()) closeSheet(); });
+  window.addEventListener('resize', () => {
+    if (!isCompactEditor()) closeSheet();
+  });
   syncDock();
 }
