@@ -12,6 +12,8 @@ const mobileStyle = `
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){
   body:not(.workspace-empty) #mobile-workspace-dock{display:grid}
   body:not(.workspace-empty) #mobile-workspace-mode{display:flex}
+  /* The former opaque 116px header obscured the supposedly full-screen board. */
+  .workspace-header{height:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none}
   #tools{display:none!important}
   #mobile-more,#mobile-more-menu{display:none!important}
   #mindmap-toolbar{display:none!important}
