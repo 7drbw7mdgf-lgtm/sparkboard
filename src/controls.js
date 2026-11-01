@@ -145,11 +145,18 @@ export function setupControls() {
     if (b.dataset.toggleStyle) {
       const toggle = b.dataset.toggleStyle;
       if (toggle === 'bold') command('bold');
-      if (toggle === 'italic') commit(() =>
-        editableNodes().forEach((n) => (n.fontStyle = n.fontStyle === 'italic' ? 'normal' : 'italic')));
-      if (toggle === 'underline') commit(() =>
-        editableNodes().forEach((n) => (n.textDecoration =
-          n.textDecoration === 'underline' ? 'none' : 'underline')));
+      if (toggle === 'italic')
+        commit(() =>
+          editableNodes().forEach(
+            (n) => (n.fontStyle = n.fontStyle === 'italic' ? 'normal' : 'italic'),
+          ),
+        );
+      if (toggle === 'underline')
+        commit(() =>
+          editableNodes().forEach(
+            (n) => (n.textDecoration = n.textDecoration === 'underline' ? 'none' : 'underline'),
+          ),
+        );
     }
     if (b.dataset.alignText)
       commit(() => editableNodes().forEach((n) => (n.align = b.dataset.alignText)));
@@ -157,13 +164,32 @@ export function setupControls() {
     if (b.dataset.distribute) commit(() => M.distribute(editableNodes(), b.dataset.distribute));
   };
   const applyInspectorProp = (prop, rawValue) => {
-    const allowed = new Set(['avoidObstacles', 'fontSize', 'rotation', 'strokeWidth', 'w', 'h',
-      'cornerRadius', 'opacity', 'type', 'route', 'stroke', 'text', 'startArrow', 'endArrow',
-      'color', 'lineStyle', 'fontFamily', 'textColor']);
+    const allowed = new Set([
+      'avoidObstacles',
+      'fontSize',
+      'rotation',
+      'strokeWidth',
+      'w',
+      'h',
+      'cornerRadius',
+      'opacity',
+      'type',
+      'route',
+      'stroke',
+      'text',
+      'startArrow',
+      'endArrow',
+      'color',
+      'lineStyle',
+      'fontFamily',
+      'textColor',
+    ]);
     if (!allowed.has(prop)) return false;
     let value = rawValue;
     if (prop === 'avoidObstacles') value = rawValue === 'true';
-    if (['fontSize', 'rotation', 'strokeWidth', 'w', 'h', 'cornerRadius', 'opacity'].includes(prop)) {
+    if (
+      ['fontSize', 'rotation', 'strokeWidth', 'w', 'h', 'cornerRadius', 'opacity'].includes(prop)
+    ) {
       value = Number(rawValue);
       if (!Number.isFinite(value)) return false;
       if (prop === 'fontSize') value = Math.max(8, Math.min(144, value));
@@ -173,9 +199,13 @@ export function setupControls() {
       if (prop === 'opacity') value = Math.max(0, Math.min(100, value)) / 100;
       if (prop === 'w' || prop === 'h') value = Math.max(30, Math.min(10000, value));
     }
-    if (prop === 'fontFamily' &&
-      !['DM Sans', 'Manrope', 'Georgia', 'Arial', 'monospace'].includes(value)) return false;
-    if (['color', 'stroke', 'textColor'].includes(prop) && !/^#[0-9a-f]{6}$/i.test(value)) return false;
+    if (
+      prop === 'fontFamily' &&
+      !['DM Sans', 'Manrope', 'Georgia', 'Arial', 'monospace'].includes(value)
+    )
+      return false;
+    if (['color', 'stroke', 'textColor'].includes(prop) && !/^#[0-9a-f]{6}$/i.test(value))
+      return false;
     if (prop === 'lineStyle' && !M.lineStyles.includes(value)) return false;
     if (['startArrow', 'endArrow'].includes(prop) && !M.arrowHeads.includes(value)) return false;
     if (prop === 'route' && !M.routes.includes(value)) return false;

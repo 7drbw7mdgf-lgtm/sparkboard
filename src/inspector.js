@@ -24,11 +24,14 @@ export function properties() {
   $('#inspect').setAttribute('aria-expanded', String(open));
   if (!open) return;
   const first = ns[0];
-  $('#inspector-eyebrow').textContent = ns.length > 1 ? 'MULTIPLE ITEMS' :
-    (shapeNames[first.type] || first.type).toUpperCase();
-  $('#inspector-subtitle').textContent = ns.length > 1 ?
-    ns.length + ' items selected · Only relevant controls shown' :
-    (first.locked ? 'Locked item · Unlock to edit' : 'Context-aware controls · One selected item');
+  $('#inspector-eyebrow').textContent =
+    ns.length > 1 ? 'MULTIPLE ITEMS' : (shapeNames[first.type] || first.type).toUpperCase();
+  $('#inspector-subtitle').textContent =
+    ns.length > 1
+      ? ns.length + ' items selected · Only relevant controls shown'
+      : first.locked
+        ? 'Locked item · Unlock to edit'
+        : 'Context-aware controls · One selected item';
   renderInspector();
 }
 

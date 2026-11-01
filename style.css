@@ -3289,10 +3289,27 @@ body.is-panning #canvas {
   background: #fff;
   box-shadow: 0 18px 58px #1e331c1b;
 }
-.format-heading { align-items: flex-start; padding: 3px 3px 13px; }
-.format-heading h3 { font-size: 22px; line-height: 1.15; margin: 5px 0; }
-.format-subtitle { font-size: 11px; line-height: 1.5; color: #717f6a; margin: 4px 0 0; }
-.format-panels { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
+.format-heading {
+  align-items: flex-start;
+  padding: 3px 3px 13px;
+}
+.format-heading h3 {
+  font-size: 22px;
+  line-height: 1.15;
+  margin: 5px 0;
+}
+.format-subtitle {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #717f6a;
+  margin: 4px 0 0;
+}
+.format-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 4px;
+}
 .format-card {
   background: #fbfcf9;
   border: 1px solid #e3e9e0;
@@ -3308,19 +3325,40 @@ body.is-panning #canvas {
   font-size: 13px;
   font-weight: 800;
   color: #273b2b;
-  letter-spacing: -.2px;
+  letter-spacing: -0.2px;
 }
-.format-card h4 span { color: #24824b; font-size: 17px; font-weight: 700; }
-.format-card-content { display: flex; flex-direction: column; gap: 10px; }
+.format-card h4 span {
+  color: #24824b;
+  font-size: 17px;
+  font-weight: 700;
+}
+.format-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .format-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
 }
-.format-grid.thirds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.format-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.format-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.format-field > span { font-size: 10px; font-weight: 600; color: #596851; }
+.format-grid.thirds {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.format-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.format-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.format-field > span {
+  font-size: 10px;
+  font-weight: 600;
+  color: #596851;
+}
 .format-field > input:not([type='range']),
 .format-field > select {
   width: 100%;
@@ -3343,8 +3381,13 @@ body.is-panning #canvas {
   accent-color: #20804a;
   cursor: pointer;
 }
-.format-button-row { display: flex; gap: 7px; }
-.format-button-row button, #inspector button.format-action, .format-grid > button {
+.format-button-row {
+  display: flex;
+  gap: 7px;
+}
+.format-button-row button,
+#inspector button.format-action,
+.format-grid > button {
   border: 1px solid #dce5db;
   border-radius: 8px;
   background: #fff;
@@ -3355,7 +3398,9 @@ body.is-panning #canvas {
   padding: 8px;
   font-weight: 650;
 }
-.format-button-row button { flex: 1; }
+.format-button-row button {
+  flex: 1;
+}
 .format-button-row button.active,
 .format-grid > button.active,
 #inspector button.format-action.active {
@@ -3363,14 +3408,26 @@ body.is-panning #canvas {
   border-color: #9ccfae;
   color: #135e33;
 }
-#inspector .format-action.danger { border-color: #f3cfcf; color: #b33939; }
-#inspector .format-action.danger:hover { background: #fff2f2; }
-#inspector button:not(:disabled):hover { border-color: #83b593; }
+#inspector .format-action.danger {
+  border-color: #f3cfcf;
+  color: #b33939;
+}
+#inspector .format-action.danger:hover {
+  background: #fff2f2;
+}
+#inspector button:not(:disabled):hover {
+  border-color: #83b593;
+}
 #inspector button:focus-visible,
 #inspector input:focus-visible,
-#inspector select:focus-visible { outline: 2px solid #26834b; outline-offset: 2px; }
-#inspector button:disabled, #inspector input:disabled, #inspector select:disabled {
-  opacity: .48;
+#inspector select:focus-visible {
+  outline: 2px solid #26834b;
+  outline-offset: 2px;
+}
+#inspector button:disabled,
+#inspector input:disabled,
+#inspector select:disabled {
+  opacity: 0.48;
   cursor: not-allowed;
 }
 @media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
@@ -3383,9 +3440,15 @@ body.is-panning #canvas {
     right: 0;
     left: 0;
   }
-  #inspector button.format-action, .format-grid > button, .format-button-row button {
+  #inspector button.format-action,
+  .format-grid > button,
+  .format-button-row button {
     min-height: 42px;
   }
-  .format-grid { gap: 8px; }
-  .format-card { padding: 11px; }
+  .format-grid {
+    gap: 8px;
+  }
+  .format-card {
+    padding: 11px;
+  }
 }

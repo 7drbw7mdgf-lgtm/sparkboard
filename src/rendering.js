@@ -45,7 +45,8 @@ export function shapeSvg(n) {
   else if (n.type === 'cylinder')
     geometry =
       '<path d="M4,18 C4,6 96,6 96,18 L96,82 C96,94 4,94 4,82 Z M4,18 C4,30 96,30 96,18"/>';
-  else geometry = `<rect x="1" y="1" width="98" height="98" rx="${n.type === 'shape' ? Math.max(0, Math.min(48, (100 * (n.cornerRadius ?? 6)) / Math.max(1, Math.min(n.w, n.h)))) : n.type === 'frame' ? 4 : 6}"/>`;
+  else
+    geometry = `<rect x="1" y="1" width="98" height="98" rx="${n.type === 'shape' ? Math.max(0, Math.min(48, (100 * (n.cornerRadius ?? 6)) / Math.max(1, Math.min(n.w, n.h)))) : n.type === 'frame' ? 4 : 6}"/>`;
   geometry = geometry.replace(/\/>/g, ' vector-effect="non-scaling-stroke"/>');
   return `<svg class="shape-body" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}>${geometry}</svg>`;
 }

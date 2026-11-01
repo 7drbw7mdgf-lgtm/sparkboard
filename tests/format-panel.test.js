@@ -4,8 +4,15 @@ import { formatPanel } from '../src/format-panel.js';
 import { objectStyle, shapeSvg } from '../src/rendering.js';
 
 const note = (id = 'note') => ({
-  id, type: 'sticky', x: 10, y: 20, w: 320, h: 240,
-  text: 'Next steps', color: '#f8df87', stroke: '#26964e'
+  id,
+  type: 'sticky',
+  x: 10,
+  y: 20,
+  w: 320,
+  h: 240,
+  text: 'Next steps',
+  color: '#f8df87',
+  stroke: '#26964e',
 });
 
 test('Format has five contextual, non-duplicated groups for a sticky', () => {
@@ -23,8 +30,9 @@ test('Format has five contextual, non-duplicated groups for a sticky', () => {
 });
 
 test('Connector shows route, caps, line style and label but not sticky formatting', () => {
-  const html = formatPanel([{ id: 'a', type: 'connector', from: 'x', to: 'y',
-    color: '#123456', strokeWidth: 3 }]);
+  const html = formatPanel([
+    { id: 'a', type: 'connector', from: 'x', to: 'y', color: '#123456', strokeWidth: 3 },
+  ]);
   assert.match(html, /data-prop="avoidObstacles"/);
   assert.match(html, /data-prop="endArrow"/);
   assert.match(html, /data-prop="text"/);
@@ -48,8 +56,14 @@ test('Locked item retains unlock but disables destructive actions', () => {
 });
 
 test('Canvas style uses saved opacity, typography and corner radius', () => {
-  const css = objectStyle({ ...note(), opacity: .5, fontFamily: 'Georgia',
-    fontStyle: 'italic', textDecoration: 'underline', cornerRadius: 20 });
+  const css = objectStyle({
+    ...note(),
+    opacity: 0.5,
+    fontFamily: 'Georgia',
+    fontStyle: 'italic',
+    textDecoration: 'underline',
+    cornerRadius: 20,
+  });
   assert.match(css, /opacity:0\.5/);
   assert.match(css, /font-family:Georgia/);
   assert.match(css, /font-style:italic/);
