@@ -8,6 +8,7 @@ import { setTool } from './tools.js';
 import { state } from './state.js';
 import { commit, snapshot, updateHistory } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
+import { allowDoubleClickEdit, isCompactEditor } from './mobile-editor-policy.js';
 
 function roundPt(p) {
   return {
@@ -137,7 +138,9 @@ export function addAt(type, p) {
     state.selected = new Set([n.id]);
   });
   setTool('select');
-  if (type === 'sticky' || type === 'text') startEdit(n.id);
+  // On phones, creation selects the object first so it can be repositioned.
+  // Text editing stays available through Format → Edit text.
+  if ((type === 'sticky' || type === 'text') && !isCompactEditor()) startEdit(n.id);
 }
 
 export function capture(e) {
@@ -277,7 +280,17 @@ export function endPointer(e) {
 }
 
 export function setupCanvas() {
+  let lastTouchAt = 0;
   $('#canvas').addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') {
+      lastTouchAt = Date.now();
+      // Free the canvas before any touch drag. The user can reopen Format explicitly.
+      if (isCompactEditor() && state.inspectorOpen) {
+        state.inspectorOpen = false;
+        $('#inspector').hidden = true;
+        $('#inspect').setAttribute('aria-expanded', 'false');
+      }
+    }
     if (!state.board || state.drag || (e.button !== 0 && e.button !== 1)) return;
     const panning = state.space || state.tool === 'hand' || e.button === 1;
     // Media buttons remain clickable, but navigation gestures take priority.
@@ -900,6 +913,15 @@ export function setupCanvas() {
   $('#canvas').addEventListener('pointercancel', endPointer);
   $('#canvas').addEventListener('lostpointercapture', endPointer);
   $('#canvas').addEventListener('dblclick', (e) => {
+    if (
+      !allowDoubleClickEdit({
+        pointerType: e.pointerType,
+        firesTouchEvents: e.sourceCapabilities?.firesTouchEvents,
+        lastTouchAt,
+        now: Date.now(),
+      })
+    )
+      return;
     if (state.space || state.tool !== 'select' || e.target.closest('[data-open]')) return;
     let id = e.target.closest('[data-id]')?.dataset.id;
     if (id) startEdit(id);
