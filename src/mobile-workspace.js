@@ -11,6 +11,7 @@ const mobileStyle = `
   body:not(.workspace-empty) #mobile-workspace-dock{display:grid}
   body:not(.workspace-empty) #mobile-workspace-mode{display:flex}
   #tools{display:none!important}
+  #mobile-more,#mobile-more-menu{display:none!important}
   #mindmap-toolbar{display:none!important}
   #mobile-workspace-mode{position:fixed;top:calc(124px + env(safe-area-inset-top));left:12px;z-index:19;align-items:center;gap:8px;border:1px solid #d8e1db;background:#fff;box-shadow:0 6px 20px #152d251b;border-radius:13px;min-height:40px;padding:0 11px;font:700 12px/1 Manrope,sans-serif;color:#476354}
   #mobile-workspace-mode select{border:0;outline:0;background:transparent;color:#264c40;font:700 14px/1 Manrope,sans-serif;min-height:40px;padding:0 16px 0 0;font-size:16px}
@@ -186,6 +187,7 @@ export function setupMobileWorkspace() {
     if (event.key === 'Escape' && !sheet.hidden) closeSheet();
   });
   document.addEventListener('sparkboard:render', syncDock);
+  document.addEventListener('sparkboard:mode', syncDock);
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
   window.addEventListener('resize', () => { if (!isCompactEditor()) closeSheet(); });
