@@ -1,4 +1,5 @@
 import { finishEdit } from './editor.js';
+import { hiddenMindmapIds } from './mindmap-model.js';
 import { state } from './state.js';
 import { $, M } from './core.js';
 export function applyView() {
@@ -79,7 +80,7 @@ export function fit() {
   }
   focusBounds(
     M.enclosing(
-      state.board.objects.filter((n) => n.type !== 'connector'),
+      state.board.objects.filter((n) => n.type !== 'connector' && !hiddenMindmapIds(state.board.objects).has(n.id)),
       state.board.objects,
     ),
   );
