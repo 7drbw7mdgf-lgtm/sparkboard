@@ -67,6 +67,22 @@ def verify_modules(manifest, prefix):
     return True
 
 
+def verify_sai(manifest):
+    """Confirm the bundled Sai HTML and JS really appear at the public subpath."""
+    files = {entry['path']: entry['sha256'] for entry in manifest['files']}
+    index_name = 'sai/index.html'
+    scripts = sorted(name for name in files
+                     if name.startswith('sai/assets/') and name.endswith('.js'))
+    if index_name not in files or not scripts:
+        raise ValueError('Hosted Sai HTML or JavaScript is absent from the release.')
+    for name in [index_name, scripts[0]]:
+        ok, description = describe(f'{SITE}/{name}?deployment={manifest["revision"]}')
+        print(f'Public Sai asset {name}: {description}', flush=True)
+        if not ok or f'sha256={files[name]}' not in description:
+            return False
+    return True
+
+
 def verify():
     revision = os.environ['EXPECTED_REVISION']
     if not re.fullmatch('[a-f0-9]{40}', revision):
@@ -89,8 +105,10 @@ def verify():
         print(f'Public homepage attempt {attempt}/{max_attempts}: {description}', flush=True)
         if ok and f'revision={revision};' in description:
             prefix = '/' if direct else f'/_sparkboard/releases/{release_id}/'
-            if verify_modules(manifest, prefix):
-                print('HTTPS website and core modules are serving the newly deployed revision.', flush=True)
+            if verify_modules(manifest, prefix) and (
+                os.environ.get('REQUIRE_SAI') != '1' or verify_sai(manifest)
+            ):
+                print('HTTPS website, core modules and hosted Sai are verified.', flush=True)
                 return 0
         if attempt in (1, max_attempts):
             direct_ok, direct_description = describe(diagnostic_url + f'?probe={attempt}')

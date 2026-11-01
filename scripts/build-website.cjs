@@ -10,11 +10,32 @@ function buildWebsite({ root, out, revision, releaseId, layout = 'versioned' }) 
   if (!new RegExp(`^${revision}-(?:[0-9]+|local)-[0-9]+$`).test(releaseId || ''))
     throw Error('Invalid website release identifier.');
   const files = [...collectPublicFiles(root), 'LICENSE.txt'];
+  const saiDist = path.join(root, 'build/sai-dist');
+  if (process.env.REQUIRE_SAI === '1' && !fs.existsSync(path.join(saiDist, 'index.html')))
+    throw Error('Sai build is required for this website release.');
+  const saiFiles = [];
+  function collectSai(directory, prefix = '') {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const relative = path.posix.join(prefix, entry.name);
+      const absolute = path.join(directory, entry.name);
+      if (entry.isDirectory()) collectSai(absolute, relative);
+      else if (
+        entry.isFile() &&
+        !fs.lstatSync(absolute).isSymbolicLink() &&
+        /^[a-zA-Z0-9_./-]+$/.test(relative) &&
+        !relative.split('/').includes('..')
+      ) {
+        saiFiles.push({ name: 'sai/' + relative, bytes: fs.readFileSync(absolute) });
+      } else throw Error('Unsafe file in Sai build: ' + relative);
+    }
+  }
+  if (fs.existsSync(path.join(saiDist, 'index.html'))) collectSai(saiDist);
   // Read everything before replacing the build directory. Never copy the repository wholesale.
   const entries = files.map((name) => ({
     name,
     bytes: fs.readFileSync(path.join(root, name === 'LICENSE.txt' ? 'LICENSE' : name)),
   }));
+  entries.push(...saiFiles);
   const prefix = `/_sparkboard/releases/${releaseId}/`;
   const html = entries.find((entry) => entry.name === 'index.html');
   const source = html.bytes.toString('utf8');
