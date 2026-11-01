@@ -100,6 +100,7 @@ export function setupFlowchart() {
 `;
   document.head.append(style);
   document.addEventListener('sparkboard:render', syncFlowchartDecorations);
+  document.addEventListener('sparkboard:mode', syncFlowchartDecorations);
   // Selection can change without a full repaint.
   document.addEventListener('sparkboard:selection', syncFlowchartDecorations);
   const host = $('#objects');
