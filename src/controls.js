@@ -1,4 +1,5 @@
 import { isNativeControl } from './keyboard.js';
+import { addFlowStep } from './flowchart.js';
 import { mindmapShortcut } from './mindmap.js';
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
@@ -183,6 +184,9 @@ export function setupControls() {
           state.selectedVertex = null;
         });
       }
+    } else if (action === 'flow-next') {
+      const id = [...state.selected][0];
+      if (state.selected.size === 1) addFlowStep('process', id);
     } else if (action === 'connect') {
       const source = editableNodes()[0];
       if (

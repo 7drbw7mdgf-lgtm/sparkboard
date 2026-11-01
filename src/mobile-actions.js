@@ -16,6 +16,7 @@ export function mobileActionMarkup(
   reshapeId,
   reshapeMode = 'points',
   selectedVertex = null,
+  diagramMode = 'canvas',
 ) {
   if (!nodes.length) return '';
   const single = nodes.length === 1 ? nodes[0] : null;
@@ -49,6 +50,8 @@ export function mobileActionMarkup(
   } else if (single && ['text', 'sticky'].includes(single.type) && !single.locked) {
     actions += button('✎ Text', 'edit');
   }
+  if (!reshaping && diagramMode === 'flowchart' && canConnectNode(single))
+    actions += button('＋ Next', 'flow-next');
   if (!reshaping && canConnectNode(single)) actions += button('↗ Connect', 'connect');
   actions += button('⚙ Format', 'format');
   if (!reshaping && nodes.some((n) => !n.locked)) actions += button('⧉ Copy', 'duplicate');
