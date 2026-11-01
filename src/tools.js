@@ -183,6 +183,7 @@ export function setTool(t) {
   properties();
   $('#canvas').style.cursor =
     state.space || t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
+  document.dispatchEvent(new Event('sparkboard:tool'));
   $('#hint').textContent =
     t === 'line'
       ? compact
