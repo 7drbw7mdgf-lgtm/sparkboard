@@ -10,7 +10,10 @@ import { setupDialogs, modal } from './src/dialogs.js';
 import { setupImporting } from './src/importing.js';
 import { setupControls } from './src/controls.js';
 import { setupAuth } from './src/auth.js';
+import { setupStartupScreen } from './src/startup-screen.js';
 import { setupMobileGestures } from './src/mobile-gestures.js';
+
+const startup = setupStartupScreen();
 
 setupTools();
 setupCanvas();
@@ -25,8 +28,9 @@ setupImporting();
 setupControls();
 
 init()
-  .then(setupAuth)
+  .then(() => setupAuth(startup))
   .catch((error) => {
+    startup.dismiss();
     document.querySelector('#saved').textContent = 'Storage could not be opened';
     document.querySelector('#canvas').removeAttribute('aria-busy');
     modal('Your saved data is safe.', `<p id="storage-error"></p>`, 'STORAGE UNAVAILABLE');
