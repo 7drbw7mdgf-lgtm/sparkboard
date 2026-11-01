@@ -2,7 +2,8 @@ import { authConfig } from './auth-config.js';
 import { authSettings } from './auth-settings.js';
 import { oauthRequest } from './auth-providers.js';
 import { modal } from './dialogs.js';
-import { flushSaves, save } from './boards.js';
+import { flushSaves, save, cloudBoardAccess, connectCloudSync } from './boards.js';
+import { CloudSync } from './cloud-sync.js';
 import { toast } from './notifications.js';
 import { $, esc } from './core.js';
 
@@ -24,6 +25,15 @@ export async function setupAuth(startup) {
   button.hidden = false;
   let client;
   let user = null;
+  let cloud = null;
+  let previousUserId = null;
+  const useSession = (session) => {
+    const next = session?.user?.id || null;
+    if (!cloud || next === previousUserId) return;
+    cloud.stop();
+    previousUserId = next;
+    if (next) cloud.configure(next);
+  };
 
   const render = () => {
     button.textContent = user
@@ -33,6 +43,12 @@ export async function setupAuth(startup) {
       : 'Sign in';
     button.title = user ? 'Your account' : 'Sign in to Sparkboard';
     button.setAttribute('aria-label', button.title);
+    const indicator = $('#cloud-indicator');
+    if (indicator) {
+      indicator.hidden = !user;
+      indicator.textContent = cloud?.status || 'Cloud sync off';
+      indicator.title = 'Cloud sync status · Open account menu to manage';
+    }
   };
 
   const showAccount = () => {
@@ -40,16 +56,56 @@ export async function setupAuth(startup) {
       startup.open();
       return;
     }
+    const syncActive = cloud?.enabled;
     modal(
       'Your account',
-      `<p class="account-name">${esc(user.user_metadata?.full_name || 'Sparkboard member')}</p><p>${esc(user.email || '')}</p><p class="account-note">Your boards are stored on this browser and are not synced or protected by your account. Signing out does not remove or hide local boards.</p><button id="account-sign-out" class="account-provider">Sign out of this browser</button>`,
+      `<p class="account-name">${esc(user.user_metadata?.full_name || 'Sparkboard member')}</p>
+      <p>${esc(user.email || '')}</p>
+      <div class="account-sync">
+        <strong>Cross-device board sync</strong>
+        <p id="cloud-sync-state" role="status">${esc(cloud?.status || 'Unavailable')}</p>
+        <p class="account-note">${
+          syncActive
+            ? 'Boards sync when this account is signed in and online. Offline changes are retained locally and synced later.'
+            : 'Enable sync to upload your existing local boards to this account and bring them to your other devices. Cloud setup must be completed first.'
+        }
+          Conflict copies are preserved instead of silently overwriting changes. Boards cached in this browser remain accessible here after sign-out.</p>
+        <button id="account-sync" class="account-provider">${syncActive ? 'Sync now' : 'Enable cloud sync on this browser'}</button>
+        ${syncActive ? '<button id="account-sync-off" class="account-provider">Pause cloud sync on this browser</button>' : ''}
+      </div>
+      <button id="account-sign-out" class="account-provider">Sign out of this browser</button>`,
       'SPARKBOARD ACCOUNT',
     );
+    $('#account-sync').onclick = async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        if (!cloud) throw Error('Cloud sync is unavailable.');
+        if (cloud.enabled) await cloud.sync();
+        else await cloud.enable();
+        $('#cloud-sync-state').textContent = cloud.status;
+        button.textContent = 'Sync now';
+        toast('Your cloud board sync is enabled.');
+      } catch (error) {
+        $('#cloud-sync-state').textContent = 'Cloud sync unavailable: ' + error.message;
+        toast(error.message);
+      } finally {
+        button.disabled = false;
+      }
+    };
+    if ($('#account-sync-off'))
+      $('#account-sync-off').onclick = () => {
+        cloud?.disable();
+        $('#dialog').close();
+        toast('Cloud sync paused. Local boards are still available.');
+      };
     $('#account-sign-out').onclick = async (event) => {
       event.currentTarget.disabled = true;
       try {
         const { error } = await client.auth.signOut({ scope: 'local' });
         if (error) throw error;
+        cloud?.stop();
+        previousUserId = null;
         user = null;
         render();
         $('#dialog').close();
@@ -78,9 +134,24 @@ export async function setupAuth(startup) {
         storageKey: 'sparkboard-auth',
       }),
     };
+    cloud = new CloudSync({
+      url: settings.url,
+      key: settings.publishableKey,
+      auth: client.auth,
+      access: cloudBoardAccess(),
+      onStatus: (message) => {
+        const display = $('#cloud-sync-state');
+        if (display) display.textContent = message;
+        const indicator = $('#cloud-indicator');
+        if (indicator) indicator.textContent = message;
+      },
+    });
+    connectCloudSync(cloud);
     client.auth.onAuthStateChange((_event, session) => {
       user = session?.user || null;
       render();
+      // Supabase recommends not awaiting Auth API calls within the auth event callback.
+      queueMicrotask(() => useSession(session));
       if (user) startup.signedIn();
     });
 
@@ -104,6 +175,7 @@ export async function setupAuth(startup) {
     if (error) throw error;
     user = data.session?.user || null;
     render();
+    useSession(data.session);
 
     const redirect = new URL(location.pathname, location.origin).href;
     const saveBeforeLogin = async () => {

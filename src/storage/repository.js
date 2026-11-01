@@ -15,6 +15,7 @@ export const boardSummary = (board) => ({
   id: board.id,
   title: board.title,
   kind: board.kind,
+  cloudOwner: board.cloudOwner || null,
   updated: board.updated,
   objectCount: board.objects.length,
   sceneCount: board.scenes?.length || 0,
