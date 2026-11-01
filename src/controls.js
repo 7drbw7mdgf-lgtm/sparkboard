@@ -111,24 +111,8 @@ export function setupControls() {
     save();
     toast(enabled ? 'Grid and snapping on' : 'Grid and snapping off');
   };
-  $('#delete').onclick = deleteSelected;
-  $('#duplicate').onclick = duplicate;
-  $('#lock').onclick = toggleLock;
   $('#undo').onclick = undo;
   $('#redo').onclick = redo;
-  $('#edit').onclick = () => {
-    if (state.selected.size === 1) startEdit([...state.selected][0]);
-  };
-  if ($('#reshape')) $('#reshape').onclick = toggleReshape;
-  $('#swatches').onclick = (e) => {
-    let c = e.target.dataset.color;
-    if (c)
-      commit(() =>
-        editableNodes()
-          .filter((n) => !['image', 'file', 'link'].includes(n.type))
-          .forEach((n) => (n.color = c)),
-      );
-  };
   $('#inspect').onclick = () => {
     if (!state.selected.size && !['pen', 'line', 'connector'].includes(state.tool)) {
       toast('Select an item on the board to format it');
@@ -143,37 +127,63 @@ export function setupControls() {
     state.inspectorOpen = false;
     properties();
   };
-  $('#inspector-body').onclick = (e) => {
+  const inspector = $('#inspector-body');
+  inspector.onclick = (e) => {
     const b = e.target.closest('button');
-    if (!b) return;
-    if (b.dataset.command) command(b.dataset.command);
-    if (b.dataset.route)
-      commit(() =>
-        editableNodes()
-          .filter((n) => ['connector', 'line'].includes(n.type))
-          .forEach((n) => M.setLineRoute(n, b.dataset.route)),
-      );
-    if (b.dataset.lineStyle)
-      commit(() => editableNodes().forEach((n) => (n.lineStyle = b.dataset.lineStyle)));
+    if (!b || b.disabled) return;
+    if (b.dataset.command) {
+      const action = b.dataset.command;
+      if (action === 'duplicate') duplicate();
+      else if (action === 'delete') deleteSelected();
+      else if (action === 'edit') {
+        if (state.selected.size === 1) startEdit([...state.selected][0]);
+      } else if (action === 'edit-link') {
+        const n = editableNodes()[0];
+        if (n?.type === 'link') linkDialog(n);
+      } else command(action);
+    }
+    if (b.dataset.toggleStyle) {
+      const toggle = b.dataset.toggleStyle;
+      if (toggle === 'bold') command('bold');
+      if (toggle === 'italic') commit(() =>
+        editableNodes().forEach((n) => (n.fontStyle = n.fontStyle === 'italic' ? 'normal' : 'italic')));
+      if (toggle === 'underline') commit(() =>
+        editableNodes().forEach((n) => (n.textDecoration =
+          n.textDecoration === 'underline' ? 'none' : 'underline')));
+    }
     if (b.dataset.alignText)
       commit(() => editableNodes().forEach((n) => (n.align = b.dataset.alignText)));
     if (b.dataset.align) commit(() => M.align(editableNodes(), b.dataset.align));
     if (b.dataset.distribute) commit(() => M.distribute(editableNodes(), b.dataset.distribute));
   };
   const applyInspectorProp = (prop, rawValue) => {
+    const allowed = new Set(['avoidObstacles', 'fontSize', 'rotation', 'strokeWidth', 'w', 'h',
+      'cornerRadius', 'opacity', 'type', 'route', 'stroke', 'text', 'startArrow', 'endArrow',
+      'color', 'lineStyle', 'fontFamily', 'textColor']);
+    if (!allowed.has(prop)) return false;
     let value = rawValue;
     if (prop === 'avoidObstacles') value = rawValue === 'true';
-    if (['fontSize', 'rotation', 'strokeWidth'].includes(prop)) {
-      value = Number(value);
+    if (['fontSize', 'rotation', 'strokeWidth', 'w', 'h', 'cornerRadius', 'opacity'].includes(prop)) {
+      value = Number(rawValue);
       if (!Number.isFinite(value)) return false;
       if (prop === 'fontSize') value = Math.max(8, Math.min(144, value));
       if (prop === 'rotation') value = Math.max(-360, Math.min(360, value));
+      if (prop === 'strokeWidth') value = Math.max(0, Math.min(16, value));
+      if (prop === 'cornerRadius') value = Math.max(0, Math.min(80, value));
+      if (prop === 'opacity') value = Math.max(0, Math.min(100, value)) / 100;
+      if (prop === 'w' || prop === 'h') value = Math.max(30, Math.min(10000, value));
     }
+    if (prop === 'fontFamily' &&
+      !['DM Sans', 'Manrope', 'Georgia', 'Arial', 'monospace'].includes(value)) return false;
+    if (['color', 'stroke', 'textColor'].includes(prop) && !/^#[0-9a-f]{6}$/i.test(value)) return false;
+    if (prop === 'lineStyle' && !M.lineStyles.includes(value)) return false;
+    if (['startArrow', 'endArrow'].includes(prop) && !M.arrowHeads.includes(value)) return false;
+    if (prop === 'route' && !M.routes.includes(value)) return false;
     editableNodes().forEach((n) => {
       if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
         n.type = value;
         delete n.vertices;
-      } else if (prop === 'route') {
+      } else if (prop === 'route' && ['connector', 'line'].includes(n.type)) {
         M.setLineRoute(n, value);
       } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
         n.color = value;
@@ -181,12 +191,14 @@ export function setupControls() {
         const trimmed = String(value || '').trim();
         if (trimmed) n.text = trimmed;
         else delete n.text;
-      } else n[prop] = value;
+      } else {
+        n[prop] = value;
+      }
     });
     return true;
   };
   let inspectorInputSnap = false;
-  $('#inspector-body').oninput = (e) => {
+  inspector.oninput = (e) => {
     const prop = e.target.dataset.prop;
     if (!prop || !['range', 'color'].includes(e.target.type)) return;
     if (!inspectorInputSnap) {
@@ -195,7 +207,7 @@ export function setupControls() {
     }
     if (applyInspectorProp(prop, e.target.value)) renderFast();
   };
-  $('#inspector-body').onchange = (e) => {
+  inspector.onchange = (e) => {
     const prop = e.target.dataset.prop;
     if (!prop) return;
     if (inspectorInputSnap) {
