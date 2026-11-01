@@ -29,6 +29,34 @@ def inspect(sftp, root):
     print(json.dumps(result), flush=True)
 
 
+def inspect_shell(root):
+    """Compare the separate SSH endpoint using only known public-file reads."""
+    client = paramiko.SSHClient()
+    client.load_host_keys(str(root / 'deploy/fasthosts_known_hosts'))
+    client.set_missing_host_key_policy(paramiko.RejectPolicy())
+    try:
+        client.connect('ssh.sparkboard.co.uk', port=22, username='csh3485371',
+                       password=os.environ['FASTHOSTS_SFTP_PASSWORD'],
+                       look_for_keys=False, allow_agent=False, timeout=20,
+                       auth_timeout=20, banner_timeout=20)
+        for command in ('pwd', 'ls -ld . htdocs webapp/public',
+                        'cat htdocs/index.html', 'cat htdocs/board-model.js'):
+            _, stdout, _ = client.exec_command(command, timeout=20)
+            data = stdout.read(2 * 1024 * 1024 + 1)
+            status = stdout.channel.recv_exit_status()
+            if command.startswith('cat '):
+                result = {'ssh_command': command, 'status': status,
+                          'bytes': len(data), 'sha256': digest(data)}
+            else:
+                result = {'ssh_command': command, 'status': status,
+                          'directory_details': data.decode(errors='replace')[:2000]}
+            print(json.dumps(result), flush=True)
+    except Exception as error:
+        print('SSH directory comparison: ' + type(error).__name__, flush=True)
+    finally:
+        client.close()
+
+
 def main():
     root = Path(__file__).resolve().parent.parent
     client = paramiko.SSHClient()
@@ -42,6 +70,11 @@ def main():
         with client.open_sftp() as sftp:
             sftp.get_channel().settimeout(30)
             print('SFTP home: ' + sftp.normalize('.'), flush=True)
+            # Stay inside this hosting account; never enumerate other tenants.
+            print(json.dumps({'home_subdirectories': [
+                entry.filename for entry in sftp.listdir_attr('.')
+                if not entry.filename.startswith('.') and stat.S_ISDIR(entry.st_mode)
+            ]}), flush=True)
             inspect(sftp, 'htdocs')
             try:
                 inspect(sftp, 'webapp/public')
@@ -59,6 +92,7 @@ def main():
                     print(directory + ': not present', flush=True)
     finally:
         client.close()
+    inspect_shell(root)
     for name in PUBLIC_FILES:
         url = 'https://sparkboard.co.uk/' + name + '?diagnostic=' + os.environ['GITHUB_RUN_ID']
         request = urllib.request.Request(url, headers={'Cache-Control': 'no-cache'})
