@@ -14,6 +14,7 @@ export function properties() {
   const selectionChanged = selectionKey !== lastSelectionKey;
   if (selectionChanged) {
     lastSelectionKey = selectionKey;
+    state.selectedVertex = null;
     if (ns.length) {
       state.inspectorOpen = inspectorOpenAfterSelection({
         changed: true,
@@ -31,7 +32,7 @@ export function properties() {
     const show = isCompactEditor() && ns.length > 0 && state.tool === 'select';
     mobileActions.hidden = !show;
     mobileActions.innerHTML = show
-      ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode)
+      ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode, state.selectedVertex)
       : '';
   }
   const toolSidePanel = ['pen', 'line', 'connector'].includes(state.tool);
