@@ -13,6 +13,8 @@ import { setupAuth } from './src/auth.js';
 import { setupStartupScreen } from './src/startup-screen.js';
 import { setupMobileGestures } from './src/mobile-gestures.js';
 import { setupMindmapWorkspace } from './src/mindmap.js';
+import { setupFlowchart } from './src/flowchart.js';
+import { setupMobileWorkspace } from './src/mobile-workspace.js';
 
 const startup = setupStartupScreen();
 
@@ -28,6 +30,8 @@ setupDialogs();
 setupImporting();
 setupControls();
 setupMindmapWorkspace();
+setupFlowchart();
+setupMobileWorkspace();
 
 init()
   .then(() => setupAuth(startup))
