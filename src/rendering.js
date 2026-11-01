@@ -37,7 +37,9 @@ export function shapeSvg(n) {
           ? ' stroke-dasharray="3 2"'
           : '';
   let geometry;
-  if (Array.isArray(n.vertices) && n.vertices.length >= 3)
+  if (Array.isArray(n.curves) && n.curves.some(Boolean))
+    geometry = `<path d="${M.shapePath(n)}"/>`;
+  else if (Array.isArray(n.vertices) && n.vertices.length >= 3)
     geometry = `<polygon points="${M.verticesToPoints(n.vertices)}"/>`;
   else if (M.polygons[n.type]) geometry = `<polygon points="${M.polygons[n.type]}"/>`;
   else if (n.type === 'circle') geometry = '<ellipse cx="50" cy="50" rx="48" ry="48"/>';
@@ -124,6 +126,15 @@ export function renderFast() {
           if (handles[i]) {
             handles[i].style.left = `${v.x}%`;
             handles[i].style.top = `${v.y}%`;
+          }
+        });
+        const bends = el.querySelectorAll('.shape-curve-handle');
+        verts.forEach((v, i) => {
+          const next = verts[(i + 1) % verts.length];
+          const handle = n.curves?.[i] || { x: (v.x + next.x) / 2, y: (v.y + next.y) / 2 };
+          if (bends[i]) {
+            bends[i].style.left = `${handle.x}%`;
+            bends[i].style.top = `${handle.y}%`;
           }
         });
       }
@@ -247,20 +258,30 @@ export function selectVisual() {
     const isReshaping = isSelected && state.reshapeId === n.id && M.shapes.includes(n.type);
     el.classList.toggle('selected', isSelected);
     el.classList.toggle('reshaping', isReshaping);
-    el.querySelectorAll('.resize, .rotate-handle, .vertex-handle, .edge-handle').forEach((h) =>
+    el.querySelectorAll('.resize, .rotate-handle, .vertex-handle, .edge-handle, .shape-curve-handle').forEach((h) =>
       h.remove(),
     );
     if (state.selected.size === 1 && isSelected && !n.locked && !state.editing) {
       if (isReshaping) {
         const verts = M.shapeVertices(n);
+        const bendMode = state.reshapeMode === 'bend';
         verts.forEach((v, i) => {
           const next = verts[(i + 1) % verts.length];
           const edge = document.createElement('span');
-          edge.className = 'edge-handle';
-          edge.dataset.edge = String(i);
-          edge.title = 'Drag or click to insert a new anchor point';
-          edge.style.left = `${(v.x + next.x) / 2}%`;
-          edge.style.top = `${(v.y + next.y) / 2}%`;
+          if (bendMode) {
+            edge.className = 'shape-curve-handle';
+            edge.dataset.curveEdge = String(i);
+            edge.title = 'Drag to bend this outline segment';
+            const control = n.curves?.[i] || { x: (v.x + next.x) / 2, y: (v.y + next.y) / 2 };
+            edge.style.left = `${control.x}%`;
+            edge.style.top = `${control.y}%`;
+          } else {
+            edge.className = 'edge-handle';
+            edge.dataset.edge = String(i);
+            edge.title = 'Drag to add an anchor point';
+            edge.style.left = `${(v.x + next.x) / 2}%`;
+            edge.style.top = `${(v.y + next.y) / 2}%`;
+          }
           el.append(edge);
         });
         verts.forEach((v, i) => {
@@ -273,7 +294,7 @@ export function selectVisual() {
           el.append(handle);
         });
       } else {
-        for (const dir of ['nw', 'ne', 'sw', 'se']) {
+        for (const dir of ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']) {
           const h = document.createElement('span');
           h.className = `resize ${dir}`;
           h.dataset.dir = dir;
