@@ -60,8 +60,24 @@ function choices(label, prop, value, options, disabled) {
       '</select>',
   );
 }
-function section(name, icon, contents) {
+function section(name, icon, contents, { compact = false, expanded = null } = {}) {
   if (!contents) return '';
+  if (compact) {
+    const open = expanded ? expanded.has(name) : name === 'Appearance';
+    return (
+      '<details class="format-card" data-format-section="' +
+      name +
+      '"' +
+      (open ? ' open' : '') +
+      '><summary><span aria-hidden="true">' +
+      icon +
+      '</span>' +
+      name +
+      '<span class="format-chevron" aria-hidden="true">⌄</span></summary><div class="format-card-content">' +
+      contents +
+      '</div></details>'
+    );
+  }
   return (
     '<section class="format-card" aria-label="' +
     name +
@@ -124,8 +140,9 @@ function selectButton(label, attr, value, active, disabled) {
   );
 }
 
-export function formatPanel(ns, reshapeId = null) {
+export function formatPanel(ns, reshapeId = null, { compact = false, expanded = null } = {}) {
   if (!ns.length) return '';
+  const panelSection = (name, icon, contents) => section(name, icon, contents, { compact, expanded });
   const n = ns[0],
     multi = ns.length > 1;
   const locked = ns.every((item) => item.locked);
@@ -182,7 +199,7 @@ export function formatPanel(ns, reshapeId = null) {
         'min="0" max="100" step="1" ' + disabled,
       ),
     );
-  appearance = section('Appearance', '◉', '<div class="format-grid">' + appearance + '</div>');
+  appearance = panelSection('Appearance', '◉', '<div class="format-grid">' + appearance + '</div>');
 
   let text = '';
   if (canText) {
@@ -238,7 +255,7 @@ export function formatPanel(ns, reshapeId = null) {
       input('text', 'text', n.text || '', 'maxlength="160" placeholder="Add a label" ' + disabled),
     );
   }
-  text = section('Text', 'T', text);
+  text = panelSection('Text', 'T', text);
 
   let layout = '';
   if (allGeometry && !multi) {
@@ -314,7 +331,7 @@ export function formatPanel(ns, reshapeId = null) {
       layout += action('Reset shape', 'reset-vertices', disabled);
     }
   }
-  layout = section('Layout', '□', layout);
+  layout = panelSection('Layout', '□', layout);
 
   let arrange =
     '<div class="format-grid two">' +
@@ -335,7 +352,7 @@ export function formatPanel(ns, reshapeId = null) {
         selectButton('Space vertically', 'distribute', 'y', false, disabled) +
         '</div>';
   }
-  arrange = section('Arrange', '▤', arrange);
+  arrange = panelSection('Arrange', '▤', arrange);
 
   let behavior =
     '<div class="format-grid two">' +
@@ -346,7 +363,7 @@ export function formatPanel(ns, reshapeId = null) {
     (ns.some((item) => item.group) ? action('Ungroup', 'ungroup', disabled) : '') +
     action('⌫ Delete', 'delete', disabled, 'danger') +
     '</div>';
-  behavior = section('Actions', '⚡', behavior);
+  behavior = panelSection('Actions', '⚡', behavior);
 
   return '<div class="format-panels">' + appearance + text + layout + arrange + behavior + '</div>';
 }
