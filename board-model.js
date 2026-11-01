@@ -148,6 +148,18 @@ function defaultVertices(type) {
   ];
 }
 
+function defaultShapeSize(type) {
+  if (type === 'frame') return { w: 420, h: 320 };
+  if (['circle', 'triangle', 'pentagon', 'hexagon', 'octagon', 'star', 'burst',
+    'heart', 'gear', 'shield', 'house', 'diamond', 'right-triangle'].includes(type))
+    return { w: 174, h: 174 };
+  if (['arrow', 'left-arrow', 'double-arrow', 'chevron', 'flow-data',
+    'parallelogram', 'trapezoid', 'ribbon'].includes(type))
+    return { w: 210, h: 134 };
+  if (['up-arrow', 'down-arrow', 'bookmark'].includes(type)) return { w: 138, h: 198 };
+  return { w: 190, h: 170 };
+}
+
 function shapeVertices(n) {
   if (Array.isArray(n?.vertices) && n.vertices.length >= 3) {
     return n.vertices.map((p) => ({ x: Number(p.x), y: Number(p.y) }));
@@ -1082,6 +1094,8 @@ function validateBoard(value) {
       throw Error('Invalid start arrow');
     if (n.endArrow !== undefined && !arrowHeads.includes(n.endArrow))
       throw Error('Invalid end arrow');
+    if (n.lockAspect !== undefined && typeof n.lockAspect !== 'boolean')
+      throw Error('Invalid aspect lock');
     if (n.curves !== undefined) {
       if (
         !shapes.includes(n.type) ||
@@ -1160,6 +1174,7 @@ export {
   arrowHeads,
   polygons,
   defaultVertices,
+  defaultShapeSize,
   shapeVertices,
   verticesToPoints,
   shapePath,
