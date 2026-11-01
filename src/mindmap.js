@@ -7,6 +7,7 @@ import { selectIds } from './selection.js';
 import { centerPoint } from './viewport.js';
 import { setTool } from './tools.js';
 import { toast } from './notifications.js';
+import { addFlowStep, startFlowLink } from './flowchart.js';
 import {
   appendMindNode,
   addMindChild,
@@ -128,37 +129,6 @@ function placeSibling(siblingId) {
       : 'Sibling added next to it · Enter adds another',
   );
 }
-function addFlowchart(shape) {
-  if (!state.board) return;
-  const selectedId = state.selected.size === 1 ? [...state.selected][0] : null;
-  const source = state.board.objects.find(
-    (item) => item.id === selectedId && !['connector', 'line', 'path'].includes(item.type),
-  );
-  const p = centerPoint();
-  commit(() => {
-    const created = node(
-      shape,
-      source ? source.x + source.w + 130 : p.x - 100,
-      source ? source.y : p.y - 50,
-      195,
-      100,
-      shape === 'diamond' ? 'Decision?' : 'Process',
-      shape === 'diamond' ? '#f8df87' : '#dce7cc',
-    );
-    state.board.objects.push(created);
-    if (source)
-      state.board.objects.push({
-        id: uid(),
-        type: 'connector',
-        from: source.id,
-        to: created.id,
-        route: 'elbow',
-        endArrow: 'arrow',
-      });
-    state.selected = new Set([created.id]);
-  });
-  if (window.matchMedia('(min-width:651px)').matches) setTool('select');
-}
 function changeMode(mode) {
   if (!state.board || !modes.some(([id]) => id === mode)) return;
   state.board.diagramView = mode;
@@ -182,6 +152,7 @@ function refreshWorkspace() {
   if (!bar || !board) return;
   const mode = board.diagramView || (board.kind === 'mindmap' ? 'mindmap' : 'canvas');
   state.diagramMode = mode;
+  bar.dataset.view = mode;
   bar
     .querySelectorAll('[data-mm-mode]')
     .forEach((button) =>
@@ -337,8 +308,12 @@ export function setupMindmapWorkspace() {
       <button data-mm-action="adopt" title="Convert selected object and connected descendants">Convert</button>
     </div>
     <div class="mmw-actions" data-mm-actions="flowchart" hidden>
-      <button data-mm-action="process">＋ Process</button>
-      <button data-mm-action="decision">＋ Decision</button>
+      <button data-mm-action="start">◉ Start</button>
+      <button data-mm-action="process">▭ Process</button>
+      <button data-mm-action="decision">◇ Decision</button>
+      <button data-mm-action="data">▱ Data</button>
+      <button data-mm-action="end">◎ End</button>
+      <button data-mm-action="flow-link" title="Connect selected nodes, or choose a destination">↗ Link nodes</button>
     </div>`;
   const panel = document.createElement('aside');
   panel.id = 'mindmap-panel';
@@ -373,8 +348,8 @@ export function setupMindmapWorkspace() {
       commit(() => adoptMindTree(state.board.objects, id));
       toast('Existing objects converted without duplicating them');
     }
-    if (action === 'process') addFlowchart('shape');
-    if (action === 'decision') addFlowchart('diamond');
+    if (['start', 'process', 'decision', 'data', 'end'].includes(action)) addFlowStep(action);
+    if (action === 'flow-link') startFlowLink();
   });
   panel.addEventListener('click', (event) => {
     if (event.target.closest('[data-mm-close]')) return changeMode('mindmap');
