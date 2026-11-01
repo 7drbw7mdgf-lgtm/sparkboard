@@ -4985,7 +4985,7 @@ body.is-panning #canvas {
   #tools [data-tool='connector'] {
     display: none !important;
   }
-  #objects .object.selected:not(.locked) .port {
+  #canvas[data-tool='connector'] #objects .object.selected:not(.locked) .port {
     display: block !important;
   }
   #objects .object:not(.selected) .port {
