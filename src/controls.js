@@ -167,9 +167,15 @@ export function setupControls() {
     } else if (action === 'remove-point') {
       const node = editableNodes()[0];
       const index = state.selectedVertex;
-      if (node && state.reshapeId === node.id && M.shapes.includes(node.type) &&
-        state.reshapeMode === 'points' && Number.isInteger(index) &&
-        M.shapeVertices(node).length > 3 && index < M.shapeVertices(node).length) {
+      if (
+        node &&
+        state.reshapeId === node.id &&
+        M.shapes.includes(node.type) &&
+        state.reshapeMode === 'points' &&
+        Number.isInteger(index) &&
+        M.shapeVertices(node).length > 3 &&
+        index < M.shapeVertices(node).length
+      ) {
         commit(() => {
           M.removeVertex(node, index);
           state.selectedVertex = null;
