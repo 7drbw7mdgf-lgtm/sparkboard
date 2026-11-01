@@ -31,6 +31,13 @@ export async function sample(kind = 'brainstorm') {
         node('sticky', 180, 490, 190, 155, 'What could it become?', colors[2]),
         node('sticky', 800, 490, 190, 155, 'What’s the first step?', colors[4]),
       ];
+    c.mindmap = true;
+    c.mindParent = null;
+    ns.forEach((topic, i) => {
+      topic.mindmap = true;
+      topic.mindParent = c.id;
+      topic.mindOrder = i;
+    });
     return [
       c,
       ...ns,
