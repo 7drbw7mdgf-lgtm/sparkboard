@@ -52,6 +52,12 @@ test('mobile connector works from a selected item without requiring its toolbar 
   assert.match(controls, /action === 'connect'/);
   assert.match(controls, /state\.connectorStart = source\.id/);
   assert.match(canvas, /if \(state\.tool === 'connector'\)/);
+  // Mobile taps can land directly on a shape's outline handle; Connect must take precedence.
+  assert.match(canvas, /state\.tool !== 'connector' && vertexEl && n/);
+  assert.match(canvas, /state\.tool !== 'connector' && edgeEl && n/);
+  assert.match(canvas, /if \(isCompactEditor\(\) && wasConnecting\) setTool\('select'\)/);
+  assert.match(css, /#canvas\[data-tool='connector'\] #objects/);
+
   assert.match(css, /#tools \[data-tool='connector'\] \{\s*display:\s*none !important;/);
   assert.doesNotMatch(
     mobileActionMarkup([{ ...sticky, type: 'line' }], null),
