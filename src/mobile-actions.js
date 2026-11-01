@@ -53,7 +53,8 @@ export function mobileActionMarkup(
   if (!reshaping && diagramMode === 'flowchart' && canConnectNode(single))
     actions += button('＋ Next', 'flow-next');
   if (!reshaping && canConnectNode(single)) actions += button('↗ Connect', 'connect');
-  if (single?.type === 'connector' && !single.locked) actions += button('↝ Route', 'connector-style');
+  if (single?.type === 'connector' && !single.locked)
+    actions += button('↝ Route', 'connector-style');
   actions += button('⚙ Format', 'format');
   if (!reshaping && nodes.some((n) => !n.locked)) actions += button('⧉ Copy', 'duplicate');
   return (

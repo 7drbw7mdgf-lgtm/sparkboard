@@ -674,18 +674,23 @@ function connectorRoute(n, objects = [], context) {
   // Explicit waypoints deliberately override automatic obstacle routing.
   // Endpoints remain bound to nodes and update as those nodes move.
   if (Array.isArray(n.waypoints) && n.waypoints.length) {
-    const waypoints = n.waypoints.filter((p) =>
-      p && Number.isFinite(p.x) && Number.isFinite(p.y)).slice(0, 12);
+    const waypoints = n.waypoints
+      .filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y))
+      .slice(0, 12);
     if (waypoints.length) {
       const anchors = [candidate.start, ...waypoints, candidate.end];
-      const path = n.route === 'elbow'
-        ? anchors.slice(1).reduce((points, to) => {
-            const from = points.at(-1);
-            if (from.x !== to.x && from.y !== to.y) points.push({ x: to.x, y: from.y });
-            points.push(to);
-            return points;
-          }, [anchors[0]])
-        : anchors;
+      const path =
+        n.route === 'elbow'
+          ? anchors.slice(1).reduce(
+              (points, to) => {
+                const from = points.at(-1);
+                if (from.x !== to.x && from.y !== to.y) points.push({ x: to.x, y: from.y });
+                points.push(to);
+                return points;
+              },
+              [anchors[0]],
+            )
+          : anchors;
       return { ...routedPath(path, n.route === 'curved'), manual: true };
     }
   }
@@ -1112,10 +1117,19 @@ function validateBoard(value) {
         )
           throw Error('Invalid connector anchor');
       }
-      if (n.waypoints !== undefined &&
-        (!Array.isArray(n.waypoints) || n.waypoints.length > 12 ||
-          !n.waypoints.every((p) => p && Number.isFinite(p.x) &&
-            Number.isFinite(p.y) && Math.abs(p.x) <= 1000000 && Math.abs(p.y) <= 1000000)))
+      if (
+        n.waypoints !== undefined &&
+        (!Array.isArray(n.waypoints) ||
+          n.waypoints.length > 12 ||
+          !n.waypoints.every(
+            (p) =>
+              p &&
+              Number.isFinite(p.x) &&
+              Number.isFinite(p.y) &&
+              Math.abs(p.x) <= 1000000 &&
+              Math.abs(p.y) <= 1000000,
+          ))
+      )
         throw Error('Invalid connector waypoints');
       if (n.avoidObstacles !== undefined && typeof n.avoidObstacles !== 'boolean')
         throw Error('Invalid connector routing');

@@ -288,19 +288,66 @@ function showMindMaster(id) {
   const topic = state.board?.objects.find((n) => n.id === id && isMindNode(n));
   if (!topic) return;
   const style = topic.mindMaster || {
-    palette: 'forest', route: 'curved', lineStyle: 'solid', endArrow: 'none', strokeWidth: 2,
+    palette: 'forest',
+    route: 'curved',
+    lineStyle: 'solid',
+    endArrow: 'none',
+    strokeWidth: 2,
   };
-  const options = (entries, value) => entries
-    .map(([key, label]) => `<option value="${key}"${key === value ? ' selected' : ''}>${label}</option>`).join('');
-  modal('Style mind-map branches', `<form id="mind-master-form">
+  const options = (entries, value) =>
+    entries
+      .map(
+        ([key, label]) =>
+          `<option value="${key}"${key === value ? ' selected' : ''}>${label}</option>`,
+      )
+      .join('');
+  modal(
+    'Style mind-map branches',
+    `<form id="mind-master-form">
     <p>Applies to this topic and every child below it. Unrelated canvas items stay untouched.</p>
-    <label>Colour scheme<select id="mind-palette">${options(Object.entries(MIND_PALETTES).map(([key, p]) => [key, p.label]), style.palette)}</select></label>
+    <label>Colour scheme<select id="mind-palette">${options(
+      Object.entries(MIND_PALETTES).map(([key, p]) => [key, p.label]),
+      style.palette,
+    )}</select></label>
     <div class="master-columns">
-      <label>Connector path<select id="mind-route">${options([['curved','Curved'],['elbow','Elbow / orthogonal'],['straight','Straight']], style.route)}</select></label>
-      <label>Line pattern<select id="mind-pattern">${options([['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']], style.lineStyle)}</select></label>
-      <label>End cap<select id="mind-cap">${options([['none','None'],['arrow','Open arrow'],['filled','Filled arrow'],['circle','Circle'],['diamond','Diamond']], style.endArrow)}</select></label>
-      <label>Thickness<select id="mind-thickness">${options([['1','Thin'],['2','Medium'],['3','Bold'],['4','Heavy']], String(style.strokeWidth))}</select></label>
-    </div><button class="master-submit" type="submit">Apply to branch</button></form>`, 'BRANCH MASTER');
+      <label>Connector path<select id="mind-route">${options(
+        [
+          ['curved', 'Curved'],
+          ['elbow', 'Elbow / orthogonal'],
+          ['straight', 'Straight'],
+        ],
+        style.route,
+      )}</select></label>
+      <label>Line pattern<select id="mind-pattern">${options(
+        [
+          ['solid', 'Solid'],
+          ['dashed', 'Dashed'],
+          ['dotted', 'Dotted'],
+        ],
+        style.lineStyle,
+      )}</select></label>
+      <label>End cap<select id="mind-cap">${options(
+        [
+          ['none', 'None'],
+          ['arrow', 'Open arrow'],
+          ['filled', 'Filled arrow'],
+          ['circle', 'Circle'],
+          ['diamond', 'Diamond'],
+        ],
+        style.endArrow,
+      )}</select></label>
+      <label>Thickness<select id="mind-thickness">${options(
+        [
+          ['1', 'Thin'],
+          ['2', 'Medium'],
+          ['3', 'Bold'],
+          ['4', 'Heavy'],
+        ],
+        String(style.strokeWidth),
+      )}</select></label>
+    </div><button class="master-submit" type="submit">Apply to branch</button></form>`,
+    'BRANCH MASTER',
+  );
   $('#mind-master-form').onsubmit = (event) => {
     event.preventDefault();
     const next = {

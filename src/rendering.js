@@ -223,13 +223,34 @@ export function renderLines() {
           : '';
       const waypoints =
         n.type === 'connector' && selected && !n.locked
-          ? (n.waypoints || []).map((p, i) =>
-              '<circle class="connector-waypoint" data-id="' + n.id + '" data-connector-waypoint="' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + Math.max(7, 9 / state.view.z) + '"><title>Drag to move bend · Alt-click to remove</title></circle>'
-            ).join('')
+          ? (n.waypoints || [])
+              .map(
+                (p, i) =>
+                  '<circle class="connector-waypoint" data-id="' +
+                  n.id +
+                  '" data-connector-waypoint="' +
+                  i +
+                  '" cx="' +
+                  p.x +
+                  '" cy="' +
+                  p.y +
+                  '" r="' +
+                  Math.max(7, 9 / state.view.z) +
+                  '"><title>Drag to move bend · Alt-click to remove</title></circle>',
+              )
+              .join('')
           : '';
       const addBend =
         n.type === 'connector' && selected && !n.locked && (n.waypoints?.length || 0) < 12
-          ? '<circle class="connector-add-waypoint" data-id="' + n.id + '" data-connector-add="true" cx="' + route.labelX + '" cy="' + (route.labelY + 24 / state.view.z) + '" r="' + Math.max(8, 10 / state.view.z) + '"><title>Add a bend point</title></circle>'
+          ? '<circle class="connector-add-waypoint" data-id="' +
+            n.id +
+            '" data-connector-add="true" cx="' +
+            route.labelX +
+            '" cy="' +
+            (route.labelY + 24 / state.view.z) +
+            '" r="' +
+            Math.max(8, 10 / state.view.z) +
+            '"><title>Add a bend point</title></circle>'
           : '';
       const handles = selected
         ? n.type === 'line' && !n.locked

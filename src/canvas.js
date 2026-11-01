@@ -365,7 +365,9 @@ export function setupCanvas() {
     const bendHandle = e.target.closest('[data-connector-waypoint]');
     const addBendHandle = e.target.closest('[data-connector-add]');
     if (bendHandle) {
-      const edge = state.board.objects.find((item) => item.id === bendHandle.dataset.id && item.type === 'connector');
+      const edge = state.board.objects.find(
+        (item) => item.id === bendHandle.dataset.id && item.type === 'connector',
+      );
       const index = Number(bendHandle.dataset.connectorWaypoint);
       if (!edge || edge.locked || !Array.isArray(edge.waypoints) || !edge.waypoints[index]) return;
       if (e.altKey) {
@@ -377,7 +379,9 @@ export function setupCanvas() {
       return;
     }
     if (addBendHandle) {
-      const edge = state.board.objects.find((item) => item.id === addBendHandle.dataset.id && item.type === 'connector');
+      const edge = state.board.objects.find(
+        (item) => item.id === addBendHandle.dataset.id && item.type === 'connector',
+      );
       if (!edge || edge.locked || (edge.waypoints?.length || 0) >= 12) return;
       commit(() => {
         edge.waypoints ??= [];
@@ -690,7 +694,9 @@ export function setupCanvas() {
       return;
     const p = point(e);
     if (state.drag.type === 'connector-waypoint') {
-      const edge = state.board.objects.find((item) => item.id === state.drag.id && item.type === 'connector');
+      const edge = state.board.objects.find(
+        (item) => item.id === state.drag.id && item.type === 'connector',
+      );
       if (!edge?.waypoints?.[state.drag.index]) return;
       if (!state.drag.changed) snapshot();
       state.drag.changed = true;

@@ -166,16 +166,22 @@ function choose(action, value) {
   if (action === 'flow') addFlowStep(value);
   else if (action === 'connect') startFlowLink();
   else if (action === 'connection') {
-    const edge = state.board?.objects.find((item) => state.selected.has(item.id) && item.type === 'connector');
-    if (edge) document.dispatchEvent(new CustomEvent('sparkboard:connector-edit', { detail: { id: edge.id } }));
+    const edge = state.board?.objects.find(
+      (item) => state.selected.has(item.id) && item.type === 'connector',
+    );
+    if (edge)
+      document.dispatchEvent(
+        new CustomEvent('sparkboard:connector-edit', { detail: { id: edge.id } }),
+      );
     else toast('Select a connector first');
-  }
-  else if (action === 'map-style') {
+  } else if (action === 'map-style') {
     const topic = state.board?.objects.find((item) => state.selected.has(item.id) && item.mindmap);
-    if (topic) document.dispatchEvent(new CustomEvent('sparkboard:mind-style', { detail: { id: topic.id } }));
+    if (topic)
+      document.dispatchEvent(
+        new CustomEvent('sparkboard:mind-style', { detail: { id: topic.id } }),
+      );
     else toast('Select a mind-map topic first');
-  }
-  else if (action === 'tool') setTool(value);
+  } else if (action === 'tool') setTool(value);
   else if (action === 'picker') {
     const trigger =
       value === 'shapes' ? $('#shape-toggle') : $('#tools [data-tool="' + value + '"]');
@@ -237,7 +243,10 @@ export function setupMobileWorkspace() {
     if (event.key === 'Escape' && !sheet.hidden) closeSheet();
   });
   document.addEventListener('sparkboard:render', syncDock);
-  document.addEventListener('sparkboard:mode', () => { if (state.tool === 'hand') setTool('select'); syncDock(); });
+  document.addEventListener('sparkboard:mode', () => {
+    if (state.tool === 'hand') setTool('select');
+    syncDock();
+  });
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
   window.addEventListener('resize', () => {
