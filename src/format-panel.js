@@ -142,7 +142,8 @@ function selectButton(label, attr, value, active, disabled) {
 
 export function formatPanel(ns, reshapeId = null, { compact = false, expanded = null } = {}) {
   if (!ns.length) return '';
-  const panelSection = (name, icon, contents) => section(name, icon, contents, { compact, expanded });
+  const panelSection = (name, icon, contents) =>
+    section(name, icon, contents, { compact, expanded });
   const n = ns[0],
     multi = ns.length > 1;
   const locked = ns.every((item) => item.locked);

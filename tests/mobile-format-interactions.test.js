@@ -8,8 +8,16 @@ import {
 } from '../src/mobile-editor-policy.js';
 import { formatPanel } from '../src/format-panel.js';
 
-const note = { id: 'test-note', type: 'sticky', text: 'A note', x: 0, y: 0,
-  w: 200, h: 140, color: '#f4e4a4' };
+const note = {
+  id: 'test-note',
+  type: 'sticky',
+  text: 'A note',
+  x: 0,
+  y: 0,
+  w: 200,
+  h: 140,
+  color: '#f4e4a4',
+};
 
 test('small screens and coarse landscape screens use the compact inspector', () => {
   let requested;
@@ -26,15 +34,34 @@ test('small screens and coarse landscape screens use the compact inspector', () 
 });
 
 test('touch selection leaves Format closed, while desktop auto-opens', () => {
-  assert.equal(inspectorOpenAfterSelection({
-    changed: true, hasSelection: true, compact: true, open: true,
-  }), false);
-  assert.equal(inspectorOpenAfterSelection({
-    changed: true, hasSelection: true, compact: false, open: false,
-  }), true);
-  assert.equal(inspectorOpenAfterSelection({
-    changed: false, hasSelection: true, compact: true, open: true,
-  }), true, 'an explicitly opened panel stays open through ordinary re-rendering');
+  assert.equal(
+    inspectorOpenAfterSelection({
+      changed: true,
+      hasSelection: true,
+      compact: true,
+      open: true,
+    }),
+    false,
+  );
+  assert.equal(
+    inspectorOpenAfterSelection({
+      changed: true,
+      hasSelection: true,
+      compact: false,
+      open: false,
+    }),
+    true,
+  );
+  assert.equal(
+    inspectorOpenAfterSelection({
+      changed: false,
+      hasSelection: true,
+      compact: true,
+      open: true,
+    }),
+    true,
+    'an explicitly opened panel stays open through ordinary re-rendering',
+  );
 });
 
 test('touch-generated double clicks never invoke text editing or insert sticky notes', () => {
@@ -54,7 +81,8 @@ test('compact Format renders only one section open until user explicitly expands
   assert.equal((compact.match(/data-command="duplicate"/g) || []).length, 1);
 
   const reopened = formatPanel([note], null, {
-    compact: true, expanded: new Set(['Text', 'Actions']),
+    compact: true,
+    expanded: new Set(['Text', 'Actions']),
   });
   assert.match(reopened, /data-format-section="Text" open/);
   assert.match(reopened, /data-format-section="Actions" open/);

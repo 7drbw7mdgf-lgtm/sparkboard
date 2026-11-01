@@ -48,9 +48,14 @@ export function renderInspector() {
   const compact = isCompactEditor();
   const selection = nodes.map((n) => n.id).join(',');
   const previous = body.dataset.selection === selection && body.dataset.compact === String(compact);
-  const expanded = previous && compact
-    ? new Set([...body.querySelectorAll('details.format-card[open]')].map((el) => el.dataset.formatSection))
-    : null;
+  const expanded =
+    previous && compact
+      ? new Set(
+          [...body.querySelectorAll('details.format-card[open]')].map(
+            (el) => el.dataset.formatSection,
+          ),
+        )
+      : null;
   body.innerHTML = formatPanel(nodes, state.reshapeId, { compact, expanded });
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);

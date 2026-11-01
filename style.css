@@ -3551,7 +3551,9 @@ body.is-panning #canvas {
     cursor: pointer;
     min-height: 41px;
     padding: 9px 11px;
-    font: 750 12px Manrope, sans-serif;
+    font:
+      750 12px Manrope,
+      sans-serif;
     color: #2a402f;
     user-select: none;
     -webkit-user-select: none;

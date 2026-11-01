@@ -913,12 +913,15 @@ export function setupCanvas() {
   $('#canvas').addEventListener('pointercancel', endPointer);
   $('#canvas').addEventListener('lostpointercapture', endPointer);
   $('#canvas').addEventListener('dblclick', (e) => {
-    if (!allowDoubleClickEdit({
-      pointerType: e.pointerType,
-      firesTouchEvents: e.sourceCapabilities?.firesTouchEvents,
-      lastTouchAt,
-      now: Date.now(),
-    })) return;
+    if (
+      !allowDoubleClickEdit({
+        pointerType: e.pointerType,
+        firesTouchEvents: e.sourceCapabilities?.firesTouchEvents,
+        lastTouchAt,
+        now: Date.now(),
+      })
+    )
+      return;
     if (state.space || state.tool !== 'select' || e.target.closest('[data-open]')) return;
     let id = e.target.closest('[data-id]')?.dataset.id;
     if (id) startEdit(id);

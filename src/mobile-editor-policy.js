@@ -2,8 +2,7 @@
 export const COMPACT_EDITOR_QUERY = '(max-width: 650px), (max-height: 500px) and (pointer: coarse)';
 
 export function isCompactEditor(target = globalThis) {
-  return typeof target.matchMedia === 'function' &&
-    target.matchMedia(COMPACT_EDITOR_QUERY).matches;
+  return typeof target.matchMedia === 'function' && target.matchMedia(COMPACT_EDITOR_QUERY).matches;
 }
 
 /** Selecting a board item must never summon the format sheet over a touch drag. */
