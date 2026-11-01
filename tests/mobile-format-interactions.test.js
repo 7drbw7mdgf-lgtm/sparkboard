@@ -5,6 +5,8 @@ import {
   isCompactEditor,
   inspectorOpenAfterSelection,
   allowDoubleClickEdit,
+  initialToolForLayout,
+  toolAvailableOnLayout,
 } from '../src/mobile-editor-policy.js';
 import { formatPanel } from '../src/format-panel.js';
 
@@ -72,21 +74,32 @@ test('touch-generated double clicks never invoke text editing or insert sticky n
   assert.equal(allowDoubleClickEdit({ pointerType: 'mouse', now: 2000 }), true);
 });
 
-test('compact Format renders only one section open until user explicitly expands more', () => {
+test('compact Format presents one accessible page, tabs and Back/Next', () => {
   const compact = formatPanel([note], null, { compact: true });
-  assert.equal((compact.match(/<details class="format-card"/g) || []).length, 5);
-  assert.match(compact, /data-format-section="Appearance" open/);
-  assert.match(compact, /data-format-section="Text"><summary>/);
-  assert.match(compact, /data-command="edit"/);
+  assert.equal((compact.match(/<section class="format-card format-page"/g) || []).length, 5);
+  assert.equal((compact.match(/data-format-page="/g) || []).length, 5);
+  assert.match(compact, /role="tablist"/);
+  assert.match(compact, /data-format-section="Appearance"/);
+  assert.match(compact, /data-format-section="Text"/);
+  assert.match(compact, /data-format-step="-1" aria-label="Previous format page" disabled/);
+  assert.match(compact, /data-format-step="1"/);
+  assert.doesNotMatch(compact, /<details/);
   assert.equal((compact.match(/data-command="duplicate"/g) || []).length, 1);
+  const textPage = formatPanel([note], null, { compact: true, page: 'Text' });
+  assert.match(textPage, /data-format-page="Text"/);
+  assert.match(textPage, /data-format-section="Text"/);
+  assert.match(textPage, /format-page" hidden/);
+  assert.match(textPage, /data-format-counter aria-live="polite">2 \/ 5/);
+});
 
-  const reopened = formatPanel([note], null, {
-    compact: true,
-    expanded: new Set(['Text', 'Actions']),
-  });
-  assert.match(reopened, /data-format-section="Text" open/);
-  assert.match(reopened, /data-format-section="Actions" open/);
-  assert.doesNotMatch(reopened, /data-format-section="Appearance" open/);
+test('mobile defaults to Pan but retains Select and Line; Connector stays desktop-only', () => {
+  assert.equal(initialToolForLayout(true), 'hand');
+  assert.equal(initialToolForLayout(false), 'select');
+  for (const tool of ['hand', 'select', 'line', 'pen', 'shape']) {
+    assert.equal(toolAvailableOnLayout(tool, true), true);
+  }
+  assert.equal(toolAvailableOnLayout('connector', true), false);
+  assert.equal(toolAvailableOnLayout('connector', false), true);
 });
 
 test('desktop Format keeps all controls visible without mobile accordion', () => {
