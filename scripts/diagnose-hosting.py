@@ -41,7 +41,7 @@ def inspect_shell(root):
                        auth_timeout=20, banner_timeout=20)
         for command in ('pwd', 'ls -ld . htdocs webapp/public',
                         'cat htdocs/index.html', 'cat htdocs/board-model.js'):
-            _, stdout, _ = client.exec_command(command, timeout=20)
+            _, stdout, _ = client.exec_command(command, timeout=20, get_pty=True)
             data = stdout.read(2 * 1024 * 1024 + 1)
             status = stdout.channel.recv_exit_status()
             if command.startswith('cat '):
@@ -53,6 +53,25 @@ def inspect_shell(root):
             print(json.dumps(result), flush=True)
     except Exception as error:
         print('SSH directory comparison: ' + type(error).__name__, flush=True)
+    finally:
+        client.close()
+
+
+def inspect_transfer_port(root):
+    client = paramiko.SSHClient()
+    client.load_host_keys(str(root / 'deploy/fasthosts_known_hosts'))
+    client.set_missing_host_key_policy(paramiko.RejectPolicy())
+    try:
+        client.connect('ssh.sparkboard.co.uk', port=1022, username='csh3485371',
+                       password=os.environ['FASTHOSTS_SFTP_PASSWORD'],
+                       look_for_keys=False, allow_agent=False, timeout=20,
+                       auth_timeout=20, banner_timeout=20)
+        with client.open_sftp() as sftp:
+            sftp.get_channel().settimeout(20)
+            print('SSH transfer port 1022 home: ' + sftp.normalize('.'), flush=True)
+            inspect(sftp, 'htdocs')
+    except Exception as error:
+        print('SSH transfer port comparison: ' + type(error).__name__, flush=True)
     finally:
         client.close()
 
@@ -93,6 +112,7 @@ def main():
     finally:
         client.close()
     inspect_shell(root)
+    inspect_transfer_port(root)
     for name in PUBLIC_FILES:
         url = 'https://sparkboard.co.uk/' + name + '?diagnostic=' + os.environ['GITHUB_RUN_ID']
         request = urllib.request.Request(url, headers={'Cache-Control': 'no-cache'})
