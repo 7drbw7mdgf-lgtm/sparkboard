@@ -20,6 +20,54 @@ let conflictShown = false;
 let repository;
 let saves;
 let transition = Promise.resolve();
+let cloudSync = null;
+
+/** Cloud code only sees a narrow, revision-protected local board adapter. */
+export function connectCloudSync(controller) { cloudSync = controller; }
+export function cloudBoardAccess() {
+  return {
+    list: () => repository.listBoards(),
+    load: (id) => repository.loadBoard(id),
+    flush: () => flushSaves(),
+    isEditing: () => Boolean(state.editing || saves?.dirty),
+    async import(board) {
+      const exists = state.boards.some((item) => item.id === board.id);
+      if (exists) await repository.loadBoard(board.id);
+      await repository.saveBoard(board);
+      state.boards = await repository.listBoards();
+      if (state.board?.id === board.id) mountBoard(await repository.loadBoard(board.id));
+      else renderBoardTabs();
+    },
+    async fork(id) {
+      const old = await repository.loadBoard(id);
+      const copy = {
+        ...old, id: uid(),
+        title: (old.title || 'Board') + ' (conflict copy)',
+        updated: Date.now(),
+        cloudOwner: cloudSync?.enabled ? cloudSync.userId : old.cloudOwner,
+      };
+      delete copy.revision;
+      delete copy.writer;
+      await repository.saveBoard(copy);
+      state.boards = await repository.listBoards();
+      renderBoardTabs();
+      toast('Cloud conflict: both versions were kept as separate boards.');
+    },
+    async remove(id) {
+      await repository.deleteBoard(id);
+      sessions.forget(id);
+      state.boards = await repository.listBoards();
+      if (state.board?.id === id) {
+        if (state.boards.length) mountBoard(await repository.loadBoard(state.boards[0].id));
+        else await insertBoard({
+          id: uid(), title: 'Untitled board', kind: 'blank',
+          objects: [], scenes: [], grid: true, snap: false, updated: Date.now(),
+        });
+      } else renderBoardTabs();
+    },
+  };
+}
+
 
 function reportSaveStatus(status, error) {
   const text = {
@@ -149,11 +197,14 @@ export function openBoard(id) {
 }
 
 async function insertBoard(board) {
+  if (cloudSync?.enabled && cloudSync.userId) board.cloudOwner = cloudSync.userId;
+  else delete board.cloudOwner;
   await repository.saveBoard(board);
   state.boards = await repository.listBoards();
   await repository.setActiveBoard(board.id);
   mountBoard(await repository.loadBoard(board.id));
   reportSaveStatus('saved');
+  cloudSync?.schedule();
 }
 
 export function createBoard(kind = 'blank') {
@@ -194,6 +245,7 @@ export function importBoard(parsed) {
 export function deleteBoard(id) {
   return switchSafely(async () => {
     await repository.deleteBoard(id);
+    cloudSync?.markDeleted(id);
     sessions.forget(id);
     state.boards = await repository.listBoards();
     if (state.board?.id === id) {
@@ -216,6 +268,7 @@ export function deleteBoard(id) {
     }
     renderBoardTabs();
     reportSaveStatus('saved');
+    cloudSync?.schedule();
   });
 }
 
@@ -225,6 +278,7 @@ export async function init() {
     async (snapshot, original) => {
       const stored = await repository.saveBoard(snapshot);
       original.revision = stored.revision;
+      cloudSync?.schedule();
       // Retain fast media references without applying stale text/geometry to live edits.
       for (const item of stored.objects.filter((item) => item.mediaId)) {
         const live = original.objects.find((object) => object.id === item.id);
