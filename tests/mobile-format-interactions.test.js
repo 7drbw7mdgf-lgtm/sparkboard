@@ -92,8 +92,8 @@ test('compact Format presents one accessible page, tabs and Back/Next', () => {
   assert.match(textPage, /data-format-counter aria-live="polite">2 \/ 5/);
 });
 
-test('mobile defaults to Pan; Connector remains available without a toolbar icon', () => {
-  assert.equal(initialToolForLayout(true), 'hand');
+test('mobile defaults to Select for one-finger editing; Connector stays available', () => {
+  assert.equal(initialToolForLayout(true), 'select');
   assert.equal(initialToolForLayout(false), 'select');
   for (const tool of ['hand', 'select', 'line', 'pen', 'shape']) {
     assert.equal(toolAvailableOnLayout(tool, true), true);
