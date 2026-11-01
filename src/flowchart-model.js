@@ -89,6 +89,11 @@ export function connectFlowNodes(objects, fromId, toId, makeId) {
     endArrow: 'filled',
     flowEdge: true,
   };
+  if (source.flowRole === 'decision') {
+    const outgoing = objects.filter((item) => item.type === 'connector' && item.from === source.id);
+    if (outgoing.length === 0) edge.text = 'Yes';
+    else if (outgoing.length === 1) edge.text = 'No';
+  }
   objects.push(edge);
   return edge;
 }
