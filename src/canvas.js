@@ -266,6 +266,11 @@ export function endPointer(e) {
     save();
     return;
   }
+  if (d.type === 'vertex' && !d.changed && isCompactEditor()) {
+    state.selectedVertex = d.index;
+    selectVisual();
+    return;
+  }
   if (d.type === 'move' && !d.changed && !d.shiftKey && d.wasSelected && state.selected.size > 1) {
     state.selected = M.expandGroups(state.board.objects, [d.id]);
     selectVisual();
@@ -365,6 +370,7 @@ export function setupCanvas() {
     const vertexEl = e.target.closest('.vertex-handle');
     if (vertexEl && n && !n.locked) {
       const idx = Number(vertexEl.dataset.vertex);
+      state.selectedVertex = idx;
       if (e.altKey) {
         if (M.shapeVertices(n).length <= 3) {
           toast('A shape needs at least 3 anchor points');
@@ -399,6 +405,7 @@ export function setupCanvas() {
       snapshot();
       const local = localShapePoint(n, p);
       M.insertVertex(n, edgeIdx, local);
+      state.selectedVertex = edgeIdx + 1;
       state.drag = {
         type: 'vertex',
         id: n.id,
