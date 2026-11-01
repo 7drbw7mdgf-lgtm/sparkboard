@@ -45,7 +45,8 @@ export function shapeSvg(n) {
   else if (n.type === 'cylinder')
     geometry =
       '<path d="M4,18 C4,6 96,6 96,18 L96,82 C96,94 4,94 4,82 Z M4,18 C4,30 96,30 96,18"/>';
-  else geometry = `<rect x="1" y="1" width="98" height="98" rx="${n.type === 'frame' ? 4 : 6}"/>`;
+  else
+    geometry = `<rect x="1" y="1" width="98" height="98" rx="${n.type === 'shape' ? Math.max(0, Math.min(48, (100 * (n.cornerRadius ?? 6)) / Math.max(1, Math.min(n.w, n.h)))) : n.type === 'frame' ? 4 : 6}"/>`;
   geometry = geometry.replace(/\/>/g, ' vector-effect="non-scaling-stroke"/>');
   return `<svg class="shape-body" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}>${geometry}</svg>`;
 }
@@ -61,7 +62,7 @@ export function objectContents(n) {
 }
 
 export function objectStyle(n) {
-  return `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;transform:rotate(${n.rotation || 0}deg);z-index:${objectLayer(n)};--fill:${n.color || colors[0]};--text-color:${n.textColor || (n.type === 'text' ? n.color : '#3c4234')};font-size:${n.fontSize || (n.type === 'text' ? 22 : n.type === 'frame' ? 12 : 17)}px;font-weight:${n.fontWeight || (n.type === 'text' || n.type === 'frame' ? 700 : 400)};text-align:${n.align || (n.type === 'text' || n.type === 'frame' ? 'left' : 'center')}`;
+  return `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;transform:rotate(${n.rotation || 0}deg);z-index:${objectLayer(n)};--fill:${n.color || colors[0]};--text-color:${n.textColor || (n.type === 'text' ? n.color : '#3c4234')};font-size:${n.fontSize || (n.type === 'text' ? 22 : n.type === 'frame' ? 12 : 17)}px;font-weight:${n.fontWeight || (n.type === 'text' || n.type === 'frame' ? 700 : 400)};text-align:${n.align || (n.type === 'text' || n.type === 'frame' ? 'left' : 'center')};font-family:${['DM Sans', 'Manrope', 'Georgia', 'Arial', 'monospace'].includes(n.fontFamily) ? n.fontFamily : n.type === 'text' ? 'DM Sans' : 'Manrope'};font-style:${n.fontStyle === 'italic' ? 'italic' : 'normal'};text-decoration:${n.textDecoration === 'underline' ? 'underline' : 'none'};opacity:${Number.isFinite(n.opacity) ? Math.max(0, Math.min(1, n.opacity)) : 1}${n.type === 'sticky' ? `;border-radius:${Math.max(0, Math.min(80, n.cornerRadius ?? 12))}px` : ''}`;
 }
 
 export function render() {
