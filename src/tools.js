@@ -5,7 +5,7 @@ import { linkDialog } from './links.js';
 import { modal } from './dialogs.js';
 import { properties } from './inspector.js';
 import { labels, shapeNames, svgIcon, shapeCategory, shapeCategories } from './icons.js';
-import { $, $, M } from './core.js';
+import { $, $$, M } from './core.js';
 import { isCompactEditor, toolAvailableOnLayout } from './mobile-editor-policy.js';
 const categoryButtons = (scope) =>
   ['All', ...Object.keys(shapeCategories)]
