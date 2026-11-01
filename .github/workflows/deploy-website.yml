@@ -46,9 +46,12 @@ jobs:
           npm test
           python3 -m unittest discover -s tests -p 'test_*website.py'
           npm run build
+      - name: Build hosted Sai planner
+        run: npm run sai:build
       - name: Build the public website
         env:
           WEBSITE_REVISION: ${{ github.sha }}
+          REQUIRE_SAI: '1'
           WEBSITE_LAYOUT: ${{ inputs.layout || 'direct' }}
         run: npm run website:build
       - name: Skip superseded commits
@@ -70,4 +73,5 @@ jobs:
         if: steps.current.outputs.deploy == 'true'
         env:
           EXPECTED_REVISION: ${{ github.sha }}
+          REQUIRE_SAI: '1'
         run: python3 scripts/verify-website.py
