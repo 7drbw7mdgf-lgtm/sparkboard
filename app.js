@@ -15,6 +15,7 @@ import { setupMobileGestures } from './src/mobile-gestures.js';
 import { setupMindmapWorkspace } from './src/mindmap.js';
 import { setupFlowchart } from './src/flowchart.js';
 import { setupMobileWorkspace } from './src/mobile-workspace.js';
+import { setupConnectorEdit } from './src/connector-edit.js';
 
 const startup = setupStartupScreen();
 
@@ -32,6 +33,7 @@ setupControls();
 setupMindmapWorkspace();
 setupFlowchart();
 setupMobileWorkspace();
+setupConnectorEdit();
 
 init()
   .then(() => setupAuth(startup))
