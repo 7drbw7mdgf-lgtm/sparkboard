@@ -185,6 +185,12 @@ export function setupControls() {
           state.selectedVertex = null;
         });
       }
+    } else if (action === 'mind-child') {
+      $('#mindmap-toolbar [data-mm-action="child"]')?.click();
+    } else if (action === 'mind-style') {
+      document.dispatchEvent(new CustomEvent('sparkboard:mind-style', {
+        detail: { id: [...state.selected][0] },
+      }));
     } else if (action === 'flow-next') {
       const id = [...state.selected][0];
       if (state.selected.size === 1) addFlowStep('process', id);
@@ -198,7 +204,7 @@ export function setupControls() {
         return;
       setTool('connector');
       state.connectorStart = source.id;
-      toast('Tap the object you want to connect to. Tap Select to cancel.');
+      toast('Tap the destination node. Tap Done above the dock to cancel.');
     } else if (action === 'connector-style') {
       openConnectorControls([...state.selected][0]);
     } else if (action === 'format') {
