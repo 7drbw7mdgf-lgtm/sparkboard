@@ -4059,3 +4059,123 @@ body.is-panning #canvas {
     min-height: 44px;
   }
 }
+
+/* Mobile-first editing: no connector tool or accidental drag-to-connect ports.
+   Desktop connector tools remain available without a mobile compromise. */
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  #tools [data-tool='connector'],
+  #objects .object .port {
+    display: none !important;
+  }
+  #line-options[hidden] {
+    display: none !important;
+  }
+  #inspector:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    width: min(350px, calc(100vw - 18px));
+    max-height: min(55dvh, 450px);
+    overflow: hidden;
+    bottom: calc(89px + env(safe-area-inset-bottom));
+    padding: 10px;
+  }
+  #inspector-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #inspector .format-heading { flex: 0 0 auto; }
+  #inspector .format-paged {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 7px;
+  }
+  #inspector .format-page-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 1px 7px;
+  }
+  #inspector .format-page-tabs::-webkit-scrollbar { display: none; }
+  #inspector .format-page-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-height: 40px;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 750;
+    color: #5b6c57;
+    border: 1px solid #e2e8df;
+    background: #f8faf7;
+  }
+  #inspector .format-page-tab.active,
+  #inspector .format-page-tab[aria-selected='true'] {
+    color: #165d36;
+    background: #e3f3e7;
+    border-color: #93c5a2;
+  }
+  #inspector .format-page-stack {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 8px;
+  }
+  #inspector .format-page-stack > .format-page {
+    display: block;
+    min-height: 0;
+    margin: 0;
+    padding: 11px;
+    background: #fbfcfa;
+  }
+  #inspector .format-page-stack > .format-page[hidden] {
+    display: none !important;
+  }
+  #inspector .format-page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 42px;
+    flex: 0 0 auto;
+    border-top: 1px solid #e4eadf;
+    padding-top: 6px;
+  }
+  #inspector .format-page-footer > button {
+    min-height: 36px;
+    padding: 7px 12px;
+    font-weight: 700;
+    font-size: 12px;
+    border: 1px solid #e2e8df;
+    border-radius: 9px;
+    color: #285339;
+    background: #f7fbf7;
+  }
+  #inspector .format-page-footer > span {
+    color: #798778;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  #inspector:not([hidden]) {
+    max-height: min(65dvh, 325px);
+    bottom: calc(73px + env(safe-area-inset-bottom));
+  }
+}
