@@ -286,6 +286,7 @@ export function selectVisual() {
         verts.forEach((v, i) => {
           const handle = document.createElement('span');
           handle.className = 'vertex-handle';
+          if (i === state.selectedVertex) handle.classList.add('active-node');
           handle.dataset.vertex = String(i);
           handle.title = 'Drag to reshape · Option/Alt-click to delete point';
           handle.style.left = `${v.x}%`;
