@@ -440,6 +440,7 @@ export function setupControls() {
       return;
     }
     if (
+      e.target?.closest?.('#mindmap-toolbar,#mindmap-panel') ||
       activeEditor() ||
       isNativeControl(e.target) ||
       $('#dialog').open ||
