@@ -382,6 +382,17 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    const curveEl = e.target.closest('.shape-curve-handle');
+    if (curveEl && n && M.shapes.includes(n.type) && !n.locked) {
+      state.drag = {
+        type: 'curve-edge',
+        id: n.id,
+        index: Number(curveEl.dataset.curveEdge),
+        changed: false,
+      };
+      capture(e);
+      return;
+    }
     const edgeEl = e.target.closest('.edge-handle');
     if (edgeEl && n && !n.locked) {
       const edgeIdx = Number(edgeEl.dataset.edge);
@@ -809,6 +820,19 @@ export function setupCanvas() {
       renderFast();
       return;
     }
+    if (state.drag.type === 'curve-edge') {
+      const local = localShapePoint(n, p);
+      const existing = n.curves?.[state.drag.index];
+      if (!state.drag.changed &&
+          Math.hypot((existing?.x ?? 50) - local.x, (existing?.y ?? 50) - local.y) < 0.25) return;
+      if (!state.drag.changed) {
+        snapshot();
+        state.drag.changed = true;
+      }
+      M.moveCurve(n, state.drag.index, local);
+      renderFast();
+      return;
+    }
     if (state.drag.type === 'line-control') {
       if (!state.drag.changed) {
         snapshot();
@@ -865,7 +889,8 @@ export function setupCanvas() {
     if (state.drag.type === 'resize') {
       const original = state.drag.original.find((o) => o.id === n.id);
       const nextBox = M.resizeBox(original, state.drag.dir, dx, dy, {
-        lockAspect: e.shiftKey || n.type === 'image',
+        lockAspect:
+          e.shiftKey || n.type === 'image' || (M.shapes.includes(n.type) && n.lockAspect !== false),
         snap: !!state.board.snap,
       });
       Object.assign(n, nextBox);
