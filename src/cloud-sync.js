@@ -98,7 +98,6 @@ export class CloudSync {
     this.storage.removeItem(this.prefKey(id));
     this.stop();
     this.userId = id;
-    this.meta = JSON.parse(this.storage.getItem(this.metaKey(id)) || '{}');
     this.setStatus('Cloud sync paused on this browser');
   }
 
@@ -119,8 +118,14 @@ export class CloudSync {
     if (!this.userId) throw Error('Sign in before enabling sync.');
     // Fail closed if the SQL migration has not been installed.
     await this.rows();
+    await this.access.flush();
     for (const board of await this.access.list()) {
-      if (!board.cloudOwner) this.meta[board.id] ??= { adopt: true, updated: 0, version: 0 };
+      if (!board.cloudOwner) {
+        // Persist ownership locally before the first upload; otherwise switching
+        // accounts in this browser could accidentally re-upload another user's boards.
+        await this.access.claim(board.id, this.userId);
+        this.meta[board.id] ??= { adopt: true, updated: 0, version: 0 };
+      }
     }
     this.storage.setItem(this.prefKey(this.userId), 'yes');
     this.persist();
@@ -295,6 +300,10 @@ export class CloudSync {
         continue;
       }
       if (local?.cloudOwner && local.cloudOwner !== this.userId) continue;
+      if (this.access.isEditing()) {
+        this.setStatus('Local edits are still saving; cloud sync will retry');
+        return;
+      }
       const decision = syncDecision(local, remote, marker);
       if (decision === 'push') await this.write(local, remote);
       if (decision === 'fork-pull' || decision === 'fork-delete') {
@@ -323,6 +332,10 @@ export class CloudSync {
     }
     for (const board of localMap.values()) {
       if (epoch !== this.epoch) return;
+      if (this.access.isEditing()) {
+        this.setStatus('Local edits are still saving; cloud sync will retry');
+        return;
+      }
       if (board.cloudOwner && board.cloudOwner !== this.userId) continue;
       const mark = this.meta[board.id];
       if (!board.cloudOwner && !mark?.adopt) continue; // Never upload unrelated guest boards.
