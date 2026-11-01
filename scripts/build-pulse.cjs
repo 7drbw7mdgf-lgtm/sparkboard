@@ -17,10 +17,13 @@ function buildPulse(root = path.resolve(__dirname, '..')) {
   fs.rmSync(source, { recursive: true, force: true });
   fs.rmSync(destination, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(source), { recursive: true });
-  execFileSync('git', ['clone', '--quiet', '--filter=blob:none', '--no-checkout', PULSE_REPOSITORY, source], { stdio: 'inherit' });
-  execFileSync('git', ['-C', source, 'sparse-checkout', 'set', 'site/fasthosts'], { stdio: 'inherit' });
-  execFileSync('git', ['-C', source, 'checkout', '--quiet', '--detach', PULSE_COMMIT], { stdio: 'inherit' });
-  const actual = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const git = (...args) => execFileSync('git', args, { stdio: 'inherit' });
+  git('clone', '--quiet', '--filter=blob:none', '--no-checkout', PULSE_REPOSITORY, source);
+  git('-C', source, 'sparse-checkout', 'set', 'site/fasthosts');
+  git('-C', source, 'checkout', '--quiet', '--detach', PULSE_COMMIT);
+  const actual = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], {
+    encoding: 'utf8',
+  }).trim();
   if (actual !== PULSE_COMMIT) throw Error('Pulse source revision mismatch.');
   fs.mkdirSync(destination, { recursive: true });
   for (const file of PUBLIC_FILES) {
@@ -31,7 +34,8 @@ function buildPulse(root = path.resolve(__dirname, '..')) {
     fs.copyFileSync(original, target);
   }
   const html = fs.readFileSync(path.join(destination, 'index.html'), 'utf8');
-  if (!html.includes('<title>Pulse') || !html.includes('github.com/7drbw7mdgf-lgtm/Pulse/releases/latest'))
+  const hasReleaseLink = html.includes('github.com/7drbw7mdgf-lgtm/Pulse/releases/latest');
+  if (!html.includes('<title>Pulse') || !hasReleaseLink)
     throw Error('Pulse landing page is missing required content.');
   if (/<script\b/i.test(html) || /<base\b/i.test(html))
     throw Error('Pulse public homepage must be standalone and must not execute scripts.');
