@@ -1,0 +1,27 @@
+name: Format mobile regression fix
+on:
+  push:
+    branches:
+      - fix/mobile-fullscreen-editor-usability
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/mobile-workspace.js src/tools.js src/mobile-actions.js src/controls.js src/editor.js src/mindmap.js tests/mobile-fullscreen-regression.test.js
+      - name: Commit formatting
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/mobile-workspace.js src/tools.js src/mobile-actions.js src/controls.js src/editor.js src/mindmap.js tests/mobile-fullscreen-regression.test.js
+            git commit -m "style: format mobile regression patch"
+            git push
+          fi
