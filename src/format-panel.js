@@ -1,7 +1,7 @@
 import { shapeNames } from './icons.js';
 import { M, esc } from './core.js';
 
-const textual = (n) => !['path', 'image', 'file', 'link', 'embed'].includes(n.type);
+const textual = (n) => !['path', 'image', 'file', 'link', 'embed', 'line', 'connector'].includes(n.type);
 const geometry = (n) => !['path', 'connector', 'line'].includes(n.type);
 const line = (n) => ['line', 'connector'].includes(n.type);
 const hex = (value, fallback) => /^#[a-f0-9]{6}$/i.test(value || '') ? value : fallback;
