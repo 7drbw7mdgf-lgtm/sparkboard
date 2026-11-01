@@ -1,4 +1,5 @@
 import { CONNECTION_LAYER, objectLayer } from './layers.js';
+import { hiddenMindmapIds } from './mindmap-model.js';
 import { disposePDFViewers } from './pdf-viewer.js';
 import { embedContents } from './embeds.js';
 import { properties } from './inspector.js';
@@ -70,9 +71,10 @@ export function render() {
   if (!state.board) return;
   disposePDFViewers();
   M.dedupeConnectors(state.board.objects);
+  const hidden = hiddenMindmapIds(state.board.objects);
   $('#objects').replaceChildren();
   for (const n of state.board.objects.filter(
-    (n) => !['connector', 'line', 'path'].includes(n.type),
+    (n) => !['connector', 'line', 'path'].includes(n.type) && !hidden.has(n.id),
   )) {
     const el = document.createElement('div');
     el.className = `object ${n.type} ${M.shapes.includes(n.type) ? 'geometric' : ''} ${state.selected.has(n.id) ? 'selected' : ''} ${n.locked ? 'locked' : ''}`;
@@ -97,6 +99,7 @@ export function render() {
   applyView();
   renderScenes();
   updateHistory();
+  document.dispatchEvent(new Event('sparkboard:render'));
 }
 
 export function renderFast() {
@@ -160,11 +163,14 @@ export function renderLines() {
   if (!state.board) return;
   $('#connections').style.zIndex = CONNECTION_LAYER;
   M.dedupeConnectors(state.board.objects);
-  const obstacles = M.obstacleBoxes(state.board.objects);
+  const hidden = hiddenMindmapIds(state.board.objects);
+  const obstacles = M.obstacleBoxes(state.board.objects.filter((item) => !hidden.has(item.id)));
   const lines = state.board.objects
     .filter(
       (n) =>
         ['connector', 'line', 'path'].includes(n.type) &&
+        !hidden.has(n.from) &&
+        !hidden.has(n.to) &&
         !(state.drag?.type === 'rebind-connector' && state.drag.id === n.id),
     )
     .slice()

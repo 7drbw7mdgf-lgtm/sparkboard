@@ -1,4 +1,5 @@
 import { isNativeControl } from './keyboard.js';
+import { mindmapShortcut } from './mindmap.js';
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
 import { linkDialog } from './links.js';
@@ -439,6 +440,7 @@ export function setupControls() {
       return;
     }
     if (
+      e.target?.closest?.('#mindmap-toolbar,#mindmap-panel') ||
       activeEditor() ||
       isNativeControl(e.target) ||
       $('#dialog').open ||
@@ -487,6 +489,7 @@ export function setupControls() {
       }
       return;
     }
+    if (mindmapShortcut(e)) return;
     if (['Backspace', 'Delete'].includes(e.key)) {
       e.preventDefault();
       deleteSelected();

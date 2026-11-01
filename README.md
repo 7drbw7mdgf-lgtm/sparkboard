@@ -30,6 +30,17 @@ The same hosted editor at [sparkboard.co.uk](https://sparkboard.co.uk/) uses a m
 
 The source website is deployed from `main` when the Fasthosts GitHub Actions environment is configured. For deployment details see [DEPLOYMENT.md](DEPLOYMENT.md).
 
+## Visual workspace modes
+
+The workspace mode bar keeps four views on the **same board**, with the same saved objects:
+
+- **Canvas:** Your existing freeform whiteboard and advanced shape editor, unchanged.
+- **Mind map:** Add root topics or child/sibling branches, automatically arrange the hierarchy, and fold or expand descendants. Select a topic and press **Tab** for a child or **Enter** for a sibling. Double-click a topic to edit its label.
+- **Flowchart:** Add connected process and decision shapes; the existing connector tool, routing, editable shape points, and formatting controls remain available.
+- **Outline:** Browse and edit mind-map topic labels in a structured sidebar. Expand/fold branches or select a topic on the canvas without duplicating objects.
+
+Use **Convert** in Mind map mode to turn an existing selected shape and its outgoing connections into a hierarchy. The conversion is explicit: other whiteboard artwork stays freeform, and arranging a mind map does not move unrelated objects. All modes use ordinary Sparkboard JSON/board storage and work with the existing undo/redo and backup systems. The mode strip is horizontally scrollable on smaller screens.
+
 ## Features
 
 - **Notes, 18 shapes & vector reshaping:** Sticky notes, editable text, and a searchable 18-shape library. Press `A` or click **Reshape points** (`◇`) to drag, add, or remove vector anchor points on any shape or stroke just like Illustrator.

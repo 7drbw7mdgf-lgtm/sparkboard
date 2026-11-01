@@ -12,6 +12,7 @@ import { setupControls } from './src/controls.js';
 import { setupAuth } from './src/auth.js';
 import { setupStartupScreen } from './src/startup-screen.js';
 import { setupMobileGestures } from './src/mobile-gestures.js';
+import { setupMindmapWorkspace } from './src/mindmap.js';
 
 const startup = setupStartupScreen();
 
@@ -26,6 +27,7 @@ setupScenes();
 setupDialogs();
 setupImporting();
 setupControls();
+setupMindmapWorkspace();
 
 init()
   .then(() => setupAuth(startup))
