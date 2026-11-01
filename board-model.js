@@ -28,6 +28,22 @@ const shapes = [
   'cylinder',
   'heart',
   'frame',
+  'chevron',
+  'double-arrow',
+  'left-arrow',
+  'up-arrow',
+  'down-arrow',
+  'lightning',
+  'house',
+  'shield',
+  'ribbon',
+  'bookmark',
+  'document',
+  'flow-data',
+  'gear',
+  'burst',
+  'right-triangle',
+  'corner-cut',
 ];
 const types = [
   'sticky',
@@ -59,6 +75,22 @@ const polygons = {
   bubble: '5,3 95,3 99,8 99,76 94,81 40,81 19,100 19,81 5,81 1,76 1,8',
   cloud: '24,78 10,78 3,66 6,50 18,42 24,25 40,18 56,22 68,14 84,20 92,36 98,50 94,68 82,78 52,78',
   heart: '50,94 16,62 3,40 8,18 26,8 43,14 50,26 57,14 74,8 92,18 97,40 84,62',
+  chevron: '2,4 65,4 99,50 65,96 2,96 36,50',
+  'double-arrow': '2,50 28,5 28,30 72,30 72,5 98,50 72,95 72,70 28,70 28,95',
+  'left-arrow': '1,50 39,3 39,28 99,28 99,72 39,72 39,97',
+  'up-arrow': '50,1 97,39 72,39 72,99 28,99 28,39 3,39',
+  'down-arrow': '28,1 72,1 72,61 97,61 50,99 3,61 28,61',
+  lightning: '57,1 12,55 45,55 33,99 89,42 54,42',
+  house: '2,43 50,2 98,43 88,43 88,98 63,98 63,64 37,64 37,98 12,98 12,43',
+  shield: '50,2 96,20 92,59 78,83 50,99 22,83 8,59 4,20',
+  ribbon: '5,2 95,2 95,98 50,72 5,98',
+  bookmark: '18,2 82,2 82,98 50,77 18,98',
+  document: '4,2 96,2 96,75 75,84 50,76 26,86 4,75',
+  'flow-data': '22,3 99,3 78,97 1,97',
+  gear: '41,1 59,1 63,14 74,19 86,11 98,24 89,36 94,45 99,45 99,59 85,63 80,74 89,86 76,99 64,89 56,94 56,99 42,99 38,85 26,80 14,89 1,76 11,64 6,56 1,56 1,42 15,38 20,26 11,14 24,1 36,11',
+  burst: '50,1 60,20 81,9 78,32 99,40 82,53 94,75 70,76 63,99 48,83 28,97 27,73 4,73 18,54 1,39 25,35 20,12 42,22',
+  'right-triangle': '3,2 97,98 3,98',
+  'corner-cut': '3,2 70,2 98,30 98,98 3,98',
 };
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const clampCoord = (v) => Math.max(-25, Math.min(125, Math.round(v * 100) / 100));
@@ -143,6 +175,8 @@ function insertVertex(n, edgeIndex, point) {
     ? { x: clampCoord(point.x), y: clampCoord(point.y) }
     : { x: clampCoord((a.x + b.x) / 2), y: clampCoord((a.y + b.y) / 2) };
   verts.splice(i + 1, 0, inserted);
+  if (Array.isArray(n.curves) && n.curves.length === verts.length - 1)
+    n.curves.splice(i, 1, null, null);
   n.vertices = verts;
   return verts;
 }
@@ -151,8 +185,39 @@ function removeVertex(n, index) {
   const verts = shapeVertices(n);
   if (verts.length <= 3 || index < 0 || index >= verts.length) return verts;
   verts.splice(index, 1);
+  if (Array.isArray(n.curves) && n.curves.length === verts.length + 1) {
+    const previousEdge = (index - 1 + n.curves.length) % n.curves.length;
+    n.curves.splice(index, 1);
+    n.curves[previousEdge >= index ? previousEdge - 1 : previousEdge] = null;
+  }
   n.vertices = verts;
   return verts;
+}
+
+function shapePath(n) {
+  const verts = shapeVertices(n);
+  if (!verts.length) return '';
+  const curves = Array.isArray(n.curves) && n.curves.length === verts.length ? n.curves : [];
+  const coord = (p) => `${clampCoord(p.x)},${clampCoord(p.y)}`;
+  const parts = ['M' + coord(verts[0])];
+  for (let i = 0; i < verts.length; i++) {
+    const next = verts[(i + 1) % verts.length];
+    const control = curves[i];
+    parts.push(control ? 'Q' + coord(control) + ' ' + coord(next) : 'L' + coord(next));
+  }
+  return parts.join(' ') + ' Z';
+}
+
+function moveCurve(n, index, point) {
+  const verts = shapeVertices(n);
+  if (index < 0 || index >= verts.length) return;
+  if (!Array.isArray(n.curves) || n.curves.length !== verts.length)
+    n.curves = Array(verts.length).fill(null);
+  n.curves[index] = { x: clampCoord(point.x), y: clampCoord(point.y) };
+}
+
+function resetCurves(n) {
+  delete n.curves;
 }
 
 function portPoint(n, port = 'e') {
@@ -1016,6 +1081,19 @@ function validateBoard(value) {
       throw Error('Invalid start arrow');
     if (n.endArrow !== undefined && !arrowHeads.includes(n.endArrow))
       throw Error('Invalid end arrow');
+    if (n.curves !== undefined) {
+      if (
+        !shapes.includes(n.type) ||
+        !Array.isArray(n.curves) ||
+        n.curves.length !== shapeVertices(n).length ||
+        !n.curves.every(
+          (point) =>
+            point === null ||
+            (point && Number.isFinite(point.x) && Number.isFinite(point.y) &&
+              point.x >= -50 && point.x <= 150 && point.y >= -50 && point.y <= 150),
+        )
+      ) throw Error('Invalid curve controls');
+    }
     if (n.vertices !== undefined) {
       if (
         !shapes.includes(n.type) ||
@@ -1077,6 +1155,9 @@ export {
   defaultVertices,
   shapeVertices,
   verticesToPoints,
+  shapePath,
+  moveCurve,
+  resetCurves,
   moveVertex,
   insertVertex,
   removeVertex,
