@@ -26,6 +26,7 @@ export function setupControls() {
     help: 'help',
     'search-board': 'search',
     inspect: 'format',
+    'mobile-more': 'more',
     scenes: 'scenes',
     templates: 'templates',
     export: 'export',
@@ -39,6 +40,27 @@ export function setupControls() {
         ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
         : '');
   }
+  const mobileMore = $('#mobile-more');
+  const mobileMoreMenu = $('#mobile-more-menu');
+  const closeMore = () => {
+    mobileMoreMenu.hidden = true;
+    mobileMore.setAttribute('aria-expanded', 'false');
+  };
+  mobileMore.onclick = () => {
+    const next = mobileMoreMenu.hidden;
+    mobileMoreMenu.hidden = !next;
+    mobileMore.setAttribute('aria-expanded', String(next));
+  };
+  mobileMoreMenu.onclick = (event) => {
+    const original = event.target.closest('[data-more-action]')?.dataset.moreAction;
+    if (!original) return;
+    closeMore();
+    $('#' + original).click();
+  };
+  document.addEventListener('pointerdown', (event) => {
+    if (!mobileMoreMenu.hidden && !mobileMore.contains(event.target) &&
+      !mobileMoreMenu.contains(event.target)) closeMore();
+  });
   $('#canvas').setAttribute('aria-busy', 'true');
   $('#close-dialog').onclick = () => $('#dialog').close();
   $('#dialog').onclick = (e) => {
