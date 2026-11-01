@@ -9,6 +9,7 @@ export const state = {
   space: false,
   editing: null,
   reshapeId: null,
+  reshapeMode: 'points',
   guides: [],
   connectorDraft: null,
   history: [],
