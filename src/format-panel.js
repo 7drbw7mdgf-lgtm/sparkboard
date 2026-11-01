@@ -140,7 +140,7 @@ function selectButton(label, attr, value, active, disabled) {
   );
 }
 
-export function formatPanel(ns, reshapeId = null, { compact = false, expanded = null } = {}) {
+export function formatPanel(ns, reshapeId = null, { compact = false, expanded = null, outlineMode = 'points' } = {}) {
   if (!ns.length) return '';
   const panelSection = (name, icon, contents) =>
     section(name, icon, contents, { compact, expanded });
@@ -335,8 +335,8 @@ export function formatPanel(ns, reshapeId = null, { compact = false, expanded = 
     );
     if (reshapeId === n.id && M.shapes.includes(n.type)) {
       layout += '<div class="format-button-row" role="group" aria-label="Outline edit mode">' +
-        selectButton('Points', 'outline-mode', 'points', true, disabled) +
-        selectButton('Bend', 'outline-mode', 'bend', false, disabled) + '</div>' +
+        selectButton('Points', 'outline-mode', 'points', outlineMode === 'points', disabled) +
+        selectButton('Bend', 'outline-mode', 'bend', outlineMode === 'bend', disabled) + '</div>' +
         '<p class="format-hint">Points: drag anchors and add nodes at edges. Bend: drag curve handles to sculpt the outline.</p>';
     }
     if (M.shapes.includes(n.type) && (Array.isArray(n.vertices) || Array.isArray(n.curves))) {
