@@ -75,6 +75,13 @@ class FTPSRemote:
         finally:
             self.ftp.cwd(previous)
 
+    def listdir(self, directory):
+        """List existing release manifests without modifying the remote directory."""
+        try:
+            return self.ftp.nlst(directory)
+        except ftplib.error_perm as error:
+            raise transfer_error('manifest listing', error) from None
+
     def open(self, name, mode):
         if mode == 'wb':
             return Upload(self.ftp, name)

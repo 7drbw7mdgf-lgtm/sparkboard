@@ -49,6 +49,46 @@ def atomic_write(sftp, path, data, release_id):
     sftp.posix_rename(temporary, path)
 
 
+def trusted_previous_files(sftp, homepage):
+    """Use the previous release manifest only when it matches the live homepage."""
+    if not homepage or not hasattr(sftp, 'listdir'):
+        return {}
+    marker = re.search(rb'<meta name="sparkboard-build" content="([a-f0-9]{40})"', homepage)
+    if not marker:
+        return {}
+    revision = marker.group(1).decode('ascii')
+    pattern = re.compile(r'^direct-manifest-' + revision + r'-(\d+)-(\d+)\.json$')
+    try:
+        filenames = sftp.listdir('_sparkboard')
+    except (OSError, ValueError):
+        return {}
+    candidates = []
+    for filename in filenames:
+        name = PurePosixPath(filename).name
+        match = pattern.fullmatch(name)
+        if match:
+            candidates.append((int(match.group(1)), int(match.group(2)), name))
+    for _, _, name in sorted(candidates, reverse=True):
+        try:
+            data = read_optional(sftp, '_sparkboard/' + name)
+            if not data:
+                continue
+            previous = json.loads(data)
+            if previous.get('revision') != revision or previous.get('layout') != 'direct':
+                continue
+            entries = previous['files']
+            hashes = {entry['path']: entry['sha256'] for entry in entries}
+            if len(entries) != len(hashes) or hashes.get('index.html') != digest(homepage):
+                continue
+            if not all(re.fullmatch(r'[a-f0-9]{64}', value) for value in hashes.values()):
+                continue
+            print('Verified previous deployment manifest; reusing unchanged assets.', flush=True)
+            return hashes
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return {}
+
+
 def deploy(sftp, build, remote_root='htdocs'):
     build = Path(build)
     manifest = json.loads((build / 'manifest.json').read_text())
@@ -93,8 +133,13 @@ def deploy(sftp, build, remote_root='htdocs'):
     if previous is not None:
         with sftp.open('_sparkboard/previous-index-' + release_id + '.html', 'wb') as stream:
             stream.write(previous)
+    previous_hashes = trusted_previous_files(sftp, previous) if layout == 'direct' else {}
+    skipped = 0
     for name, local in entries:
         if layout == 'direct' and name == 'index.html':
+            continue
+        if layout == 'direct' and previous_hashes.get(name) == digest(local.read_bytes()):
+            skipped += 1
             continue
         remote = release_path + '/' + name if release_path else name
         parent = PurePosixPath(remote).parent
@@ -110,6 +155,8 @@ def deploy(sftp, build, remote_root='htdocs'):
         with sftp.open(remote, 'rb') as stream:
             if digest(stream.read()) != digest(local.read_bytes()):
                 raise ValueError('Remote website checksum mismatch.')
+    if layout == 'direct':
+        print(f'Skipped {skipped} unchanged files; uploaded {len(entries) - 1 - skipped} changed files.', flush=True)
     existing = read_optional(sftp, '.htaccess') or b''
     if BEGIN in existing:
         before, rest = existing.split(BEGIN, 1)

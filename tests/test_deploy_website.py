@@ -46,6 +46,9 @@ class FakeSFTP:
     def lstat(self, directory):
         return SimpleNamespace(st_mode=stat.S_IFDIR)
 
+    def listdir(self, directory):
+        return [name for name in self.files if name.startswith(directory + '/')]
+
     def open(self, path, mode):
         writing = 'w' in mode
         if writing and self.fail_upload and path.startswith('src/'):
@@ -172,6 +175,53 @@ class DeploymentTests(unittest.TestCase):
                 patch.object(module, 'deploy', return_value=self.revision) as publish:
             module.main()
         self.assertEqual(publish.call_args.kwargs['remote_root'], '.')
+
+
+    def test_direct_skips_unchanged_assets_from_verified_prior_manifest(self):
+        self.direct_manifest()
+        remote = FakeSFTP()
+        previous_revision = 'b' * 40
+        previous_index = (
+            '<html><head><meta name="sparkboard-build" content="'
+            + previous_revision + '"></head></html>'
+        ).encode()
+        remote.files['index.html'] = previous_index
+        remote.files['app.js'] = (self.build / 'release/app.js').read_bytes()
+        remote.files['src/example.js'] = b'old file content'
+        previous_manifest = {
+            'revision': previous_revision,
+            'layout': 'direct',
+            'files': [
+                {'path': 'index.html', 'sha256': module.digest(previous_index)},
+                {'path': 'app.js', 'sha256': module.digest(remote.files['app.js'])},
+                {'path': 'src/example.js', 'sha256': module.digest(remote.files['src/example.js'])},
+            ],
+        }
+        remote.files['_sparkboard/direct-manifest-' + previous_revision + '-42-1.json'] = (
+            json.dumps(previous_manifest).encode()
+        )
+        module.deploy(remote, self.build)
+        self.assertNotIn(('publish', 'app.js'), remote.events)
+        self.assertIn(('publish', 'src/example.js'), remote.events)
+        self.assertEqual(remote.files['src/example.js'], b'export {};')
+        self.assertEqual(remote.events[-1], ('publish', 'index.html'))
+
+    def test_invalid_previous_manifest_never_skips_changed_assets(self):
+        self.direct_manifest()
+        remote = FakeSFTP()
+        prior = 'c' * 40
+        remote.files['index.html'] = (
+            '<meta name="sparkboard-build" content="' + prior + '">'
+        ).encode()
+        remote.files['_sparkboard/direct-manifest-' + prior + '-6-1.json'] = (
+            json.dumps({'revision': prior, 'layout': 'direct', 'files': [
+                {'path': 'index.html', 'sha256': '0' * 64},
+                {'path': 'app.js', 'sha256': module.digest((self.build / 'release/app.js').read_bytes())},
+            ]}).encode()
+        )
+        module.deploy(remote, self.build)
+        self.assertIn(('publish', 'app.js'), remote.events)
+
 
 
 if __name__ == '__main__':
