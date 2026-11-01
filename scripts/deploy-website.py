@@ -140,7 +140,7 @@ def verify_live_root(remote):
         public_index = response.read(1024 * 1024 + 1)
     if digest(remote_index) != digest(public_index):
         raise ValueError('FTP root differs from the live HTTPS homepage; no website files were changed.')
-    print('Confirmed FTP / matches the live HTTPS homepage by SHA-256.', flush=True)
+    print('Confirmed FTP login directory matches the live HTTPS homepage by SHA-256.', flush=True)
 
 
 def main():
@@ -150,9 +150,9 @@ def main():
         raise ValueError('Set the FASTHOSTS_FTP_PASSWORD GitHub environment secret first (FTP master account).')
     root = Path(__file__).resolve().parent.parent
     with FTPSRemote(password) as remote:
-        remote.chdir('/')
+        print('FTP initial working directory: ' + remote.ftp.pwd(), flush=True)
         verify_live_root(remote)
-        revision = deploy(remote, root / 'build/website', remote_root='/')
+        revision = deploy(remote, root / 'build/website', remote_root='.')
         print('Published verified website revision ' + revision)
 
 

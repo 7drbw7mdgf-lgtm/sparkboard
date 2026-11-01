@@ -6,8 +6,9 @@ import json
 from pathlib import Path
 import stat
 import tempfile
+import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from types import SimpleNamespace
 
 spec = importlib.util.spec_from_file_location('deploy_website', Path(__file__).resolve().parents[1] / 'scripts/deploy-website.py')
@@ -158,6 +159,19 @@ class DeploymentTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'no website files were changed'):
                 module.verify_live_root(remote)
         self.assertEqual(remote.events, [])
+
+    def test_main_preserves_the_ftp_login_directory_instead_of_cwd_slash(self):
+        remote = FakeSFTP()
+        remote.ftp = SimpleNamespace(pwd=lambda: '/htdocs')
+        connection = MagicMock()
+        connection.__enter__.return_value = remote
+        adapter = SimpleNamespace(FTPSRemote=MagicMock(return_value=connection))
+        with patch.dict(sys.modules, {'ftps_client': adapter}), \
+                patch.dict(module.os.environ, {'FASTHOSTS_FTP_PASSWORD': 'test credential'}), \
+                patch.object(module.urllib.request, 'urlopen', return_value=io.BytesIO(b'old working homepage')), \
+                patch.object(module, 'deploy', return_value=self.revision) as publish:
+            module.main()
+        self.assertEqual(publish.call_args.kwargs['remote_root'], '.')
 
 
 if __name__ == '__main__':
