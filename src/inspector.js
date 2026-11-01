@@ -3,16 +3,23 @@ import { state } from './state.js';
 import { $ } from './core.js';
 import { selectedNodes } from './selection.js';
 import { formatPanel } from './format-panel.js';
+import { isCompactEditor, inspectorOpenAfterSelection } from './mobile-editor-policy.js';
 
 let lastSelectionKey = '';
 
 export function properties() {
   const ns = selectedNodes();
   const selectionKey = ns.map((n) => n.id).join(',');
-  if (selectionKey !== lastSelectionKey) {
+  const selectionChanged = selectionKey !== lastSelectionKey;
+  if (selectionChanged) {
     lastSelectionKey = selectionKey;
     if (ns.length) {
-      state.inspectorOpen = true;
+      state.inspectorOpen = inspectorOpenAfterSelection({
+        changed: true,
+        hasSelection: true,
+        compact: isCompactEditor(),
+        open: state.inspectorOpen,
+      });
       state.scenePanelOpen = false;
       const scenesPanel = $('#scenes-panel');
       if (scenesPanel) scenesPanel.hidden = true;
@@ -36,5 +43,15 @@ export function properties() {
 }
 
 export function renderInspector() {
-  $('#inspector-body').innerHTML = formatPanel(selectedNodes(), state.reshapeId);
+  const body = $('#inspector-body');
+  const nodes = selectedNodes();
+  const compact = isCompactEditor();
+  const selection = nodes.map((n) => n.id).join(',');
+  const previous = body.dataset.selection === selection && body.dataset.compact === String(compact);
+  const expanded = previous && compact
+    ? new Set([...body.querySelectorAll('details.format-card[open]')].map((el) => el.dataset.formatSection))
+    : null;
+  body.innerHTML = formatPanel(nodes, state.reshapeId, { compact, expanded });
+  body.dataset.selection = selection;
+  body.dataset.compact = String(compact);
 }
