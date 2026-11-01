@@ -50,7 +50,7 @@ class FTPSTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             remote.open('missing.html', 'rb')
         remote.ftp.retrbinary.side_effect = ftplib.error_perm('550 Permission denied')
-        with self.assertRaises(ftplib.error_perm):
+        with self.assertRaisesRegex(ValueError, 'public file read failed.*550'):
             remote.open('.htaccess', 'rb')
 
 
