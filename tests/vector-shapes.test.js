@@ -81,6 +81,13 @@ test('reset curves restores the default shape outline', () => {
   assert.doesNotMatch(shapeSvg(node), /<path d="M/);
 });
 
+test('regular shapes start square and arrow presets favour their intended direction', () => {
+  assert.deepEqual(M.defaultShapeSize('circle'), { w: 174, h: 174 });
+  assert.ok(M.defaultShapeSize('arrow').w > M.defaultShapeSize('arrow').h);
+  assert.ok(M.defaultShapeSize('up-arrow').h > M.defaultShapeSize('up-arrow').w);
+  assert.equal(M.defaultShapeSize('frame').w, 420);
+});
+
 test('proportional corner scaling preserves ratio, independent stretch remains possible', () => {
   const node = shape('circle');
   const scaled = M.resizeBox(node, 'se', 80, 10, { lockAspect: true });
@@ -104,7 +111,13 @@ test('mobile contextual bar is concise and supports both Illustrator-like node m
   assert.doesNotMatch(selected, /data-mobile-action="bend"/);
   const bending = mobileActionMarkup([node], node.id, 'bend');
   assert.match(bending, /data-mobile-action="points"/);
-  assert.match(bending, /data-mobile-action="bend" class="active"/);
+  assert.doesNotMatch(bending, /data-mobile-action="remove-point"/);
   assert.match(bending, /data-mobile-action="done"/);
   assert.doesNotMatch(bending, /data-mobile-action="duplicate"/);
+  const points = mobileActionMarkup([node], node.id, 'points', 2);
+  assert.match(points, /data-mobile-action="bend"/);
+  assert.match(points, /data-mobile-action="remove-point"/);
+  assert.doesNotMatch(points, /data-mobile-action="points"/);
+  const minimal = mobileActionMarkup([shape('triangle')], 'shape-one', 'points', 0);
+  assert.doesNotMatch(minimal, /data-mobile-action="remove-point"/);
 });
