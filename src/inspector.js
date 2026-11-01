@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { $ } from './core.js';
 import { selectedNodes } from './selection.js';
 import { formatPanel } from './format-panel.js';
+import { mobileActionMarkup } from './mobile-actions.js';
 import { isCompactEditor, inspectorOpenAfterSelection } from './mobile-editor-policy.js';
 
 let lastSelectionKey = '';
@@ -24,6 +25,12 @@ export function properties() {
       const scenesPanel = $('#scenes-panel');
       if (scenesPanel) scenesPanel.hidden = true;
     }
+  }
+  const mobileActions = $('#mobile-selection-actions');
+  if (mobileActions) {
+    const show = isCompactEditor() && ns.length > 0 && state.tool === 'select';
+    mobileActions.hidden = !show;
+    mobileActions.innerHTML = show ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode) : '';
   }
   const toolSidePanel = ['pen', 'line', 'connector'].includes(state.tool);
   const open = state.inspectorOpen && ns.length > 0 && !toolSidePanel;
