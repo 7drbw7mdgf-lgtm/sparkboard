@@ -6,7 +6,14 @@ import { shapeNames, shapeCategory, shapeCategories, svgIcon } from '../src/icon
 import { mobileActionMarkup } from '../src/mobile-actions.js';
 
 const shape = (type = 'shape') => ({
-  id: 'shape-one', type, x: 10, y: 20, w: 180, h: 140, text: '', color: '#ddeedd',
+  id: 'shape-one',
+  type,
+  x: 10,
+  y: 20,
+  w: 180,
+  h: 140,
+  text: '',
+  color: '#ddeedd',
 });
 
 test('expanded shape library has distinct names, polygon outlines and usable icons', () => {
@@ -56,8 +63,14 @@ test('curve coordinates and edge arrays are validated before loading backups', (
   const node = shape('shape');
   M.moveCurve(node, 0, { x: 25, y: 20 });
   assert.doesNotThrow(() => M.validateBoard({ objects: [node] }));
-  assert.throws(() => M.validateBoard({ objects: [{ ...node, curves: [{ x: 3, y: 2 }] }] }), /Invalid curve/);
-  assert.throws(() => M.validateBoard({ objects: [{ ...node, curves: Array(4).fill({ x: Infinity, y: 0 }) }] }), /Invalid curve/);
+  assert.throws(
+    () => M.validateBoard({ objects: [{ ...node, curves: [{ x: 3, y: 2 }] }] }),
+    /Invalid curve/,
+  );
+  assert.throws(
+    () => M.validateBoard({ objects: [{ ...node, curves: Array(4).fill({ x: Infinity, y: 0 }) }] }),
+    /Invalid curve/,
+  );
 });
 
 test('reset curves restores the default shape outline', () => {
@@ -71,9 +84,12 @@ test('reset curves restores the default shape outline', () => {
 test('proportional corner scaling preserves ratio, independent stretch remains possible', () => {
   const node = shape('circle');
   const scaled = M.resizeBox(node, 'se', 80, 10, { lockAspect: true });
-  assert.equal(Math.round(scaled.w / scaled.h * 100), Math.round(node.w / node.h * 100));
+  assert.equal(Math.round((scaled.w / scaled.h) * 100), Math.round((node.w / node.h) * 100));
   const stretched = M.resizeBox(node, 'se', 80, 10, { lockAspect: false });
-  assert.notEqual(Math.round(stretched.w / stretched.h * 100), Math.round(node.w / node.h * 100));
+  assert.notEqual(
+    Math.round((stretched.w / stretched.h) * 100),
+    Math.round((node.w / node.h) * 100),
+  );
   const side = M.resizeBox(node, 'e', 80, 0, { lockAspect: false });
   assert.equal(side.h, node.h);
   assert.ok(side.w > node.w);

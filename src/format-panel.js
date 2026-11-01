@@ -140,7 +140,11 @@ function selectButton(label, attr, value, active, disabled) {
   );
 }
 
-export function formatPanel(ns, reshapeId = null, { compact = false, expanded = null, outlineMode = 'points' } = {}) {
+export function formatPanel(
+  ns,
+  reshapeId = null,
+  { compact = false, expanded = null, outlineMode = 'points' } = {},
+) {
   if (!ns.length) return '';
   const panelSection = (name, icon, contents) =>
     section(name, icon, contents, { compact, expanded });
@@ -277,9 +281,15 @@ export function formatPanel(ns, reshapeId = null, { compact = false, expanded = 
         : '') +
       '</div>';
     if (M.shapes.includes(n.type))
-      layout += '<div class="format-grid two">' +
-        selectButton(n.lockAspect === false ? 'Free stretch' : 'Proportional scaling',
-          'aspect', 'lock', n.lockAspect !== false, disabled) +
+      layout +=
+        '<div class="format-grid two">' +
+        selectButton(
+          n.lockAspect === false ? 'Free stretch' : 'Proportional scaling',
+          'aspect',
+          'lock',
+          n.lockAspect !== false,
+          disabled,
+        ) +
         '<span class="format-hint">Drag corners to scale; switch off for independent width/height.</span></div>';
     if (M.shapes.includes(n.type))
       layout += choices(
@@ -334,9 +344,11 @@ export function formatPanel(ns, reshapeId = null, { compact = false, expanded = 
       reshapeId === n.id ? 'active' : '',
     );
     if (reshapeId === n.id && M.shapes.includes(n.type)) {
-      layout += '<div class="format-button-row" role="group" aria-label="Outline edit mode">' +
+      layout +=
+        '<div class="format-button-row" role="group" aria-label="Outline edit mode">' +
         selectButton('Points', 'outline-mode', 'points', outlineMode === 'points', disabled) +
-        selectButton('Bend', 'outline-mode', 'bend', outlineMode === 'bend', disabled) + '</div>' +
+        selectButton('Bend', 'outline-mode', 'bend', outlineMode === 'bend', disabled) +
+        '</div>' +
         '<p class="format-hint">Points: drag anchors and add nodes at edges. Bend: drag curve handles to sculpt the outline.</p>';
     }
     if (M.shapes.includes(n.type) && (Array.isArray(n.vertices) || Array.isArray(n.curves))) {

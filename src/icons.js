@@ -112,14 +112,28 @@ export const labels = {
   embed: 'Embed PDF, map or video',
 };
 export const shapeCategories = {
-  Basic: ['shape', 'pill', 'circle', 'triangle', 'right-triangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'parallelogram', 'trapezoid', 'corner-cut', 'frame'],
+  Basic: [
+    'shape',
+    'pill',
+    'circle',
+    'triangle',
+    'right-triangle',
+    'diamond',
+    'pentagon',
+    'hexagon',
+    'octagon',
+    'parallelogram',
+    'trapezoid',
+    'corner-cut',
+    'frame',
+  ],
   Arrows: ['arrow', 'left-arrow', 'up-arrow', 'down-arrow', 'double-arrow', 'chevron'],
   Flowchart: ['bubble', 'document', 'flow-data', 'cylinder', 'cloud', 'cross'],
   Symbols: ['star', 'burst', 'heart', 'lightning', 'house', 'shield', 'ribbon', 'bookmark', 'gear'],
 };
-export const shapeCategory = (kind) => Object.entries(shapeCategories).find(
-  ([, kinds]) => kinds.includes(kind),
-)?.[0] || 'Basic';
-export const svgIcon = (k) => polygons[k] && !icons[k]
-  ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${polygons[k]}"/></svg>`
-  : `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[k] || icons.shape}</svg>`;
+export const shapeCategory = (kind) =>
+  Object.entries(shapeCategories).find(([, kinds]) => kinds.includes(kind))?.[0] || 'Basic';
+export const svgIcon = (k) =>
+  polygons[k] && !icons[k]
+    ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${polygons[k]}"/></svg>`
+    : `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[k] || icons.shape}</svg>`;

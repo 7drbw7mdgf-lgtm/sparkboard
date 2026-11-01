@@ -9,7 +9,14 @@ import { isCompactEditor } from './mobile-editor-policy.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
 import { commit, redo, snapshot, undo } from './history.js';
-import { command, deleteSelected, duplicate, toggleLock, toggleReshape, setOutlineMode } from './commands.js';
+import {
+  command,
+  deleteSelected,
+  duplicate,
+  toggleLock,
+  toggleReshape,
+  setOutlineMode,
+} from './commands.js';
 import { applyView, fit, zoom } from './viewport.js';
 import { toggleScenes } from './scenes.js';
 import { modal, searchBoard, showBoards, showHelp } from './dialogs.js';
@@ -58,8 +65,12 @@ export function setupControls() {
     $('#' + original).click();
   };
   document.addEventListener('pointerdown', (event) => {
-    if (!mobileMoreMenu.hidden && !mobileMore.contains(event.target) &&
-      !mobileMoreMenu.contains(event.target)) closeMore();
+    if (
+      !mobileMoreMenu.hidden &&
+      !mobileMore.contains(event.target) &&
+      !mobileMoreMenu.contains(event.target)
+    )
+      closeMore();
   });
   $('#canvas').setAttribute('aria-busy', 'true');
   $('#close-dialog').onclick = () => $('#dialog').close();
@@ -189,8 +200,13 @@ export function setupControls() {
     }
     if (b.dataset.outlineMode) setOutlineMode(b.dataset.outlineMode);
     if (b.dataset.aspect) {
-      commit(() => editableNodes().filter((n) => M.shapes.includes(n.type))
-        .forEach((n) => { n.lockAspect = n.lockAspect === false; }));
+      commit(() =>
+        editableNodes()
+          .filter((n) => M.shapes.includes(n.type))
+          .forEach((n) => {
+            n.lockAspect = n.lockAspect === false;
+          }),
+      );
     }
     if (b.dataset.toggleStyle) {
       const toggle = b.dataset.toggleStyle;
@@ -272,8 +288,13 @@ export function setupControls() {
         const trimmed = String(value || '').trim();
         if (trimmed) n.text = trimmed;
         else delete n.text;
-      } else if (['w', 'h'].includes(prop) && M.shapes.includes(n.type) &&
-        n.lockAspect !== false && n.w > 0 && n.h > 0) {
+      } else if (
+        ['w', 'h'].includes(prop) &&
+        M.shapes.includes(n.type) &&
+        n.lockAspect !== false &&
+        n.w > 0 &&
+        n.h > 0
+      ) {
         const ratio = n.w / n.h;
         if (prop === 'w') {
           n.w = value;

@@ -7,10 +7,18 @@ import { properties } from './inspector.js';
 import { labels, shapeNames, svgIcon, shapeCategory, shapeCategories } from './icons.js';
 import { $, $$, M } from './core.js';
 const categoryButtons = (scope) =>
-  ['All', ...Object.keys(shapeCategories)].map((category) =>
-    '<button type="button" data-shape-category="' + category + '"' +
-    (category === 'All' ? ' class="active" aria-pressed="true"' : ' aria-pressed="false"') +
-    '>' + category + '</button>').join('');
+  ['All', ...Object.keys(shapeCategories)]
+    .map(
+      (category) =>
+        '<button type="button" data-shape-category="' +
+        category +
+        '"' +
+        (category === 'All' ? ' class="active" aria-pressed="true"' : ' aria-pressed="false"') +
+        '>' +
+        category +
+        '</button>',
+    )
+    .join('');
 
 function showMobileShapePicker() {
   modal(
@@ -31,11 +39,14 @@ function showMobileShapePicker() {
     const search = $('#mobile-shape-search').value.trim().toLowerCase();
     const selected = picker.querySelector('[aria-pressed="true"]')?.dataset.shapeCategory || 'All';
     let count = 0;
-    $('#mobile-shape-grid').querySelectorAll('[data-mobile-shape]').forEach((button) => {
-      button.hidden = !button.dataset.shapeName.includes(search) ||
-        (selected !== 'All' && button.dataset.category !== selected);
-      if (!button.hidden) count++;
-    });
+    $('#mobile-shape-grid')
+      .querySelectorAll('[data-mobile-shape]')
+      .forEach((button) => {
+        button.hidden =
+          !button.dataset.shapeName.includes(search) ||
+          (selected !== 'All' && button.dataset.category !== selected);
+        if (!button.hidden) count++;
+      });
     $('#mobile-shape-empty').hidden = count > 0;
   };
   picker.onclick = (event) => {
@@ -118,7 +129,8 @@ export function setupTools() {
     const active = $('#shape-categories [aria-pressed="true"]')?.dataset.shapeCategory || 'All';
     let visible = 0;
     $('#shape-grid button').forEach((button) => {
-      button.hidden = !button.dataset.shapeName.includes(term) ||
+      button.hidden =
+        !button.dataset.shapeName.includes(term) ||
         (active !== 'All' && button.dataset.category !== active);
       if (!button.hidden) visible++;
     });
@@ -128,10 +140,12 @@ export function setupTools() {
   $('#shape-categories').onclick = (event) => {
     const button = event.target.closest('[data-shape-category]');
     if (!button) return;
-    $('#shape-categories').querySelectorAll('button').forEach((item) => {
-      item.classList.toggle('active', item === button);
-      item.setAttribute('aria-pressed', String(item === button));
-    });
+    $('#shape-categories')
+      .querySelectorAll('button')
+      .forEach((item) => {
+        item.classList.toggle('active', item === button);
+        item.setAttribute('aria-pressed', String(item === button));
+      });
     filterDesktopShapes();
   };
 }

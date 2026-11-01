@@ -823,8 +823,11 @@ export function setupCanvas() {
     if (state.drag.type === 'curve-edge') {
       const local = localShapePoint(n, p);
       const existing = n.curves?.[state.drag.index];
-      if (!state.drag.changed &&
-          Math.hypot((existing?.x ?? 50) - local.x, (existing?.y ?? 50) - local.y) < 0.25) return;
+      if (
+        !state.drag.changed &&
+        Math.hypot((existing?.x ?? 50) - local.x, (existing?.y ?? 50) - local.y) < 0.25
+      )
+        return;
       if (!state.drag.changed) {
         snapshot();
         state.drag.changed = true;

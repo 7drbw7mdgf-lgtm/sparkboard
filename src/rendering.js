@@ -37,8 +37,7 @@ export function shapeSvg(n) {
           ? ' stroke-dasharray="3 2"'
           : '';
   let geometry;
-  if (Array.isArray(n.curves) && n.curves.some(Boolean))
-    geometry = `<path d="${M.shapePath(n)}"/>`;
+  if (Array.isArray(n.curves) && n.curves.some(Boolean)) geometry = `<path d="${M.shapePath(n)}"/>`;
   else if (Array.isArray(n.vertices) && n.vertices.length >= 3)
     geometry = `<polygon points="${M.verticesToPoints(n.vertices)}"/>`;
   else if (M.polygons[n.type]) geometry = `<polygon points="${M.polygons[n.type]}"/>`;
@@ -258,9 +257,9 @@ export function selectVisual() {
     const isReshaping = isSelected && state.reshapeId === n.id && M.shapes.includes(n.type);
     el.classList.toggle('selected', isSelected);
     el.classList.toggle('reshaping', isReshaping);
-    el.querySelectorAll('.resize, .rotate-handle, .vertex-handle, .edge-handle, .shape-curve-handle').forEach((h) =>
-      h.remove(),
-    );
+    el.querySelectorAll(
+      '.resize, .rotate-handle, .vertex-handle, .edge-handle, .shape-curve-handle',
+    ).forEach((h) => h.remove());
     if (state.selected.size === 1 && isSelected && !n.locked && !state.editing) {
       if (isReshaping) {
         const verts = M.shapeVertices(n);

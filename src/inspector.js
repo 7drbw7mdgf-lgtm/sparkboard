@@ -30,7 +30,9 @@ export function properties() {
   if (mobileActions) {
     const show = isCompactEditor() && ns.length > 0 && state.tool === 'select';
     mobileActions.hidden = !show;
-    mobileActions.innerHTML = show ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode) : '';
+    mobileActions.innerHTML = show
+      ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode)
+      : '';
   }
   const toolSidePanel = ['pen', 'line', 'connector'].includes(state.tool);
   const open = state.inspectorOpen && ns.length > 0 && !toolSidePanel;
@@ -64,7 +66,9 @@ export function renderInspector() {
         )
       : null;
   body.innerHTML = formatPanel(nodes, state.reshapeId, {
-    compact, expanded, outlineMode: state.reshapeMode,
+    compact,
+    expanded,
+    outlineMode: state.reshapeMode,
   });
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);

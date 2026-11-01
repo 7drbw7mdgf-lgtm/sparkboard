@@ -88,7 +88,8 @@ const polygons = {
   document: '4,2 96,2 96,75 75,84 50,76 26,86 4,75',
   'flow-data': '22,3 99,3 78,97 1,97',
   gear: '41,1 59,1 63,14 74,19 86,11 98,24 89,36 94,45 99,45 99,59 85,63 80,74 89,86 76,99 64,89 56,94 56,99 42,99 38,85 26,80 14,89 1,76 11,64 6,56 1,56 1,42 15,38 20,26 11,14 24,1 36,11',
-  burst: '50,1 60,20 81,9 78,32 99,40 82,53 94,75 70,76 63,99 48,83 28,97 27,73 4,73 18,54 1,39 25,35 20,12 42,22',
+  burst:
+    '50,1 60,20 81,9 78,32 99,40 82,53 94,75 70,76 63,99 48,83 28,97 27,73 4,73 18,54 1,39 25,35 20,12 42,22',
   'right-triangle': '3,2 97,98 3,98',
   'corner-cut': '3,2 70,2 98,30 98,98 3,98',
 };
@@ -1089,10 +1090,16 @@ function validateBoard(value) {
         !n.curves.every(
           (point) =>
             point === null ||
-            (point && Number.isFinite(point.x) && Number.isFinite(point.y) &&
-              point.x >= -50 && point.x <= 150 && point.y >= -50 && point.y <= 150),
+            (point &&
+              Number.isFinite(point.x) &&
+              Number.isFinite(point.y) &&
+              point.x >= -50 &&
+              point.x <= 150 &&
+              point.y >= -50 &&
+              point.y <= 150),
         )
-      ) throw Error('Invalid curve controls');
+      )
+        throw Error('Invalid curve controls');
     }
     if (n.vertices !== undefined) {
       if (

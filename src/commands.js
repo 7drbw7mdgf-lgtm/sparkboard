@@ -55,7 +55,11 @@ export function setOutlineMode(mode) {
   if (!['points', 'bend'].includes(mode) || !state.reshapeId) return;
   state.reshapeMode = mode;
   selectVisual();
-  toast(mode === 'bend' ? 'Drag blue curve handles to bend each outline edge' : 'Drag white anchor nodes to reshape the outline');
+  toast(
+    mode === 'bend'
+      ? 'Drag blue curve handles to bend each outline edge'
+      : 'Drag white anchor nodes to reshape the outline',
+  );
 }
 
 export function command(action) {

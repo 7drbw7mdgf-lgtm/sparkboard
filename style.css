@@ -3616,28 +3616,44 @@ body.is-panning #canvas {
   border-radius: 50%;
   border: 2px solid #fff;
   background: #2665c4;
-  box-shadow: 0 0 0 1.5px #2665c4, 0 1px 5px #15366338;
+  box-shadow:
+    0 0 0 1.5px #2665c4,
+    0 1px 5px #15366338;
   z-index: 7;
   cursor: grab;
   touch-action: none;
 }
-.object .shape-curve-handle:active { cursor: grabbing; }
+.object .shape-curve-handle:active {
+  cursor: grabbing;
+}
 .object .resize.n,
 .object .resize.s {
   left: calc(50% - 5px);
   right: auto;
   cursor: ns-resize;
 }
-.object .resize.n { top: -7px; bottom: auto; }
-.object .resize.s { bottom: -7px; top: auto; }
+.object .resize.n {
+  top: -7px;
+  bottom: auto;
+}
+.object .resize.s {
+  bottom: -7px;
+  top: auto;
+}
 .object .resize.e,
 .object .resize.w {
   top: calc(50% - 5px);
   bottom: auto;
   cursor: ew-resize;
 }
-.object .resize.e { right: -7px; left: auto; }
-.object .resize.w { left: -7px; right: auto; }
+.object .resize.e {
+  right: -7px;
+  left: auto;
+}
+.object .resize.w {
+  left: -7px;
+  right: auto;
+}
 .format-hint {
   display: block;
   margin: 2px 0 5px;
@@ -3655,7 +3671,9 @@ body.is-panning #canvas {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
-.shape-categories::-webkit-scrollbar { display: none; }
+.shape-categories::-webkit-scrollbar {
+  display: none;
+}
 .shape-categories button {
   flex: 0 0 auto;
   border: 1px solid #e0e8dc;
@@ -3672,8 +3690,13 @@ body.is-panning #canvas {
   border-color: #78b68c;
   color: #165f35;
 }
-#shape-menu { max-height: min(74dvh, 650px); overflow-y: auto; }
-#shape-menu #shape-categories { margin: 5px 0 6px; }
+#shape-menu {
+  max-height: min(74dvh, 650px);
+  overflow-y: auto;
+}
+#shape-menu #shape-categories {
+  margin: 5px 0 6px;
+}
 .mobile-shapes {
   display: flex;
   flex-direction: column;
@@ -3737,20 +3760,32 @@ body.is-panning #canvas {
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
-.shape-empty { font-size: 12px; color: #697a66; }
+.shape-empty {
+  font-size: 12px;
+  color: #697a66;
+}
 
 /* Reveal controls only when an object is selected, preserving a full-height canvas. */
 #mobile-selection-actions,
 #mobile-more,
-#mobile-more-menu { display: none; }
+#mobile-more-menu {
+  display: none;
+}
 #mobile-selection-actions[hidden],
-#mobile-more-menu[hidden] { display: none !important; }
+#mobile-more-menu[hidden] {
+  display: none !important;
+}
 @media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
   .workspace-header .header-actions #search-board,
   .workspace-header .header-actions #scenes,
   .workspace-header .header-actions #templates,
-  .workspace-header .header-actions #export { display: none !important; }
-  .header-actions { justify-content: flex-end; gap: 8px; }
+  .workspace-header .header-actions #export {
+    display: none !important;
+  }
+  .header-actions {
+    justify-content: flex-end;
+    gap: 8px;
+  }
   .workspace-header .header-actions #mobile-more {
     display: flex;
     position: static;
@@ -3764,8 +3799,14 @@ body.is-panning #canvas {
     border-radius: 12px;
     background: #fff;
   }
-  #mobile-more svg { width: 22px; height: 22px; }
-  #mobile-more[aria-expanded='true'] { background: #e5f6e9; border-color: #8fc59d; }
+  #mobile-more svg {
+    width: 22px;
+    height: 22px;
+  }
+  #mobile-more[aria-expanded='true'] {
+    background: #e5f6e9;
+    border-color: #8fc59d;
+  }
   #mobile-more-menu:not([hidden]) {
     position: fixed;
     display: grid;
@@ -3806,7 +3847,11 @@ body.is-panning #canvas {
     box-shadow: 0 6px 23px #23351e25;
     padding: 5px;
   }
-  .mobile-actions-inner { display: flex; flex-wrap: nowrap; gap: 5px; }
+  .mobile-actions-inner {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
   .mobile-actions-inner button {
     flex: 0 0 auto;
     padding: 8px 11px;
@@ -3843,7 +3888,11 @@ body.is-panning #canvas {
     display: grid;
     place-items: center;
   }
-  .cloud-indicator::before { content: '☁'; font-size: 13px; color: #347349; }
+  .cloud-indicator::before {
+    content: '☁';
+    font-size: 13px;
+    color: #347349;
+  }
   .object .resize,
   .object .vertex-handle,
   .object .edge-handle,
@@ -3854,15 +3903,35 @@ body.is-panning #canvas {
     margin-top: -9px;
     touch-action: none;
   }
-  .object .shape-curve-handle { border-radius: 50%; }
-  .object .resize.n, .object .resize.s { left: calc(50% - 9px); margin: 0; }
-  .object .resize.e, .object .resize.w { top: calc(50% - 9px); margin: 0; }
-  .mobile-shape-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .object .shape-curve-handle {
+    border-radius: 50%;
+  }
+  .object .resize.n,
+  .object .resize.s {
+    left: calc(50% - 9px);
+    margin: 0;
+  }
+  .object .resize.e,
+  .object .resize.w {
+    top: calc(50% - 9px);
+    margin: 0;
+  }
+  .mobile-shape-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 365px) {
-  .mobile-actions-inner button { min-width: 51px; padding: 8px 9px; font-size: 11px; }
+  .mobile-actions-inner button {
+    min-width: 51px;
+    padding: 8px 9px;
+    font-size: 11px;
+  }
 }
 @media (max-height: 500px) and (pointer: coarse) {
-  #mobile-more-menu:not([hidden]) { top: calc(74px + env(safe-area-inset-top)); }
-  #mobile-selection-actions:not([hidden]) { bottom: calc(82px + env(safe-area-inset-bottom)); }
+  #mobile-more-menu:not([hidden]) {
+    top: calc(74px + env(safe-area-inset-top));
+  }
+  #mobile-selection-actions:not([hidden]) {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
 }

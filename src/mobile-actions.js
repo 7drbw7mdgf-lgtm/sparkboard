@@ -8,9 +8,15 @@ export function mobileActionMarkup(nodes, reshapeId, reshapeMode = 'points') {
   const shape = single && M.shapes.includes(single.type) && !single.locked;
   const reshaping = shape && reshapeId === single.id;
   const button = (text, action, active = false) =>
-    '<button type="button" data-mobile-action="' + action + '"' +
+    '<button type="button" data-mobile-action="' +
+    action +
+    '"' +
     (active ? ' class="active" aria-pressed="true"' : '') +
-    ' aria-label="' + esc(text) + '">' + esc(text) + '</button>';
+    ' aria-label="' +
+    esc(text) +
+    '">' +
+    esc(text) +
+    '</button>';
   let actions = '';
   if (reshaping) {
     actions += button('Points', 'points', reshapeMode === 'points');
@@ -23,7 +29,15 @@ export function mobileActionMarkup(nodes, reshapeId, reshapeMode = 'points') {
   }
   actions += button('⚙ Format', 'format');
   if (!reshaping && nodes.some((n) => !n.locked)) actions += button('⧉ Copy', 'duplicate');
-  return '<div class="mobile-actions-inner" role="group" aria-label="' +
-    esc(single ? (shapeNames[single.type] || single.type) + ' quick actions' : 'Selected items quick actions') +
-    '">' + actions + '</div>';
+  return (
+    '<div class="mobile-actions-inner" role="group" aria-label="' +
+    esc(
+      single
+        ? (shapeNames[single.type] || single.type) + ' quick actions'
+        : 'Selected items quick actions',
+    ) +
+    '">' +
+    actions +
+    '</div>'
+  );
 }
