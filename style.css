@@ -3940,16 +3940,40 @@ body.is-panning #canvas {
 .object .vertex-handle.active-node {
   background: #286fc9;
   border-color: #fff;
-  box-shadow: 0 0 0 2px #286fc9, 0 1px 5px #15366344;
+  box-shadow:
+    0 0 0 2px #286fc9,
+    0 1px 5px #15366344;
 }
 @media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
-  .object .resize { margin: 0; }
-  .object .resize.nw { top: -9px; left: -9px; }
-  .object .resize.ne { top: -9px; right: -9px; }
-  .object .resize.sw { bottom: -9px; left: -9px; }
-  .object .resize.se { bottom: -9px; right: -9px; }
-  .object .resize.n { top: -9px; }
-  .object .resize.s { bottom: -9px; }
-  .object .resize.e { right: -9px; }
-  .object .resize.w { left: -9px; }
+  .object .resize {
+    margin: 0;
+  }
+  .object .resize.nw {
+    top: -9px;
+    left: -9px;
+  }
+  .object .resize.ne {
+    top: -9px;
+    right: -9px;
+  }
+  .object .resize.sw {
+    bottom: -9px;
+    left: -9px;
+  }
+  .object .resize.se {
+    bottom: -9px;
+    right: -9px;
+  }
+  .object .resize.n {
+    top: -9px;
+  }
+  .object .resize.s {
+    bottom: -9px;
+  }
+  .object .resize.e {
+    right: -9px;
+  }
+  .object .resize.w {
+    left: -9px;
+  }
 }
