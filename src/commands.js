@@ -44,6 +44,7 @@ export function toggleReshape() {
   if (!M.shapes.includes(n.type) && n.type !== 'path') return;
   state.reshapeId = state.reshapeId === n.id ? null : n.id;
   state.reshapeMode = 'points';
+  state.selectedVertex = null;
   selectVisual();
   toast(
     state.reshapeId
@@ -54,6 +55,7 @@ export function toggleReshape() {
 export function setOutlineMode(mode) {
   if (!['points', 'bend'].includes(mode) || !state.reshapeId) return;
   state.reshapeMode = mode;
+  state.selectedVertex = null;
   selectVisual();
   toast(
     mode === 'bend'
@@ -81,6 +83,7 @@ export function command(action) {
       });
       state.reshapeId = null;
       state.reshapeMode = 'points';
+      state.selectedVertex = null;
     }
     if (action === 'bold') ns.forEach((n) => (n.fontWeight = n.fontWeight === 700 ? 400 : 700));
     if (action === 'group') {
