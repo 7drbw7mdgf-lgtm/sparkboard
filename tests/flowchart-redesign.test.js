@@ -84,3 +84,19 @@ test('mobile flowchart selection offers explicit linked next-step action', () =>
   assert.match(flow, /data-mobile-action="flow-next"/);
   assert.match(flow, /data-mobile-action="connect"/);
 });
+
+test('decision branches get Yes and No labels, while ordinary links stay unlabelled', () => {
+  counter = 0;
+  const objects = [
+    { id: 'decision', type: 'diamond', flowRole: 'decision', x: 100, y: 100, w: 180, h: 120 },
+    { id: 'yes', type: 'shape', x: 410, y: 40, w: 160, h: 90 },
+    { id: 'no', type: 'shape', x: 410, y: 260, w: 160, h: 90 },
+  ];
+  const yes = connectFlowNodes(objects, 'decision', 'yes', makeId);
+  const no = connectFlowNodes(objects, 'decision', 'no', makeId);
+  assert.equal(yes.text, 'Yes');
+  assert.equal(no.text, 'No');
+  assert.equal(yes.fromPort, 'e');
+  const reversed = connectFlowNodes(objects, 'no', 'decision', makeId);
+  assert.strictEqual(reversed, no, 'reverse duplicates are suppressed');
+});
