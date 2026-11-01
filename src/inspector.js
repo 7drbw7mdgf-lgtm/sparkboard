@@ -58,19 +58,14 @@ export function renderInspector() {
   const compact = isCompactEditor();
   const selection = nodes.map((n) => n.id).join(',');
   const previous = body.dataset.selection === selection && body.dataset.compact === String(compact);
-  const expanded =
-    previous && compact
-      ? new Set(
-          [...body.querySelectorAll('details.format-card[open]')].map(
-            (el) => el.dataset.formatSection,
-          ),
-        )
-      : null;
+  const page = previous && compact ? body.dataset.activePage : 'Appearance';
   body.innerHTML = formatPanel(nodes, state.reshapeId, {
     compact,
-    expanded,
+    page,
     outlineMode: state.reshapeMode,
   });
+  body.dataset.activePage = body.querySelector('[data-format-page][aria-selected="true"]')
+    ?.dataset.formatPage || 'Appearance';
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);
 }
