@@ -46,6 +46,11 @@ export function mobileActionMarkup(
     }
     actions += button('✓ Done', 'done');
   } else if (shape) {
+    actions += button('✎ Text', 'edit');
+    if (single.mindmap) {
+      actions += button('＋ Child', 'mind-child');
+      actions += button('🎨 Branch', 'mind-style');
+    }
     actions += button('◈ Nodes', 'nodes');
   } else if (single && ['text', 'sticky'].includes(single.type) && !single.locked) {
     actions += button('✎ Text', 'edit');

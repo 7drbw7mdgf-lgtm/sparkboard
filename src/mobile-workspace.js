@@ -4,12 +4,16 @@ import { setTool } from './tools.js';
 import { addFlowStep, startFlowLink } from './flowchart.js';
 import { toast } from './notifications.js';
 import { isCompactEditor } from './mobile-editor-policy.js';
+import { addAt } from './canvas.js';
+import { centerPoint } from './viewport.js';
 
 const mobileStyle = `
-#mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet{display:none}
+#mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet,#mobile-tool-active{display:none}
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){
   body:not(.workspace-empty) #mobile-workspace-dock{display:grid}
   body:not(.workspace-empty) #mobile-workspace-mode{display:flex}
+  /* The former opaque 116px header obscured the supposedly full-screen board. */
+  .workspace-header{height:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none}
   #tools{display:none!important}
   #mobile-more,#mobile-more-menu{display:none!important}
   #mindmap-toolbar{display:none!important}
@@ -32,13 +36,20 @@ const mobileStyle = `
   #mobile-tool-sheet .mw-close{font-size:22px;border-radius:10px;background:#f1f4f1;width:36px;height:36px}
   #mobile-tool-sheet .mw-sheet-section{border-top:1px solid #edf1ed;padding-top:12px;margin-top:14px}
   #mobile-tool-sheet .mw-sheet-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:#87978b;margin-bottom:8px}
-  #mobile-selection-actions:not([hidden]){bottom:calc(87px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 18px)}
+  #mobile-selection-actions:not([hidden]){bottom:calc(91px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 18px);z-index:43}
   #mobile-selection-actions:not([hidden]) .mobile-actions-inner{box-shadow:0 6px 22px #213a3026}
-  .bottom-left,.zoom{bottom:calc(175px + env(safe-area-inset-bottom))!important;scale:.86;transform-origin:bottom left}
-  .zoom{transform-origin:bottom right}
-  #canvas{bottom:calc(145px + env(safe-area-inset-bottom))!important}
+  /* Fit, zoom and undo/redo remain available via Tools, not floating over nodes. */
+  .bottom-left,.zoom{display:none!important}
+  /* Float the controls over a truly full-screen canvas. */
+  #canvas{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important}
+  #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(91px + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:7px 8px 7px 13px;border:1px solid #c9dcd0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #1a332a30;font:700 12px Manrope,sans-serif;color:#355a46;max-width:calc(100vw - 24px)}
+  #mobile-tool-active button{min-height:36px;padding:6px 12px;border-radius:9px;background:#286a51;color:#fff;font-weight:700;touch-action:manipulation}
   #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(92px + env(safe-area-inset-bottom));z-index:35}
   #toast{bottom:calc(178px + env(safe-area-inset-bottom))}
+  /* Pen width and colour remain usable, without opening a full-screen sheet. */
+  #drawing-options:not([hidden]){position:fixed!important;top:calc(174px + env(safe-area-inset-top))!important;bottom:auto!important;left:12px!important;right:auto!important;width:min(244px,calc(100vw - 24px))!important;max-height:160px!important;padding:11px!important;z-index:39;border-radius:13px;box-shadow:0 7px 25px #1634272a}
+  #drawing-options .panel-heading{display:none}
+  #drawing-options .inspector-section{padding:0}
   #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
   #inspector .format-heading{padding:7px 10px 12px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
@@ -49,8 +60,8 @@ const mobileStyle = `
   #mobile-workspace-mode{top:calc(82px + env(safe-area-inset-top));left:10px}
   #mobile-workspace-dock{height:60px}
   #mobile-tool-sheet:not([hidden]){max-height:60dvh;bottom:calc(78px + env(safe-area-inset-bottom))}
-  #canvas{bottom:calc(78px + env(safe-area-inset-bottom))!important}
-  .bottom-left,.zoom{bottom:calc(80px + env(safe-area-inset-bottom))!important}
+  #canvas{inset:0!important;height:100dvh!important}
+  #mobile-tool-active:not([hidden]){bottom:calc(80px + env(safe-area-inset-bottom))}
   #mobile-selection-actions:not([hidden]){bottom:calc(78px + env(safe-area-inset-bottom))!important}
 }
 `;
@@ -85,7 +96,9 @@ function sheetContents(section) {
       ['Templates', '▦', 'header', 'templates'],
       ['Export', '⇧', 'header', 'export'],
       ['Scenes', '▤', 'header', 'scenes'],
-      ['Fit', '⛶', 'header', 'fit'],
+      ['Fit to board', '⛶', 'header', 'fit'],
+      ['Undo', '↶', 'header', 'undo'],
+      ['Redo', '↷', 'header', 'redo'],
     ];
   } else if (current === 'flowchart') {
     choices = [
@@ -127,7 +140,9 @@ function sheetContents(section) {
         : current === 'mindmap' || current === 'outline'
           ? 'Build your mind map'
           : 'Add to canvas';
-  $('#mobile-tool-sheet').innerHTML = `
+  const sheet = $('#mobile-tool-sheet');
+  sheet.dataset.renderedMode = current;
+  sheet.innerHTML = `
     <div class="mw-sheet-head"><h3>${label}</h3><button class="mw-close" type="button" data-mw-close aria-label="Close tools">×</button></div>
     <p>${section === 'more' ? 'Everything else stays here — the canvas is for your work.' : current === 'flowchart' ? 'Select a node first to create an automatically linked next step.' : 'One finger selects or moves · two fingers pan and zoom.'}</p>
     <div class="mw-tool-grid">${choices.map(([name, symbol, action, value]) => makeButton(name, symbol, action, value)).join('')}</div>`;
@@ -159,7 +174,23 @@ function syncDock() {
     .forEach((button) =>
       button.setAttribute('aria-pressed', String(state.tool === button.dataset.mwTool)),
     );
-  if (!$('#mobile-tool-sheet').hidden) sheetContents($('#mobile-tool-sheet').dataset.section);
+  const sheet = $('#mobile-tool-sheet');
+  // Preserve drawer focus/scroll during ordinary selection and rendering.
+  if (!sheet.hidden && sheet.dataset.renderedMode !== mode()) sheetContents(sheet.dataset.section);
+  const status = $('#mobile-tool-active');
+  if (status) {
+    const busy = state.tool && state.tool !== 'select';
+    status.hidden = !busy;
+    if (busy)
+      status.querySelector('[data-mw-active-name]').textContent =
+        {
+          connector: 'Linking nodes',
+          pen: 'Drawing',
+          line: 'Drawing a line',
+          eraser: 'Erasing',
+          hand: 'Navigation',
+        }[state.tool] || 'Placing ' + state.tool;
+  }
 }
 function choose(action, value) {
   closeSheet();
@@ -181,8 +212,15 @@ function choose(action, value) {
         new CustomEvent('sparkboard:mind-style', { detail: { id: topic.id } }),
       );
     else toast('Select a mind-map topic first');
-  } else if (action === 'tool') setTool(value);
-  else if (action === 'picker') {
+  } else if (action === 'tool') {
+    if (value === 'sticky' || value === 'text') {
+      const center = centerPoint();
+      addAt(value, {
+        x: center.x - (value === 'text' ? 140 : 95),
+        y: center.y - (value === 'text' ? 40 : 85),
+      });
+    } else setTool(value);
+  } else if (action === 'picker') {
     const trigger =
       value === 'shapes' ? $('#shape-toggle') : $('#tools [data-tool="' + value + '"]');
     if (trigger) trigger.click();
@@ -208,11 +246,23 @@ export function setupMobileWorkspace() {
   dock.innerHTML = `<button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
     <button type="button" data-mw-action="connect"><span class="mwd-icon">↗</span>Link</button>
     <button type="button" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">☷</span>Tools</button>`;
+  const status = document.createElement('div');
+  status.id = 'mobile-tool-active';
+  status.hidden = true;
+  status.setAttribute('role', 'status');
+  status.innerHTML =
+    '<span data-mw-active-name></span><button type="button" data-mw-finish>Done</button>';
   const sheet = document.createElement('section');
   sheet.id = 'mobile-tool-sheet';
   sheet.hidden = true;
   sheet.setAttribute('aria-label', 'Mobile tools and shapes');
-  document.body.append(header, dock, sheet);
+  document.body.append(header, dock, sheet, status);
+  status.addEventListener('click', (event) => {
+    if (event.target.closest('[data-mw-finish]')) {
+      setTool('select');
+      syncDock();
+    }
+  });
   header.querySelector('select').addEventListener('change', (event) => {
     closeSheet();
     $('#mindmap-toolbar [data-mm-mode="' + event.target.value + '"]')?.click();
@@ -249,6 +299,12 @@ export function setupMobileWorkspace() {
   });
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
+  document.addEventListener('sparkboard:mobile-shape', (event) => {
+    if (!event.detail?.type) return;
+    const center = centerPoint();
+    addAt(event.detail.type, { x: center.x - 95, y: center.y - 85 });
+    syncDock();
+  });
   window.addEventListener('resize', () => {
     if (!isCompactEditor()) closeSheet();
   });
