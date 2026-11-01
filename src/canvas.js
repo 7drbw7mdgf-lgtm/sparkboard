@@ -327,6 +327,25 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    // Tool precedence: a Line gesture always draws, even if it starts on a
+    // shape, vertex, selection handle or former connector port.
+    if (state.tool === 'line') {
+      const opts = currentLineOptions('straight');
+      state.connectorDraft = {
+        type: 'line',
+        d: `M${p.x},${p.y} L${p.x},${p.y}`,
+        ...opts,
+      };
+      state.drag = {
+        type: 'draw-line',
+        start: p,
+        end: p,
+        opts,
+      };
+      capture(e);
+      renderLines();
+      return;
+    }
     if (state.tool === 'eraser') {
       state.drag = {
         type: 'erase',
@@ -346,7 +365,7 @@ export function setupCanvas() {
       return;
     }
     const portEl = e.target.closest('.port');
-    if (portEl && n && !['path', 'line', 'connector', 'frame'].includes(n.type)) {
+    if (portEl && !isCompactEditor() && n && !['path', 'line', 'connector', 'frame'].includes(n.type)) {
       const fromPort = portEl.dataset.port,
         startPt = M.portPoint(n, fromPort),
         opts = currentLineOptions('curved');
@@ -453,23 +472,6 @@ export function setupCanvas() {
         changed: false,
       };
       capture(e);
-      return;
-    }
-    if (state.tool === 'line') {
-      const opts = currentLineOptions('straight');
-      state.connectorDraft = {
-        type: 'line',
-        d: `M${p.x},${p.y} L${p.x},${p.y}`,
-        ...opts,
-      };
-      state.drag = {
-        type: 'draw-line',
-        start: p,
-        end: p,
-        opts,
-      };
-      capture(e);
-      renderLines();
       return;
     }
     if (state.tool === 'connector') {
