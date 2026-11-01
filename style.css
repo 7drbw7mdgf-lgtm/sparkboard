@@ -5150,3 +5150,23 @@ body.is-panning #canvas {
     font-size: 14px;
   }
 }
+
+/* Selected-connector waypoint editing and advanced editor */
+#connections .connector-waypoint{fill:#326fc4;stroke:#fff;stroke-width:2;cursor:move;pointer-events:all;filter:drop-shadow(0 1px 3px #17375b55)}
+#connections .connector-waypoint:hover{fill:#194c91;stroke-width:3}
+#connections .connector-add-waypoint{fill:#f8fcff;stroke:#326fc4;stroke-width:2;stroke-dasharray:3 2;cursor:copy;pointer-events:all}
+#connections .connector-add-waypoint:hover{fill:#dcecff}
+.connector-advanced{display:grid;gap:12px;min-width:0}
+.connector-advanced p{font-size:12px;line-height:1.5;color:#6c786d;margin:0}
+.connector-advanced label{display:grid;gap:5px;font-size:12px;font-weight:700;min-width:0}
+.connector-advanced input,.connector-advanced select{min-height:42px;border:1px solid #d7dfd6;border-radius:9px;background:#fff;padding:8px 10px;font-size:16px;min-width:0;width:100%}
+.connector-advanced .ca-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.connector-advanced .ca-primary{min-height:44px;border-radius:10px;background:#2c7154;color:white;font-weight:750}
+.connector-advanced .ca-buttons{display:flex;gap:6px;flex-wrap:wrap}
+.connector-advanced .ca-buttons button{padding:10px;border-radius:9px;border:1px solid #d6e2db;background:#f5f9f6;font-weight:650;font-size:12px}
+.connector-advanced small{color:#819087;font-size:11px;line-height:1.4}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){
+ #connections .connector-waypoint,#connections .connector-add-waypoint{stroke-width:2.5}
+ .connector-advanced .ca-grid{grid-template-columns:1fr 1fr;gap:8px}
+ .connector-advanced .ca-buttons button{min-height:43px}
+}
