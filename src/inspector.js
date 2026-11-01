@@ -63,7 +63,9 @@ export function renderInspector() {
           ),
         )
       : null;
-  body.innerHTML = formatPanel(nodes, state.reshapeId, { compact, expanded });
+  body.innerHTML = formatPanel(nodes, state.reshapeId, {
+    compact, expanded, outlineMode: state.reshapeMode,
+  });
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);
 }
