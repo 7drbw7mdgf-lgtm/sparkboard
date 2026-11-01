@@ -185,7 +185,6 @@ test('offline deletion creates version-checked cloud tombstone on next sync', as
   client.stop();
 });
 
-
 test('account switching cannot adopt a board already owned by another user', async () => {
   const { client, local, cloud } = setup({ initial: [board(id, 100, other)] });
   await client.enable();

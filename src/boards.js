@@ -35,7 +35,9 @@ export function cloudBoardAccess() {
     async claim(id, owner) {
       const board = await repository.loadBoard(id);
       if (board.cloudOwner && board.cloudOwner !== owner)
-        throw Error('This board belongs to a different account. Export it to make a personal copy.');
+        throw Error(
+          'This board belongs to a different account. Export it to make a personal copy.',
+        );
       if (board.cloudOwner === owner) return;
       board.cloudOwner = owner;
       const saved = await repository.saveBoard(board);
