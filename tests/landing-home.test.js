@@ -34,7 +34,7 @@ test('marketing home has original visual demonstration, features, practical use 
   ]) {
     assert.equal((index.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, 'ID ' + id);
   }
-  assert.match(index, /<svg class="landing-board-svg"/);
+  assert.match(index, /<svg\s+class="landing-board-svg"/);
   assert.match(index, /aria-label="Illustration of a Sparkboard canvas/);
   assert.match(index, /Account sync is optional/);
   assert.match(index, /not live multiuser collaboration/);
