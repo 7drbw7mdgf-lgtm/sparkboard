@@ -1,6 +1,12 @@
 import { M, esc } from './core.js';
 import { shapeNames } from './icons.js';
 
+/** Connectors can originate from spatial objects, not existing paths or lines. */
+export function canConnectNode(node) {
+  return !!node && !node.locked &&
+    !['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(node.type);
+}
+
 /** One contextual mobile row: the rest of the canvas stays clear for dragging. */
 export function mobileActionMarkup(
   nodes,
@@ -40,6 +46,7 @@ export function mobileActionMarkup(
   } else if (single && ['text', 'sticky'].includes(single.type) && !single.locked) {
     actions += button('✎ Text', 'edit');
   }
+  if (!reshaping && canConnectNode(single)) actions += button('↗ Connect', 'connect');
   actions += button('⚙ Format', 'format');
   if (!reshaping && nodes.some((n) => !n.locked)) actions += button('⧉ Copy', 'duplicate');
   return (
