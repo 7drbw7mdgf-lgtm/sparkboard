@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { $ } from './core.js';
 import { selectedNodes } from './selection.js';
 import { formatPanel } from './format-panel.js';
+import { mobileActionMarkup } from './mobile-actions.js';
 import { isCompactEditor, inspectorOpenAfterSelection } from './mobile-editor-policy.js';
 
 let lastSelectionKey = '';
@@ -13,6 +14,7 @@ export function properties() {
   const selectionChanged = selectionKey !== lastSelectionKey;
   if (selectionChanged) {
     lastSelectionKey = selectionKey;
+    state.selectedVertex = null;
     if (ns.length) {
       state.inspectorOpen = inspectorOpenAfterSelection({
         changed: true,
@@ -24,6 +26,14 @@ export function properties() {
       const scenesPanel = $('#scenes-panel');
       if (scenesPanel) scenesPanel.hidden = true;
     }
+  }
+  const mobileActions = $('#mobile-selection-actions');
+  if (mobileActions) {
+    const show = isCompactEditor() && ns.length > 0 && state.tool === 'select';
+    mobileActions.hidden = !show;
+    mobileActions.innerHTML = show
+      ? mobileActionMarkup(ns, state.reshapeId, state.reshapeMode, state.selectedVertex)
+      : '';
   }
   const toolSidePanel = ['pen', 'line', 'connector'].includes(state.tool);
   const open = state.inspectorOpen && ns.length > 0 && !toolSidePanel;
@@ -56,7 +66,11 @@ export function renderInspector() {
           ),
         )
       : null;
-  body.innerHTML = formatPanel(nodes, state.reshapeId, { compact, expanded });
+  body.innerHTML = formatPanel(nodes, state.reshapeId, {
+    compact,
+    expanded,
+    outlineMode: state.reshapeMode,
+  });
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);
 }

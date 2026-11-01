@@ -115,6 +115,17 @@
         <button class="quiet" id="export" title="Export board" aria-label="Export board">
           <span>Export</span>
         </button>
+        <button
+          class="quiet"
+          id="mobile-more"
+          type="button"
+          aria-label="More board actions"
+          aria-expanded="false"
+          aria-controls="mobile-more-menu"
+          title="More actions"
+        >
+          More
+        </button>
         <span id="cloud-indicator" class="cloud-indicator" role="status" hidden></span>
         <button id="account" class="account-button" aria-label="Sign in to Sparkboard" hidden>
           Sign in
@@ -139,6 +150,13 @@
       <span id="board-type">Brainstorm</span>
     </div>
     <nav id="tools" aria-label="Whiteboard tools"></nav>
+    <nav id="mobile-more-menu" aria-label="More board actions" hidden>
+      <button type="button" data-more-action="search-board">⌕ Find</button>
+      <button type="button" data-more-action="scenes">▤ Scenes</button>
+      <button type="button" data-more-action="templates">▦ Templates</button>
+      <button type="button" data-more-action="export">↥ Export</button>
+    </nav>
+    <nav id="mobile-selection-actions" aria-label="Selected object actions" hidden></nav>
     <aside id="inspector" hidden aria-label="Format" tabindex="-1">
       <div class="panel-heading format-heading">
         <div>

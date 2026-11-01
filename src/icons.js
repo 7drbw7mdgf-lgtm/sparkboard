@@ -1,5 +1,7 @@
+import { polygons } from '../board-model.js';
 export const icons = {
   close: '<path d="m7 7 10 10M17 7 7 17"/>',
+  more: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
   undo: '<path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 6 6v3"/>',
   redo: '<path d="m15 5 5 5-5 5m5-5H10a6 6 0 0 0-6 6v3"/>',
   grid: '<circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/>',
@@ -79,6 +81,22 @@ export const shapeNames = {
   frame: 'Frame',
   line: 'Line',
   connector: 'Connector',
+  chevron: 'Chevron',
+  'double-arrow': 'Double arrow',
+  'left-arrow': 'Left arrow',
+  'up-arrow': 'Up arrow',
+  'down-arrow': 'Down arrow',
+  lightning: 'Lightning bolt',
+  house: 'House',
+  shield: 'Shield',
+  ribbon: 'Ribbon',
+  bookmark: 'Bookmark',
+  document: 'Document',
+  'flow-data': 'Flowchart data',
+  gear: 'Gear',
+  burst: 'Burst',
+  'right-triangle': 'Right triangle',
+  'corner-cut': 'Cut corner',
 };
 export const labels = {
   select: 'Select · V',
@@ -93,4 +111,29 @@ export const labels = {
   link: 'Link card · K',
   embed: 'Embed PDF, map or video',
 };
-export const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[k]}</svg>`;
+export const shapeCategories = {
+  Basic: [
+    'shape',
+    'pill',
+    'circle',
+    'triangle',
+    'right-triangle',
+    'diamond',
+    'pentagon',
+    'hexagon',
+    'octagon',
+    'parallelogram',
+    'trapezoid',
+    'corner-cut',
+    'frame',
+  ],
+  Arrows: ['arrow', 'left-arrow', 'up-arrow', 'down-arrow', 'double-arrow', 'chevron'],
+  Flowchart: ['bubble', 'document', 'flow-data', 'cylinder', 'cloud', 'cross'],
+  Symbols: ['star', 'burst', 'heart', 'lightning', 'house', 'shield', 'ribbon', 'bookmark', 'gear'],
+};
+export const shapeCategory = (kind) =>
+  Object.entries(shapeCategories).find(([, kinds]) => kinds.includes(kind))?.[0] || 'Basic';
+export const svgIcon = (k) =>
+  polygons[k] && !icons[k]
+    ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${polygons[k]}"/></svg>`
+    : `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[k] || icons.shape}</svg>`;

@@ -3606,3 +3606,374 @@ body.is-panning #canvas {
     bottom: calc(74px + env(safe-area-inset-bottom));
   }
 }
+
+/* Vector editing: separate anchors, add-point handles, and adjustable curve tangents. */
+.object .shape-curve-handle {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #2665c4;
+  box-shadow:
+    0 0 0 1.5px #2665c4,
+    0 1px 5px #15366338;
+  z-index: 7;
+  cursor: grab;
+  touch-action: none;
+}
+.object .shape-curve-handle:active {
+  cursor: grabbing;
+}
+.object .resize.n,
+.object .resize.s {
+  left: calc(50% - 5px);
+  right: auto;
+  cursor: ns-resize;
+}
+.object .resize.n {
+  top: -7px;
+  bottom: auto;
+}
+.object .resize.s {
+  bottom: -7px;
+  top: auto;
+}
+.object .resize.e,
+.object .resize.w {
+  top: calc(50% - 5px);
+  bottom: auto;
+  cursor: ew-resize;
+}
+.object .resize.e {
+  right: -7px;
+  left: auto;
+}
+.object .resize.w {
+  left: -7px;
+  right: auto;
+}
+.format-hint {
+  display: block;
+  margin: 2px 0 5px;
+  color: #6c786a;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Shared searchable shape categories: discoverable, not an endless flat catalog. */
+.shape-categories {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.shape-categories::-webkit-scrollbar {
+  display: none;
+}
+.shape-categories button {
+  flex: 0 0 auto;
+  border: 1px solid #e0e8dc;
+  border-radius: 999px;
+  color: #4a5d48;
+  background: #fff;
+  padding: 7px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  min-height: 33px;
+}
+.shape-categories button.active {
+  background: #dff3e3;
+  border-color: #78b68c;
+  color: #165f35;
+}
+#shape-menu {
+  max-height: min(74dvh, 650px);
+  overflow-y: auto;
+}
+#shape-menu #shape-categories {
+  margin: 5px 0 6px;
+}
+.mobile-shapes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: min(60dvh, 560px);
+  min-height: 0;
+}
+.shape-search-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #596b52;
+}
+#mobile-shape-search {
+  flex: 0 0 auto;
+  border-radius: 11px;
+  min-height: 44px;
+  border: 1px solid #dbe5d8;
+  padding: 0 12px;
+  font-size: 16px;
+  background: #fff;
+}
+.mobile-shape-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  padding: 3px;
+}
+.mobile-shape-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #e0e8dc;
+  border-radius: 13px;
+  background: #fbfcfa;
+  color: #354d3d;
+  padding: 9px 5px;
+  min-height: 90px;
+  min-width: 0;
+}
+.mobile-shape-grid button:hover,
+.mobile-shape-grid button:focus-visible {
+  background: #eaf7ed;
+  border-color: #6eae84;
+}
+.mobile-shape-grid button svg {
+  width: 31px;
+  height: 31px;
+  stroke: currentColor;
+  stroke-width: 2px;
+  fill: none;
+}
+.mobile-shape-grid button span {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.shape-empty {
+  font-size: 12px;
+  color: #697a66;
+}
+
+/* Reveal controls only when an object is selected, preserving a full-height canvas. */
+#mobile-selection-actions,
+#mobile-more,
+#mobile-more-menu {
+  display: none;
+}
+#mobile-selection-actions[hidden],
+#mobile-more-menu[hidden] {
+  display: none !important;
+}
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  .workspace-header .header-actions #search-board,
+  .workspace-header .header-actions #scenes,
+  .workspace-header .header-actions #templates,
+  .workspace-header .header-actions #export {
+    display: none !important;
+  }
+  .header-actions {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .workspace-header .header-actions #mobile-more {
+    display: flex;
+    position: static;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 42px;
+    padding: 9px;
+    flex-shrink: 0;
+    border: 1px solid #e4e9e0;
+    border-radius: 12px;
+    background: #fff;
+  }
+  #mobile-more svg {
+    width: 22px;
+    height: 22px;
+  }
+  #mobile-more[aria-expanded='true'] {
+    background: #e5f6e9;
+    border-color: #8fc59d;
+  }
+  #mobile-more-menu:not([hidden]) {
+    position: fixed;
+    display: grid;
+    gap: 5px;
+    top: calc(112px + env(safe-area-inset-top));
+    right: 10px;
+    width: min(205px, calc(100vw - 20px));
+    padding: 8px;
+    z-index: 75;
+    border: 1px solid #e0e8dc;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 10px 30px #20351c2b;
+  }
+  #mobile-more-menu button {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 650;
+    color: #354c39;
+    background: #f8faf6;
+    border: 0;
+    border-radius: 9px;
+    min-height: 43px;
+    padding: 9px 12px;
+  }
+  #mobile-selection-actions:not([hidden]) {
+    display: flex;
+    position: fixed;
+    left: 50%;
+    right: auto;
+    bottom: calc(139px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    max-width: calc(100vw - 20px);
+    z-index: 19;
+    border-radius: 15px;
+    background: #fff;
+    border: 1px solid #e2e8dc;
+    box-shadow: 0 6px 23px #23351e25;
+    padding: 5px;
+  }
+  .mobile-actions-inner {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .mobile-actions-inner button {
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    min-height: 39px;
+    min-width: 58px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #3a5340;
+    font-size: 12px;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+  .mobile-actions-inner button.active {
+    color: #155d34;
+    background: #e2f5e6;
+    border-color: #a4d6b1;
+  }
+  .mobile-actions-inner button:focus-visible {
+    outline: 2px solid #217d43;
+    outline-offset: -2px;
+  }
+  .cloud-indicator:not([hidden]) {
+    flex: 0 0 23px;
+    width: 23px;
+    max-width: 23px;
+    height: 23px;
+    overflow: hidden;
+    font-size: 0;
+    padding: 0;
+    background: #ecf7ec;
+    border: 1px solid #c9e2ce;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+  }
+  .cloud-indicator::before {
+    content: '☁';
+    font-size: 13px;
+    color: #347349;
+  }
+  .object .resize,
+  .object .vertex-handle,
+  .object .edge-handle,
+  .object .shape-curve-handle {
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    margin-top: -9px;
+    touch-action: none;
+  }
+  .object .shape-curve-handle {
+    border-radius: 50%;
+  }
+  .object .resize.n,
+  .object .resize.s {
+    left: calc(50% - 9px);
+    margin: 0;
+  }
+  .object .resize.e,
+  .object .resize.w {
+    top: calc(50% - 9px);
+    margin: 0;
+  }
+  .mobile-shape-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 365px) {
+  .mobile-actions-inner button {
+    min-width: 51px;
+    padding: 8px 9px;
+    font-size: 11px;
+  }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  #mobile-more-menu:not([hidden]) {
+    top: calc(74px + env(safe-area-inset-top));
+  }
+  #mobile-selection-actions:not([hidden]) {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Clear selection affordances without enlarging the visible node artwork. */
+.object .vertex-handle.active-node {
+  background: #286fc9;
+  border-color: #fff;
+  box-shadow:
+    0 0 0 2px #286fc9,
+    0 1px 5px #15366344;
+}
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  .object .resize {
+    margin: 0;
+  }
+  .object .resize.nw {
+    top: -9px;
+    left: -9px;
+  }
+  .object .resize.ne {
+    top: -9px;
+    right: -9px;
+  }
+  .object .resize.sw {
+    bottom: -9px;
+    left: -9px;
+  }
+  .object .resize.se {
+    bottom: -9px;
+    right: -9px;
+  }
+  .object .resize.n {
+    top: -9px;
+  }
+  .object .resize.s {
+    bottom: -9px;
+  }
+  .object .resize.e {
+    right: -9px;
+  }
+  .object .resize.w {
+    left: -9px;
+  }
+}

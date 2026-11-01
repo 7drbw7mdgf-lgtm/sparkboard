@@ -9,7 +9,14 @@ import { isCompactEditor } from './mobile-editor-policy.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
 import { commit, redo, snapshot, undo } from './history.js';
-import { command, deleteSelected, duplicate, toggleLock, toggleReshape } from './commands.js';
+import {
+  command,
+  deleteSelected,
+  duplicate,
+  toggleLock,
+  toggleReshape,
+  setOutlineMode,
+} from './commands.js';
 import { applyView, fit, zoom } from './viewport.js';
 import { toggleScenes } from './scenes.js';
 import { modal, searchBoard, showBoards, showHelp } from './dialogs.js';
@@ -26,6 +33,7 @@ export function setupControls() {
     help: 'help',
     'search-board': 'search',
     inspect: 'format',
+    'mobile-more': 'more',
     scenes: 'scenes',
     templates: 'templates',
     export: 'export',
@@ -36,9 +44,34 @@ export function setupControls() {
     button.innerHTML =
       svgIcon(icon) +
       (button.classList.contains('quiet')
-        ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
+        ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export', more: 'More' }[icon]}</span>`
         : '');
   }
+  const mobileMore = $('#mobile-more');
+  const mobileMoreMenu = $('#mobile-more-menu');
+  const closeMore = () => {
+    mobileMoreMenu.hidden = true;
+    mobileMore.setAttribute('aria-expanded', 'false');
+  };
+  mobileMore.onclick = () => {
+    const next = mobileMoreMenu.hidden;
+    mobileMoreMenu.hidden = !next;
+    mobileMore.setAttribute('aria-expanded', String(next));
+  };
+  mobileMoreMenu.onclick = (event) => {
+    const original = event.target.closest('[data-more-action]')?.dataset.moreAction;
+    if (!original) return;
+    closeMore();
+    $('#' + original).click();
+  };
+  document.addEventListener('pointerdown', (event) => {
+    if (
+      !mobileMoreMenu.hidden &&
+      !mobileMore.contains(event.target) &&
+      !mobileMoreMenu.contains(event.target)
+    )
+      closeMore();
+  });
   $('#canvas').setAttribute('aria-busy', 'true');
   $('#close-dialog').onclick = () => $('#dialog').close();
   $('#dialog').onclick = (e) => {
@@ -124,6 +157,39 @@ export function setupControls() {
     $('#scenes-panel').hidden = true;
     properties();
   };
+  $('#mobile-selection-actions').onclick = (event) => {
+    const action = event.target.closest('[data-mobile-action]')?.dataset.mobileAction;
+    if (!action || !state.selected.size) return;
+    if (action === 'nodes' || action === 'done') {
+      toggleReshape();
+    } else if (action === 'points' || action === 'bend') {
+      setOutlineMode(action);
+    } else if (action === 'remove-point') {
+      const node = editableNodes()[0];
+      const index = state.selectedVertex;
+      if (
+        node &&
+        state.reshapeId === node.id &&
+        M.shapes.includes(node.type) &&
+        state.reshapeMode === 'points' &&
+        Number.isInteger(index) &&
+        M.shapeVertices(node).length > 3 &&
+        index < M.shapeVertices(node).length
+      ) {
+        commit(() => {
+          M.removeVertex(node, index);
+          state.selectedVertex = null;
+        });
+      }
+    } else if (action === 'format') {
+      state.inspectorOpen = !state.inspectorOpen;
+      properties();
+    } else if (action === 'duplicate') {
+      duplicate();
+    } else if (action === 'edit' && state.selected.size === 1) {
+      startEdit([...state.selected][0]);
+    }
+  };
   $('#close-inspector').onclick = () => {
     state.inspectorOpen = false;
     properties();
@@ -148,6 +214,16 @@ export function setupControls() {
         const n = editableNodes()[0];
         if (n?.type === 'link') linkDialog(n);
       } else command(action);
+    }
+    if (b.dataset.outlineMode) setOutlineMode(b.dataset.outlineMode);
+    if (b.dataset.aspect) {
+      commit(() =>
+        editableNodes()
+          .filter((n) => M.shapes.includes(n.type))
+          .forEach((n) => {
+            n.lockAspect = n.lockAspect === false;
+          }),
+      );
     }
     if (b.dataset.toggleStyle) {
       const toggle = b.dataset.toggleStyle;
@@ -220,6 +296,7 @@ export function setupControls() {
       if (prop === 'type' && M.shapes.includes(n.type) && M.shapes.includes(value)) {
         n.type = value;
         delete n.vertices;
+        M.resetCurves(n);
       } else if (prop === 'route' && ['connector', 'line'].includes(n.type)) {
         M.setLineRoute(n, value);
       } else if (prop === 'stroke' && ['path', 'connector', 'line'].includes(n.type)) {
@@ -228,6 +305,21 @@ export function setupControls() {
         const trimmed = String(value || '').trim();
         if (trimmed) n.text = trimmed;
         else delete n.text;
+      } else if (
+        ['w', 'h'].includes(prop) &&
+        M.shapes.includes(n.type) &&
+        n.lockAspect !== false &&
+        n.w > 0 &&
+        n.h > 0
+      ) {
+        const ratio = n.w / n.h;
+        if (prop === 'w') {
+          n.w = value;
+          n.h = Math.max(30, Math.min(10000, value / ratio));
+        } else {
+          n.h = value;
+          n.w = Math.max(30, Math.min(10000, value * ratio));
+        }
       } else {
         n[prop] = value;
       }

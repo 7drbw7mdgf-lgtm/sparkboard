@@ -266,6 +266,11 @@ export function endPointer(e) {
     save();
     return;
   }
+  if (d.type === 'vertex' && !d.changed && isCompactEditor()) {
+    state.selectedVertex = d.index;
+    selectVisual();
+    return;
+  }
   if (d.type === 'move' && !d.changed && !d.shiftKey && d.wasSelected && state.selected.size > 1) {
     state.selected = M.expandGroups(state.board.objects, [d.id]);
     selectVisual();
@@ -365,6 +370,7 @@ export function setupCanvas() {
     const vertexEl = e.target.closest('.vertex-handle');
     if (vertexEl && n && !n.locked) {
       const idx = Number(vertexEl.dataset.vertex);
+      state.selectedVertex = idx;
       if (e.altKey) {
         if (M.shapeVertices(n).length <= 3) {
           toast('A shape needs at least 3 anchor points');
@@ -382,12 +388,24 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    const shapeCurveEl = e.target.closest('.shape-curve-handle');
+    if (shapeCurveEl && n && M.shapes.includes(n.type) && !n.locked) {
+      state.drag = {
+        type: 'curve-edge',
+        id: n.id,
+        index: Number(shapeCurveEl.dataset.curveEdge),
+        changed: false,
+      };
+      capture(e);
+      return;
+    }
     const edgeEl = e.target.closest('.edge-handle');
     if (edgeEl && n && !n.locked) {
       const edgeIdx = Number(edgeEl.dataset.edge);
       snapshot();
       const local = localShapePoint(n, p);
       M.insertVertex(n, edgeIdx, local);
+      state.selectedVertex = edgeIdx + 1;
       state.drag = {
         type: 'vertex',
         id: n.id,
@@ -522,8 +540,7 @@ export function setupCanvas() {
     if (M.shapes.includes(state.tool)) {
       snapshot();
       const type = state.tool,
-        defaultW = type === 'frame' ? 420 : 190,
-        defaultH = type === 'frame' ? 320 : 170,
+        { w: defaultW, h: defaultH } = M.defaultShapeSize(type),
         created = node(
           type,
           p.x,
@@ -809,6 +826,25 @@ export function setupCanvas() {
       renderFast();
       return;
     }
+    if (state.drag.type === 'curve-edge') {
+      const local = localShapePoint(n, p);
+      const verts = M.shapeVertices(n);
+      const start = verts[state.drag.index];
+      const end = verts[(state.drag.index + 1) % verts.length];
+      const existing = n.curves?.[state.drag.index] || {
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2,
+      };
+      if (!state.drag.changed && Math.hypot(existing.x - local.x, existing.y - local.y) < 0.25)
+        return;
+      if (!state.drag.changed) {
+        snapshot();
+        state.drag.changed = true;
+      }
+      M.moveCurve(n, state.drag.index, local);
+      renderFast();
+      return;
+    }
     if (state.drag.type === 'line-control') {
       if (!state.drag.changed) {
         snapshot();
@@ -865,7 +901,8 @@ export function setupCanvas() {
     if (state.drag.type === 'resize') {
       const original = state.drag.original.find((o) => o.id === n.id);
       const nextBox = M.resizeBox(original, state.drag.dir, dx, dy, {
-        lockAspect: e.shiftKey || n.type === 'image',
+        lockAspect:
+          e.shiftKey || n.type === 'image' || (M.shapes.includes(n.type) && n.lockAspect !== false),
         snap: !!state.board.snap,
       });
       Object.assign(n, nextBox);
