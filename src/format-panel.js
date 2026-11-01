@@ -1,3 +1,4 @@
+import { resolveFormatPage } from './mobile-format-pages.js';
 import { shapeNames } from './icons.js';
 import { M, esc } from './core.js';
 
@@ -60,22 +61,20 @@ function choices(label, prop, value, options, disabled) {
       '</select>',
   );
 }
-function section(name, icon, contents, { compact = false, expanded = null } = {}) {
+function section(name, icon, contents, { compact = false } = {}) {
   if (!contents) return '';
   if (compact) {
-    const open = expanded ? expanded.has(name) : name === 'Appearance';
     return (
-      '<details class="format-card" data-format-section="' +
+      '<section class="format-card format-page" role="tabpanel" id="format-panel-' +
       name +
-      '"' +
-      (open ? ' open' : '') +
-      '><summary><span aria-hidden="true">' +
-      icon +
-      '</span>' +
+      '" aria-labelledby="format-tab-' +
       name +
-      '<span class="format-chevron" aria-hidden="true">⌄</span></summary><div class="format-card-content">' +
+      '" data-format-section="' +
+      name +
+      '">' +
+      '<div class="format-card-content">' +
       contents +
-      '</div></details>'
+      '</div></section>'
     );
   }
   return (
@@ -143,11 +142,10 @@ function selectButton(label, attr, value, active, disabled) {
 export function formatPanel(
   ns,
   reshapeId = null,
-  { compact = false, expanded = null, outlineMode = 'points' } = {},
+  { compact = false, page = 'Appearance', outlineMode = 'points' } = {},
 ) {
   if (!ns.length) return '';
-  const panelSection = (name, icon, contents) =>
-    section(name, icon, contents, { compact, expanded });
+  const panelSection = (name, icon, contents) => section(name, icon, contents, { compact });
   const n = ns[0],
     multi = ns.length > 1;
   const locked = ns.every((item) => item.locked);
@@ -389,5 +387,69 @@ export function formatPanel(
     '</div>';
   behavior = panelSection('Actions', '⚡', behavior);
 
+  if (compact) {
+    const pages = [
+      ['Appearance', appearance],
+      ['Text', text],
+      ['Layout', layout],
+      ['Arrange', arrange],
+      ['Actions', behavior],
+    ].filter(([, markup]) => markup);
+    const names = pages.map(([name]) => name);
+    const current = resolveFormatPage(names, page);
+    const currentIndex = names.indexOf(current);
+    const tabs = pages
+      .map(
+        ([name]) =>
+          '<button type="button" role="tab" id="format-tab-' +
+          name +
+          '" aria-controls="format-panel-' +
+          name +
+          '" aria-selected="' +
+          String(name === current) +
+          '" tabindex="' +
+          (name === current ? '0' : '-1') +
+          '" class="format-page-tab' +
+          (name === current ? ' active' : '') +
+          '" data-format-page="' +
+          name +
+          '">' +
+          name +
+          '</button>',
+      )
+      .join('');
+    const panels = pages
+      .map(([name, markup]) =>
+        name === current
+          ? markup
+          : markup.replace(
+              'class="format-card format-page"',
+              'class="format-card format-page" hidden',
+            ),
+      )
+      .join('');
+    return (
+      '<div class="format-paged">' +
+      '<nav class="format-page-tabs" role="tablist" aria-label="Format pages">' +
+      tabs +
+      '</nav>' +
+      '<div class="format-page-stack">' +
+      panels +
+      '</div>' +
+      '<div class="format-page-footer">' +
+      '<button type="button" data-format-step="-1" aria-label="Previous format page"' +
+      (currentIndex === 0 ? ' disabled' : '') +
+      '>‹ Back</button>' +
+      '<span data-format-counter aria-live="polite">' +
+      (currentIndex + 1) +
+      ' / ' +
+      names.length +
+      '</span>' +
+      '<button type="button" data-format-step="1" aria-label="Next format page"' +
+      (currentIndex >= names.length - 1 ? ' disabled' : '') +
+      '>Next ›</button>' +
+      '</div></div>'
+    );
+  }
   return '<div class="format-panels">' + appearance + text + layout + arrange + behavior + '</div>';
 }

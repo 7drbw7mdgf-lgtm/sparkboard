@@ -6,6 +6,7 @@ import { render, renderFast, selectVisual } from './rendering.js';
 import { closeShapes, setTool } from './tools.js';
 import { properties } from './inspector.js';
 import { isCompactEditor } from './mobile-editor-policy.js';
+import { showFormatPage, stepVisibleFormatPage } from './mobile-format-pages.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
 import { commit, redo, snapshot, undo } from './history.js';
@@ -196,6 +197,16 @@ export function setupControls() {
   };
   const inspector = $('#inspector-body');
   inspector.onclick = (e) => {
+    const page = e.target.closest('[data-format-page]');
+    if (page) {
+      showFormatPage(inspector, page.dataset.formatPage);
+      return;
+    }
+    const step = e.target.closest('[data-format-step]');
+    if (step) {
+      stepVisibleFormatPage(inspector, Number(step.dataset.formatStep));
+      return;
+    }
     const b = e.target.closest('button');
     if (!b || b.disabled) return;
     if (b.dataset.command) {

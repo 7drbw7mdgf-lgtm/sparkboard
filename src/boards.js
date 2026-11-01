@@ -11,6 +11,7 @@ import { finishEdit } from './editor.js';
 import { render } from './rendering.js';
 import { fit } from './viewport.js';
 import { setTool } from './tools.js';
+import { isCompactEditor, initialToolForLayout } from './mobile-editor-policy.js';
 import { sample } from './templates.js';
 import { toast } from './notifications.js';
 
@@ -326,7 +327,7 @@ export async function init() {
     );
   } else await createBoard('brainstorm');
   state.ready = true;
-  setTool('select');
+  setTool(initialToolForLayout(isCompactEditor()));
   $('#canvas').removeAttribute('aria-busy');
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {

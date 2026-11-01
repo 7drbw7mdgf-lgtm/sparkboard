@@ -15,3 +15,13 @@ export function allowDoubleClickEdit({ pointerType, firesTouchEvents, lastTouchA
   if (pointerType === 'touch' || firesTouchEvents) return false;
   return !lastTouchAt || now - lastTouchAt > 900;
 }
+
+/** Compact editor should open in navigation mode, not object selection. */
+export function initialToolForLayout(compact) {
+  return compact ? 'hand' : 'select';
+}
+
+/** Connector creation is a desktop tool; mobile uses direct Line drawing. */
+export function toolAvailableOnLayout(tool, compact) {
+  return !(compact && tool === 'connector');
+}
