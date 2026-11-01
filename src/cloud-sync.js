@@ -59,7 +59,12 @@ export class CloudSync {
     if (!UUID.test(userId)) throw Error('Invalid account identity.');
     this.stop();
     this.userId = userId;
-    this.meta = JSON.parse(this.storage.getItem(this.metaKey(userId)) || '{}');
+    try {
+      this.meta = JSON.parse(this.storage.getItem(this.metaKey(userId)) || '{}');
+      if (!this.meta || typeof this.meta !== 'object' || Array.isArray(this.meta)) this.meta = {};
+    } catch {
+      this.meta = {};
+    }
     this.enabled = this.storage.getItem(this.prefKey(userId)) === 'yes';
     if (this.enabled) {
       this.setStatus('Cloud sync starting…');
@@ -68,6 +73,16 @@ export class CloudSync {
     } else {
       this.setStatus('Cloud sync off · local boards only');
     }
+  }
+
+  disable() {
+    if (!this.userId) return;
+    const id = this.userId;
+    this.storage.removeItem(this.prefKey(id));
+    this.stop();
+    this.userId = id;
+    this.meta = JSON.parse(this.storage.getItem(this.metaKey(id)) || '{}');
+    this.setStatus('Cloud sync paused on this browser');
   }
 
   stop() {
@@ -173,7 +188,7 @@ export class CloudSync {
   }
 
   markDeleted(id) {
-    if (!this.enabled) return;
+    if (!this.userId) return;
     const mark = this.meta[id] || { version: 0 };
     this.meta[id] = { ...mark, deleted: true, updated: Date.now() };
     this.persist();
@@ -212,7 +227,19 @@ export class CloudSync {
       const local = localMap.get(id);
       const marker = this.meta[id];
       if (marker?.deleted) {
-        await this.tombstone(id, remote, marker);
+        if (remote.deleted) {
+          this.meta[id] = { version: remote.version, updated: Date.now(), deleted: true };
+          this.persist();
+        } else if (marker.version && marker.version === remote.version) {
+          await this.tombstone(id, remote, marker);
+        } else {
+          // A newer remote edit wins over a stale deletion intent.
+          // Restore it instead of deleting another device's work.
+          await this.access.import({ ...remote.payload, cloudOwner: this.userId });
+          this.meta[id] = { version: remote.version, updated: remote.payload.updated };
+          this.persist();
+          this.setStatus('Deletion conflicted with newer cloud edits; remote board restored');
+        }
         continue;
       }
       if (local?.cloudOwner && local.cloudOwner !== this.userId) continue;
