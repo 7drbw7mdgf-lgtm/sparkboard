@@ -44,6 +44,10 @@ const mobileStyle = `
   #mobile-tool-active button{min-height:36px;padding:6px 12px;border-radius:9px;background:#286a51;color:#fff;font-weight:700;touch-action:manipulation}
   #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(92px + env(safe-area-inset-bottom));z-index:35}
   #toast{bottom:calc(178px + env(safe-area-inset-bottom))}
+  /* Pen width and colour remain usable, without opening a full-screen sheet. */
+  #drawing-options:not([hidden]){position:fixed!important;top:calc(174px + env(safe-area-inset-top))!important;bottom:auto!important;left:12px!important;right:auto!important;width:min(244px,calc(100vw - 24px))!important;max-height:160px!important;padding:11px!important;z-index:39;border-radius:13px;box-shadow:0 7px 25px #1634272a}
+  #drawing-options .panel-heading{display:none}
+  #drawing-options .inspector-section{padding:0}
   #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
   #inspector .format-heading{padding:7px 10px 12px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
