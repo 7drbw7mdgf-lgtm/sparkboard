@@ -86,7 +86,7 @@ function chosenTopic() {
     : null;
 }
 function finishPlacement(message) {
-  if (window.matchMedia('(min-width:651px)').matches) setTool('select');
+  setTool('select');
   toast(message);
 }
 function placeRoot() {
