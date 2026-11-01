@@ -7,6 +7,7 @@ import { render, selectVisual } from './rendering.js';
 import { commit, snapshot } from './history.js';
 import { linkDialog } from './links.js';
 import { state } from './state.js';
+import { isCompactEditor } from './mobile-editor-policy.js';
 export function startEdit(id) {
   if (state.editing?.id === id) return;
   finishEdit();
@@ -41,6 +42,22 @@ export function startEdit(id) {
       $('#dialog').close();
     };
     $('#connector-label-input').select();
+    return;
+  }
+  // A native form is far more reliable than in-canvas contenteditable with iOS keyboards.
+  if (isCompactEditor() && typeof n.text === 'string' && n.type !== 'link') {
+    modal('Edit node text', `<form id="mobile-node-text-form" class="modal-form">
+      <label for="mobile-node-text">Text</label>
+      <textarea id="mobile-node-text" rows="4" maxlength="2000" spellcheck="true"
+        style="width:100%;min-height:130px;font-size:16px;resize:vertical">${esc(n.text)}</textarea>
+      <button type="submit" class="primary" style="min-height:46px">Save text</button>
+    </form>`, 'EDIT NODE');
+    $('#mobile-node-text-form').onsubmit = (event) => {
+      event.preventDefault();
+      commit(() => { n.text = $('#mobile-node-text').value; });
+      $('#dialog').close();
+    };
+    $('#mobile-node-text').focus();
     return;
   }
   if (n.type === 'embed') {
