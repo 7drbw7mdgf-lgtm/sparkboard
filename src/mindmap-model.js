@@ -131,6 +131,11 @@ export function appendMindNode(
 ) {
   if (!id || objects.some((item) => item.id === id)) throw Error('A unique topic ID is required.');
   const parent = objects.find((item) => item.id === parentId && isMindNode(item));
+  if (
+    parent &&
+    (!connectorId || connectorId === id || objects.some((item) => item.id === connectorId))
+  )
+    throw Error('A unique connector ID is required.');
   const topic = {
     id,
     type: 'shape',
@@ -147,8 +152,6 @@ export function appendMindNode(
   };
   objects.push(topic);
   if (parent) {
-    if (!connectorId || objects.some((item) => item.id === connectorId))
-      throw Error('A unique connector ID is required.');
     objects.push({
       id: connectorId,
       type: 'connector',
