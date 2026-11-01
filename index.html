@@ -95,6 +95,25 @@
             </div>
           </section>
 
+          <section id="start-auth" class="start-auth landing-auth" aria-labelledby="start-title">
+            <div class="start-auth-inner">
+              <span class="start-mark" aria-hidden="true">✳</span>
+              <p class="start-kicker">YOUR SPACE STARTS HERE</p>
+              <h2 id="start-title" tabindex="-1">Ready to make something?</h2>
+              <p class="start-subtitle">Sign in to your account or jump straight into a local board. No lengthy setup required.</p>
+              <form id="start-email-form" class="start-email-form" hidden>
+                <label for="start-email">Email address</label>
+                <input id="start-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254" required />
+                <button id="start-email-submit" class="start-submit" type="submit">Continue with email <span aria-hidden="true">→</span></button>
+              </form>
+              <div id="start-providers" class="start-providers" hidden></div>
+              <p id="start-unavailable" class="start-unavailable" hidden>Account sign-in is not configured yet. You can still use your local boards.</p>
+              <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">Preparing your workspace…</p>
+              <div class="start-divider"><span>OR</span></div>
+              <button id="start-guest" class="start-guest" type="button" disabled>Continue without an account <span aria-hidden="true">↗</span></button>
+              <p class="start-privacy">Guest boards are saved in this browser. Account sync is optional and must be enabled after signing in. Local copies remain on this device and are accessible to others using this browser profile after sign-out. Sparkboard is a personal visual workspace, not live multiuser collaboration.</p>
+            </div>
+          </section>
           <section class="landing-value-strip" aria-label="Sparkboard highlights">
             <span>✳ Free to start</span><span>◇ 34 editable shapes</span><span>↗ Connected diagrams</span><span>▧ Media &amp; PDF support</span><span>☁ Optional board sync</span>
           </section>
@@ -149,25 +168,6 @@
             <a class="landing-primary-cta" href="#start-auth">Open your workspace <span aria-hidden="true">↗</span></a>
           </section>
 
-          <section id="start-auth" class="start-auth landing-auth" aria-labelledby="start-title">
-            <div class="start-auth-inner">
-              <span class="start-mark" aria-hidden="true">✳</span>
-              <p class="start-kicker">YOUR SPACE STARTS HERE</p>
-              <h2 id="start-title" tabindex="-1">Ready to make something?</h2>
-              <p class="start-subtitle">Sign in to your account or jump straight into a local board. No lengthy setup required.</p>
-              <form id="start-email-form" class="start-email-form" hidden>
-                <label for="start-email">Email address</label>
-                <input id="start-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254" required />
-                <button id="start-email-submit" class="start-submit" type="submit">Continue with email <span aria-hidden="true">→</span></button>
-              </form>
-              <div id="start-providers" class="start-providers" hidden></div>
-              <p id="start-unavailable" class="start-unavailable" hidden>Account sign-in is not configured yet. You can still use your local boards.</p>
-              <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">Preparing your workspace…</p>
-              <div class="start-divider"><span>OR</span></div>
-              <button id="start-guest" class="start-guest" type="button" disabled>Continue without an account <span aria-hidden="true">↗</span></button>
-              <p class="start-privacy">Guest boards are saved in this browser. Account sync is optional and must be enabled after signing in. Local copies remain on this device and are accessible to others using this browser profile after sign-out. Sparkboard is a personal visual workspace, not live multiuser collaboration.</p>
-            </div>
-          </section>
         </main>
         <footer class="landing-footer"><span class="landing-logo"><span class="landing-spark" aria-hidden="true">✳</span> sparkboard<span class="landing-logo-dot">.</span></span><span>Your ideas. Your space.</span><span>Made for visual thinking · <a href="#start-features">Explore features ↑</a></span></footer>
       </div>
