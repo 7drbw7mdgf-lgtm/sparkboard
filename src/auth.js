@@ -43,6 +43,12 @@ export async function setupAuth(startup) {
       : 'Sign in';
     button.title = user ? 'Your account' : 'Sign in to Sparkboard';
     button.setAttribute('aria-label', button.title);
+    const indicator = $('#cloud-indicator');
+    if (indicator) {
+      indicator.hidden = !user;
+      indicator.textContent = cloud?.status || 'Cloud sync off';
+      indicator.title = 'Cloud sync status · Open account menu to manage';
+    }
   };
 
   const showAccount = () => {
@@ -133,6 +139,8 @@ export async function setupAuth(startup) {
       onStatus: (message) => {
         const display = $('#cloud-sync-state');
         if (display) display.textContent = message;
+        const indicator = $('#cloud-indicator');
+        if (indicator) indicator.textContent = message;
       },
     });
     connectCloudSync(cloud);
