@@ -83,6 +83,17 @@ def verify_sai(manifest):
     return True
 
 
+def verify_pulse(manifest):
+    """Confirm the pinned Pulse public homepage is served over HTTPS."""
+    files = {entry['path']: entry['sha256'] for entry in manifest['files']}
+    name = 'pulse/index.html'
+    if name not in files:
+        raise ValueError('Pulse homepage is absent from the deployment manifest.')
+    ok, description = describe(f'{SITE}/{name}?deployment={manifest["revision"]}')
+    print(f'Public Pulse homepage: {description}', flush=True)
+    return ok and f'sha256={files[name]}' in description
+
+
 def verify():
     revision = os.environ['EXPECTED_REVISION']
     if not re.fullmatch('[a-f0-9]{40}', revision):
@@ -105,10 +116,10 @@ def verify():
         print(f'Public homepage attempt {attempt}/{max_attempts}: {description}', flush=True)
         if ok and f'revision={revision};' in description:
             prefix = '/' if direct else f'/_sparkboard/releases/{release_id}/'
-            if verify_modules(manifest, prefix) and (
-                os.environ.get('REQUIRE_SAI') != '1' or verify_sai(manifest)
-            ):
-                print('HTTPS website, core modules and hosted Sai are verified.', flush=True)
+            if (verify_modules(manifest, prefix)
+                    and (os.environ.get('REQUIRE_SAI') != '1' or verify_sai(manifest))
+                    and (os.environ.get('REQUIRE_PULSE') != '1' or verify_pulse(manifest))):
+                print('HTTPS website, core modules, Sai and Pulse public homepage verified.', flush=True)
                 return 0
         if attempt in (1, max_attempts):
             direct_ok, direct_description = describe(diagnostic_url + f'?probe={attempt}')
