@@ -8,6 +8,9 @@ import re
 import stat
 import sys
 import urllib.request
+import ssl
+import time
+import ftplib
 
 BEGIN = b"# BEGIN SPARKBOARD DEPLOYMENT\n"
 END = b"# END SPARKBOARD DEPLOYMENT\n"
@@ -190,17 +193,39 @@ def verify_live_root(remote):
     print('Confirmed FTP login directory matches the live HTTPS homepage by SHA-256.', flush=True)
 
 
+def publish_with_retries(remote_factory, build, attempts=4, pause=time.sleep):
+    """Retry transient FTPS disconnects using a fresh verified TLS session.
+
+    A partial attempt may have uploaded temporary files. The current public
+    homepage remains untouched until deploy() publishes index.html last;
+    every retry checks the live FTP root again before making changes.
+    """
+    transient = (ssl.SSLEOFError, ConnectionResetError, BrokenPipeError,
+                 TimeoutError, EOFError, ftplib.error_temp)
+    for attempt in range(1, attempts + 1):
+        try:
+            with remote_factory() as remote:
+                print('FTP initial working directory: ' + remote.ftp.pwd(), flush=True)
+                verify_live_root(remote)
+                return deploy(remote, build, remote_root='.')
+        except transient as error:
+            if attempt >= attempts:
+                raise
+            print('Temporary FTPS disconnect (' + type(error).__name__ +
+                  '); opening a fresh TLS session for attempt ' +
+                  str(attempt + 1) + '/' + str(attempts) + '.', flush=True)
+            pause(min(2 ** attempt, 8))
+    raise AssertionError('Unreachable FTPS retry state.')
+
+
 def main():
     from ftps_client import FTPSRemote
     password = os.environ.get('FASTHOSTS_FTP_PASSWORD', '')
     if not password:
         raise ValueError('Set the FASTHOSTS_FTP_PASSWORD GitHub environment secret first (FTP master account).')
     root = Path(__file__).resolve().parent.parent
-    with FTPSRemote(password) as remote:
-        print('FTP initial working directory: ' + remote.ftp.pwd(), flush=True)
-        verify_live_root(remote)
-        revision = deploy(remote, root / 'build/website', remote_root='.')
-        print('Published verified website revision ' + revision)
+    revision = publish_with_retries(lambda: FTPSRemote(password), root / 'build/website')
+    print('Published verified website revision ' + revision)
 
 
 if __name__ == '__main__':
