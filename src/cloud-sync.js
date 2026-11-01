@@ -116,18 +116,28 @@ export class CloudSync {
 
   async enable() {
     if (!this.userId) throw Error('Sign in before enabling sync.');
+    const account = this.userId, epoch = this.epoch;
+    const assertAccount = () => {
+      if (this.userId !== account || this.epoch !== epoch)
+        throw Error('Account changed during sync setup; try again after signing in.');
+    };
     // Fail closed if the SQL migration has not been installed.
     await this.rows();
+    assertAccount();
     await this.access.flush();
+    assertAccount();
     for (const board of await this.access.list()) {
+      assertAccount();
       if (!board.cloudOwner) {
         // Persist ownership locally before the first upload; otherwise switching
         // accounts in this browser could accidentally re-upload another user's boards.
-        await this.access.claim(board.id, this.userId);
+        await this.access.claim(board.id, account);
+        assertAccount();
         this.meta[board.id] ??= { adopt: true, updated: 0, version: 0 };
       }
     }
-    this.storage.setItem(this.prefKey(this.userId), 'yes');
+    assertAccount();
+    this.storage.setItem(this.prefKey(account), 'yes');
     this.persist();
     this.enabled = true;
     this.poll = setInterval(() => this.sync().catch(() => {}), 30000);
@@ -135,9 +145,11 @@ export class CloudSync {
   }
 
   async requestJSON(method, query, body, preference = '') {
+    const account = this.userId, epoch = this.epoch;
     const { data, error } = await this.auth.getSession();
     const session = data?.session;
-    if (error || !session?.access_token || session.user.id !== this.userId)
+    if (error || !session?.access_token || !account || session.user.id !== account ||
+      account !== this.userId || epoch !== this.epoch)
       throw Error('Sign-in expired. Sign in again to resume cloud sync.');
     this.controller ??= new AbortController();
     const response = await this.request(this.url + '/rest/v1/sparkboard_boards' + query, {
@@ -185,16 +197,20 @@ export class CloudSync {
     }
   }
 
-  async write(local, remote) {
-    const payload = portable(await this.access.load(local.id), this.userId);
+  async write(local, remote, epoch = this.epoch) {
+    const account = this.userId;
+    const board = await this.access.load(local.id);
+    if (!account || account !== this.userId || epoch !== this.epoch)
+      throw Error('Account changed during upload; no cloud changes were made.');
+    const payload = portable(board, account);
     const id = encodeURIComponent(local.id),
-      owner = encodeURIComponent(this.userId);
+      owner = encodeURIComponent(account);
     let rows;
     if (!remote) {
       rows = await this.requestJSON(
         'POST',
         '?on_conflict=owner_id,board_id',
-        { owner_id: this.userId, board_id: local.id, payload, version: 1, deleted: false },
+        { owner_id: account, board_id: local.id, payload, version: 1, deleted: false },
         'resolution=ignore-duplicates,return=representation',
       );
     } else {
@@ -305,7 +321,7 @@ export class CloudSync {
         return;
       }
       const decision = syncDecision(local, remote, marker);
-      if (decision === 'push') await this.write(local, remote);
+      if (decision === 'push') await this.write(local, remote, epoch);
       if (decision === 'fork-pull' || decision === 'fork-delete') {
         if (local) await this.access.fork(id);
       }
@@ -340,7 +356,7 @@ export class CloudSync {
       const mark = this.meta[board.id];
       if (!board.cloudOwner && !mark?.adopt) continue; // Never upload unrelated guest boards.
       const remote = remoteMap.get(board.id);
-      if (!remote && !mark?.deleted) await this.write(board, null);
+      if (!remote && !mark?.deleted) await this.write(board, null, epoch);
     }
     if (epoch === this.epoch) this.setStatus('✓ Synced across devices');
   }
