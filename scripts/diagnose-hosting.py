@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import sys
@@ -76,8 +77,35 @@ def inspect_transfer_port(root):
         client.close()
 
 
+def inspect_error_paths(sftp, probe):
+    """Print only paths for our unique missing-file probe, never visitor log lines."""
+    try:
+        print('Log directory: ' + sftp.normalize('logfiles'), flush=True)
+        entries = sftp.listdir_attr('logfiles')
+        print(json.dumps({'available_log_files': [entry.filename for entry in entries]}), flush=True)
+        errors = sorted((entry for entry in entries if 'error' in entry.filename.lower()
+                         and stat.S_ISREG(entry.st_mode) and not entry.filename.endswith('.gz')),
+                        key=lambda entry: entry.st_mtime, reverse=True)[:3]
+        for entry in errors:
+            with sftp.open('logfiles/' + entry.filename, 'rb') as stream:
+                stream.seek(max(0, entry.st_size - 262144))
+                lines = stream.read(262144).decode(errors='replace').splitlines()
+            paths = []
+            for line in lines:
+                if probe in line:
+                    paths.extend(re.findall(r'/[^\s"<>;,]*' + re.escape(probe), line))
+            print(json.dumps({'error_log': entry.filename, 'probe_paths': paths}), flush=True)
+    except OSError as error:
+        print('Error-log access: ' + type(error).__name__, flush=True)
+
+
 def main():
     root = Path(__file__).resolve().parent.parent
+    probe = 'sparkboard-root-probe-' + os.environ['GITHUB_RUN_ID'] + '.js'
+    try:
+        urllib.request.urlopen('https://sparkboard.co.uk/' + probe, timeout=20).close()
+    except urllib.error.HTTPError as error:
+        print('Missing-file root probe HTTP: ' + str(error.code), flush=True)
     client = paramiko.SSHClient()
     client.load_host_keys(str(root / 'deploy/fasthosts_known_hosts'))
     client.set_missing_host_key_policy(paramiko.RejectPolicy())
@@ -89,6 +117,7 @@ def main():
         with client.open_sftp() as sftp:
             sftp.get_channel().settimeout(30)
             print('SFTP home: ' + sftp.normalize('.'), flush=True)
+            inspect_error_paths(sftp, probe)
             # Stay inside this hosting account; never enumerate other tenants.
             print(json.dumps({'home_subdirectories': [
                 entry.filename for entry in sftp.listdir_attr('.')
