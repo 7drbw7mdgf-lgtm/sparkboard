@@ -66,61 +66,125 @@ export function outlineMindmap(objects = []) {
   return rows;
 }
 
-/** Layout only tagged mind-map items. Other whiteboard objects never move. */
+const center = (item) => ({
+  x: (Number(item.x) || 0) + (Number(item.w) || 0) / 2,
+  y: (Number(item.y) || 0) + (Number(item.h) || 0) / 2,
+});
+
+/**
+ * Which way each topic grows: 'left' or 'right' of its root. A first-level topic's side is
+ * read from where it sits relative to the root (so dragging it across switches sides);
+ * deeper topics inherit their branch's side. Roots report 'right'.
+ */
+export function mindSides(objects = [], index = indexMindmap(objects)) {
+  const { nodes, byId, children } = index;
+  const sides = new Map();
+  function assign(item, side, visited) {
+    if (visited.has(item.id)) return;
+    visited.add(item.id);
+    sides.set(item.id, side);
+    for (const child of children.get(item.id) || []) assign(child, side, visited);
+  }
+  for (const item of nodes) {
+    if (sides.has(item.id)) continue;
+    // Walk up to this topic's root (cycle-safe), then label the whole tree.
+    let top = item;
+    const seen = new Set([item.id]);
+    while (top.mindParent && byId.has(top.mindParent) && !seen.has(top.mindParent)) {
+      top = byId.get(top.mindParent);
+      seen.add(top.id);
+    }
+    sides.set(top.id, 'right');
+    const visited = new Set([top.id]);
+    const rootX = center(top).x;
+    for (const child of children.get(top.id) || [])
+      assign(child, center(child).x < rootX ? 'left' : 'right', visited);
+  }
+  return sides;
+}
+
+/** Number of topics below a topic (at any depth). */
+export function descendantCount(objects = [], id, index = indexMindmap(objects)) {
+  const seen = new Set([id]);
+  const stack = [...(index.children.get(id) || [])];
+  while (stack.length) {
+    const item = stack.pop();
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    stack.push(...(index.children.get(item.id) || []));
+  }
+  return seen.size - 1;
+}
+
+/**
+ * Layout only tagged mind-map items. Other whiteboard objects never move.
+ * Roots keep their position; first-level branches stay on the side of the root they are on,
+ * so a two-sided (radial) map remains two-sided.
+ */
 export function layoutMindmap(objects = [], options = {}) {
-  const { nodes, roots, children } = indexMindmap(objects);
+  const index = indexMindmap(objects);
+  const { nodes, roots, children } = index;
   if (!nodes.length) return 0;
   const hgap = options.horizontalGap ?? 105;
   const vgap = options.verticalGap ?? 34;
   const rootGap = options.rootGap ?? 90;
+  const sides = mindSides(objects, index);
   const heightCache = new Map();
   const visiting = new Set();
+  const stackHeight = (list) =>
+    list.reduce((acc, child) => acc + height(child), 0) + Math.max(0, list.length - 1) * vgap;
   function height(item) {
     if (heightCache.has(item.id)) return heightCache.get(item.id);
     if (visiting.has(item.id)) return Math.max(64, Number(item.h) || 70);
     visiting.add(item.id);
     const descendants = item.mindCollapsed ? [] : children.get(item.id) || [];
-    const sum = descendants.reduce((acc, child) => acc + height(child), 0);
-    const result = Math.max(Number(item.h) || 70, sum + Math.max(0, descendants.length - 1) * vgap);
+    const result = Math.max(Number(item.h) || 70, stackHeight(descendants));
     visiting.delete(item.id);
     heightCache.set(item.id, result);
     return result;
   }
   const placed = new Set();
-  function place(item, x, top) {
+  // Stack `list` vertically, centred on `middle`, growing away from `anchorX` towards `side`.
+  function placeStack(list, anchorX, middle, side) {
+    let cursor = middle - stackHeight(list) / 2;
+    for (const child of list) {
+      place(child, anchorX, cursor, side);
+      cursor += height(child) + vgap;
+    }
+  }
+  // `anchorX` is the edge facing the parent: left edge on the right side, right edge on the left.
+  function place(item, anchorX, top, side) {
     if (placed.has(item.id)) return;
     placed.add(item.id);
     const span = height(item);
     if (!item.locked) {
-      item.x = Math.round(x);
+      item.x = Math.round(side === 'left' ? anchorX - item.w : anchorX);
       item.y = Math.round(top + (span - item.h) / 2);
     }
     if (item.mindCollapsed) return;
     const descendants = (children.get(item.id) || []).filter((child) => !placed.has(child.id));
-    const total =
-      descendants.reduce((acc, child) => acc + height(child), 0) +
-      Math.max(0, descendants.length - 1) * vgap;
-    let cursor = top + (span - total) / 2;
-    for (const child of descendants) {
-      place(child, item.x + item.w + hgap, cursor);
-      cursor += height(child) + vgap;
-    }
+    const nextAnchor = side === 'left' ? item.x - hgap : item.x + item.w + hgap;
+    placeStack(descendants, nextAnchor, item.y + item.h / 2, side);
+  }
+  function placeRoot(root, lastBottom) {
+    placed.add(root.id);
+    const kids = root.mindCollapsed
+      ? []
+      : (children.get(root.id) || []).filter((child) => !placed.has(child.id));
+    const left = kids.filter((child) => sides.get(child.id) === 'left');
+    const right = kids.filter((child) => sides.get(child.id) !== 'left');
+    const span = Math.max(Number(root.h) || 70, stackHeight(left), stackHeight(right));
+    const start = Math.max(root.y - (span - root.h) / 2, lastBottom + rootGap);
+    if (!root.locked) root.y = Math.round(start + (span - root.h) / 2);
+    const middle = root.y + root.h / 2;
+    placeStack(right, root.x + root.w + hgap, middle, 'right');
+    placeStack(left, root.x - hgap, middle, 'left');
+    return start + span;
   }
   let lastBottom = -Infinity;
-  for (const root of roots) {
-    const span = height(root);
-    const start = Math.max(root.y - (span - root.h) / 2, lastBottom + rootGap);
-    place(root, root.x, start);
-    lastBottom = start + span;
-  }
+  for (const root of roots) lastBottom = placeRoot(root, lastBottom);
   // Imported cycles and damaged references are recovered as additional roots.
-  for (const item of nodes) {
-    if (placed.has(item.id)) continue;
-    const span = height(item);
-    const start = Math.max(item.y - (span - item.h) / 2, lastBottom + rootGap);
-    place(item, item.x, start);
-    lastBottom = start + span;
-  }
+  for (const item of nodes) if (!placed.has(item.id)) lastBottom = placeRoot(item, lastBottom);
   return placed.size;
 }
 
@@ -165,6 +229,80 @@ export function appendMindNode(
     });
   }
   return topic;
+}
+
+const branchStyleKeys = ['route', 'endArrow', 'startArrow', 'color', 'strokeWidth', 'lineStyle'];
+const incomingBranch = (objects, id) =>
+  objects.find((item) => item.type === 'connector' && item.to === id);
+
+/** Give `topicId` position `afterId + 1` among its siblings and renumber them 0..n-1. */
+function orderAfter(objects, topicId, afterId) {
+  const topic = objects.find((item) => item.id === topicId);
+  const { children } = indexMindmap(objects);
+  const siblings = (children.get(topic.mindParent) || []).filter((item) => item.id !== topicId);
+  const at = afterId ? siblings.findIndex((item) => item.id === afterId) + 1 : siblings.length;
+  siblings.splice(at > 0 ? at : siblings.length, 0, topic);
+  siblings.forEach((item, i) => (item.mindOrder = i));
+}
+
+/**
+ * Add a child topic. A child of a root goes to whichever side has fewer branches (ties go
+ * right); deeper children grow on their parent's side and reuse its branch style.
+ */
+export function addMindChild(objects, { id, connectorId, parentId, text, hgap = 105 }) {
+  const parent = objects.find((item) => item.id === parentId && isMindNode(item));
+  if (!parent) throw Error('A mind-map parent topic is required.');
+  const index = indexMindmap(objects);
+  const sides = mindSides(objects, index);
+  const kids = index.children.get(parent.id) || [];
+  let side;
+  if (!parent.mindParent || !index.byId.has(parent.mindParent)) {
+    const leftCount = kids.filter((item) => sides.get(item.id) === 'left').length;
+    side = leftCount < kids.length - leftCount ? 'left' : 'right';
+  } else side = sides.get(parent.id) || 'right';
+  const topic = appendMindNode(objects, { id, connectorId, parentId, text });
+  topic.x = side === 'left' ? parent.x - hgap - topic.w : parent.x + parent.w + hgap;
+  const inherited = incomingBranch(objects, parent.id);
+  const edge = objects.find((item) => item.id === connectorId);
+  if (inherited?.mindBranch && edge)
+    for (const key of branchStyleKeys) if (key in inherited) edge[key] = inherited[key];
+  orderAfter(objects, topic.id, null);
+  return topic;
+}
+
+/**
+ * Add a topic directly after `siblingId` (same parent, same side, same look). A root has no
+ * siblings, so for a root this adds a child instead; `asChild` reports which happened.
+ */
+export function insertMindSibling(objects, { id, connectorId, siblingId, text }) {
+  const sibling = objects.find((item) => item.id === siblingId && isMindNode(item));
+  if (!sibling) throw Error('A mind-map topic is required.');
+  const parent = objects.find((item) => item.id === sibling.mindParent && isMindNode(item));
+  if (!parent) {
+    return {
+      topic: addMindChild(objects, { id, connectorId, parentId: sibling.id, text }),
+      asChild: true,
+    };
+  }
+  const topic = appendMindNode(objects, { id, connectorId, parentId: parent.id, text });
+  Object.assign(topic, {
+    type: sibling.type,
+    w: sibling.w,
+    h: sibling.h,
+    color: sibling.color,
+    // Same column and just below the sibling, so it lands on the same side before layout.
+    x: sibling.x,
+    y: sibling.y + sibling.h + 1,
+  });
+  const siblingEdge = incomingBranch(objects, sibling.id);
+  const edge = objects.find((item) => item.id === connectorId);
+  if (siblingEdge && edge)
+    for (const key of branchStyleKeys) {
+      if (key in siblingEdge) edge[key] = siblingEdge[key];
+      else delete edge[key];
+    }
+  orderAfter(objects, topic.id, sibling.id);
+  return { topic, asChild: false };
 }
 
 /** Convert an existing node and its existing connector descendants, without cloning art. */
