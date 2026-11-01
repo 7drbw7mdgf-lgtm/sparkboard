@@ -43,6 +43,10 @@ def main():
             sftp.get_channel().settimeout(30)
             print('SFTP home: ' + sftp.normalize('.'), flush=True)
             inspect(sftp, 'htdocs')
+            try:
+                inspect(sftp, 'webapp/public')
+            except FileNotFoundError:
+                print('webapp/public: not present', flush=True)
             # Inspect directory names only, excluding private files and logs.
             for directory in ('htdocs', 'webapp'):
                 try:
