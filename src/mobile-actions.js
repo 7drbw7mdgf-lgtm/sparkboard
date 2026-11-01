@@ -2,7 +2,12 @@ import { M, esc } from './core.js';
 import { shapeNames } from './icons.js';
 
 /** One contextual mobile row: the rest of the canvas stays clear for dragging. */
-export function mobileActionMarkup(nodes, reshapeId, reshapeMode = 'points', selectedVertex = null) {
+export function mobileActionMarkup(
+  nodes,
+  reshapeId,
+  reshapeMode = 'points',
+  selectedVertex = null,
+) {
   if (!nodes.length) return '';
   const single = nodes.length === 1 ? nodes[0] : null;
   const shape = single && M.shapes.includes(single.type) && !single.locked;
@@ -20,9 +25,13 @@ export function mobileActionMarkup(nodes, reshapeId, reshapeMode = 'points', sel
   let actions = '';
   if (reshaping) {
     actions += reshapeMode === 'points' ? button('⌁ Bend', 'bend') : button('◈ Points', 'points');
-    if (reshapeMode === 'points' && Number.isInteger(selectedVertex) &&
-        selectedVertex >= 0 && selectedVertex < M.shapeVertices(single).length &&
-        M.shapeVertices(single).length > 3) {
+    if (
+      reshapeMode === 'points' &&
+      Number.isInteger(selectedVertex) &&
+      selectedVertex >= 0 &&
+      selectedVertex < M.shapeVertices(single).length &&
+      M.shapeVertices(single).length > 3
+    ) {
       actions += button('− Point', 'remove-point');
     }
     actions += button('✓ Done', 'done');
