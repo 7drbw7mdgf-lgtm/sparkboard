@@ -5,6 +5,7 @@ import { linkDialog } from './links.js';
 import { render, renderFast, selectVisual } from './rendering.js';
 import { closeShapes, setTool } from './tools.js';
 import { properties } from './inspector.js';
+import { isCompactEditor } from './mobile-editor-policy.js';
 import { editableNodes, selectIds } from './selection.js';
 import { activeEditor, finishEdit, startEdit } from './editor.js';
 import { commit, redo, snapshot, undo } from './history.js';
@@ -136,7 +137,13 @@ export function setupControls() {
       if (action === 'duplicate') duplicate();
       else if (action === 'delete') deleteSelected();
       else if (action === 'edit') {
-        if (state.selected.size === 1) startEdit([...state.selected][0]);
+        if (state.selected.size === 1) {
+          if (isCompactEditor()) {
+            state.inspectorOpen = false;
+            properties();
+          }
+          startEdit([...state.selected][0]);
+        }
       } else if (action === 'edit-link') {
         const n = editableNodes()[0];
         if (n?.type === 'link') linkDialog(n);
