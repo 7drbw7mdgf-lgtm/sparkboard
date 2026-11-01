@@ -221,12 +221,22 @@ export function renderLines() {
               })
               .join('')
           : '';
+      const waypoints =
+        n.type === 'connector' && selected && !n.locked
+          ? (n.waypoints || []).map((p, i) =>
+              '<circle class="connector-waypoint" data-id="' + n.id + '" data-connector-waypoint="' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + Math.max(7, 9 / state.view.z) + '"><title>Drag to move bend · Alt-click to remove</title></circle>'
+            ).join('')
+          : '';
+      const addBend =
+        n.type === 'connector' && selected && !n.locked && (n.waypoints?.length || 0) < 12
+          ? '<circle class="connector-add-waypoint" data-id="' + n.id + '" data-connector-add="true" cx="' + route.labelX + '" cy="' + (route.labelY + 24 / state.view.z) + '" r="' + Math.max(8, 10 / state.view.z) + '"><title>Add a bend point</title></circle>'
+          : '';
       const handles = selected
         ? n.type === 'line' && !n.locked
           ? `<circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="0" cx="${route.start.x}" cy="${route.start.y}" r="5.5"/><circle class="path-vertex line-vertex" data-id="${n.id}" data-line-vertex="${n.points.length - 1}" cx="${route.end.x}" cy="${route.end.y}" r="5.5"/>`
           : `<circle class="connector-endpoint ${n.locked ? '' : 'connector-binding'}" ${n.locked ? '' : 'data-connector-end="from"'} data-id="${n.id}" cx="${route.start.x}" cy="${route.start.y}" r="${6 / state.view.z}"/><circle class="connector-endpoint ${n.locked ? '' : 'connector-binding'}" ${n.locked ? '' : 'data-connector-end="to"'} data-id="${n.id}" cx="${route.end.x}" cy="${route.end.y}" r="${6 / state.view.z}"/>`
         : '';
-      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${curveControls}${handles}</g>`;
+      return `<g data-id="${n.id}" class="${selected ? 'is-selected' : ''}"><path class="connector-hit" data-id="${n.id}" d="${route.d}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>${halo}<path data-id="${n.id}" d="${route.d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${dash}${markers}/>${label}${curveControls}${handles}${waypoints}${addBend}</g>`;
     })
     .join('');
   const draft = state.connectorDraft
