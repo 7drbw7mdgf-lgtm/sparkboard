@@ -7,6 +7,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest.mock import patch
 from types import SimpleNamespace
 
 spec = importlib.util.spec_from_file_location('deploy_website', Path(__file__).resolve().parents[1] / 'scripts/deploy-website.py')
@@ -148,6 +149,15 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.deploy(remote, self.build)
         self.assertEqual(remote.directories, set())
+
+    def test_live_root_preflight_accepts_only_identical_public_homepage(self):
+        remote = FakeSFTP()
+        with patch.object(module.urllib.request, 'urlopen', return_value=io.BytesIO(b'old working homepage')):
+            module.verify_live_root(remote)
+        with patch.object(module.urllib.request, 'urlopen', return_value=io.BytesIO(b'different hosting space')):
+            with self.assertRaisesRegex(ValueError, 'no website files were changed'):
+                module.verify_live_root(remote)
+        self.assertEqual(remote.events, [])
 
 
 if __name__ == '__main__':

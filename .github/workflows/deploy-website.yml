@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       layout:
-        description: Upload files directly to htdocs or use immutable releases
+        description: Upload directly to the live FTP root or use immutable releases
         type: choice
         default: direct
         options:
@@ -51,8 +51,6 @@ jobs:
           WEBSITE_REVISION: ${{ github.sha }}
           WEBSITE_LAYOUT: ${{ inputs.layout || 'direct' }}
         run: npm run website:build
-      - name: Install SFTP client
-        run: python3 -m pip install --disable-pip-version-check -r deploy/requirements.txt
       - name: Skip superseded commits
         id: current
         shell: bash
@@ -66,7 +64,7 @@ jobs:
       - name: Upload and publish
         if: steps.current.outputs.deploy == 'true'
         env:
-          FASTHOSTS_SFTP_PASSWORD: ${{ secrets.FASTHOSTS_SFTP_PASSWORD }}
+          FASTHOSTS_FTP_PASSWORD: ${{ secrets.FASTHOSTS_FTP_PASSWORD }}
         run: python3 scripts/deploy-website.py
       - name: Verify the public website
         if: steps.current.outputs.deploy == 'true'

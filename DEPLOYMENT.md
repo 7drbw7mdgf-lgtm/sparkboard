@@ -1,35 +1,44 @@
 # Automatic Fasthosts deployment
 
-Pushes to `main` run `.github/workflows/deploy-website.yml`. A manual **Run workflow** on `main` is also available. The workflow checks syntax, formatting, tests and packaging before deploying. Pull requests and other branches never deploy.
+Pushes to `main` run `.github/workflows/deploy-website.yml`. GitHub Actions also offers **Run workflow** on `main`. Checks and builds must pass before publishing; pull requests and other branches never deploy.
 
-## One-time setup
+## Confirmed live destination
 
-1. In GitHub repository Settings → Environments, create `fasthosts-production` and limit deployment branches to `main`.
-2. In that environment, add the secret `FASTHOSTS_SFTP_PASSWORD`. Its value is the existing Fasthosts **SSH/SFTP password**, not the control panel password. Enter it directly in GitHub; never put it in source code, a workflow, or an issue. The workflow authenticates as `csh3485371` on `sftp.sparkboard.co.uk:22`, the hosting account configured for Sparkboard.
-3. Trigger **Deploy website to Fasthosts** on `main`, or push a change. Check the run reaches the final HTTPS verification step. Missing credentials fail with an actionable message and do not change the live homepage.
+The public site is served by the **FTP master account**:
 
-The GitHub Actions environment secret is encrypted by GitHub and is passed only to the upload step. Anyone able to change trusted deployment code on `main` could use that credential, so keep repository write access limited. Changing the hosting password requires updating this secret.
+- Protocol: explicit **FTPS**, with certificate and hostname validation and encrypted data connections.
+- Host: `ftp.fasthosts.co.uk`, port `21`.
+- Username: `sparkboard.co.uk`.
+- Destination: FTP `/` (the account already starts at the website root). Do not append `htdocs`.
+- GitHub environment: `fasthosts-production`, restricted to `main`.
+- Encrypted environment secret: `FASTHOSTS_FTP_PASSWORD`, containing the FTP master password.
+
+This destination was confirmed by downloading FTP `/index.html` and comparing its SHA-256 with HTTPS `/index.html`: both were `efa7ba65ea7e9e7d8fe9587ded3199050a0a93720585f3050167d6486451b5d6`. The SFTP account `csh3485371` exposes a different filesystem view and is no longer the publishing destination. Its secret remains separate for read-only diagnostics; changing that SSH password does not update the FTP master password.
+
+Save the FTP secret without putting it into source code, command arguments, issues or chat:
+
+```sh
+gh secret set FASTHOSTS_FTP_PASSWORD --env fasthosts-production --repo 7drbw7mdgf-lgtm/sparkboard
+```
+
+Enter the password at the hidden prompt. Updating the hosting FTP password requires updating this secret. Anyone who can modify trusted deployment code on `main` can use this credential; keep repository write access limited.
 
 ## Publishing behavior
 
-`npm run website:build` creates `build/website/` from the existing public-file manifest. It includes only HTML, CSS, frontend modules, media/PDF viewer assets and the MIT license. It excludes Node server code, desktop files, local boards, `.git`, dependencies and publisher signing keys.
+`WEBSITE_LAYOUT=direct npm run website:build` creates `build/website/` using the public-file manifest. Only HTML, CSS, frontend modules, media/PDF assets and the MIT license are included. Node server code, desktop files, `.git`, local boards, dependencies and signing keys are excluded.
 
-The default is **direct upload**, matching the manual SFTP method: public files go directly into `htdocs/assets`, `htdocs/src`, and the `htdocs` root. The homepage contains no release-directory base URL. Each file is uploaded to a temporary name, checked by SHA-256, then atomically renamed into place. The existing homepage is backed up and `index.html` is replaced last. Existing unrelated files are retained and hosting rules are preserved. No password is stored in the repository.
+Before any writes, deployment compares FTP `/index.html` with the live HTTPS homepage. A different file means the destination is unconfirmed: publication stops without modifying website files. This check deliberately fails if hosting mapping or caching makes the two views disagree.
 
-Unlike a versioned release, a direct upload replaces shared assets individually: an open browser can briefly load a mixture of old and new modules while deployment runs, and an interrupted upload can leave some updated assets beside the previous homepage. Re-run a successful deployment to complete the set; the homepage backup alone cannot restore overwritten root assets.
+The default `direct` layout matches the manual upload: `assets`, `src`, root modules and CSS go directly into FTP `/`. Each file is staged under a temporary name, read back and checked by SHA-256, then replaced by a same-directory server rename. The deployer never deletes a live file to work around a failed rename. Existing hosting rules and unrelated files are retained. The existing homepage is backed up to `/_sparkboard/previous-index-<release-id>.html`; `index.html` is published last, without a versioned base URL.
 
-In GitHub → Actions → **Deploy website to Fasthosts** → **Run workflow**, choose `direct` (default) to repeat this upload manually. Every push to `main` also uses `direct`. For a local package, use `WEBSITE_LAYOUT=direct npm run website:build`; upload the contents of `build/website/release/` into `htdocs`, keeping `index.html` last.
+Direct uploads replace shared assets individually. Existing browser sessions can briefly see mixed module versions during upload, and interruption can leave some updated assets with the previous homepage. Re-run deployment to finish the set. A homepage backup alone cannot restore overwritten root modules; redeploy the desired source revision for a complete rollback.
 
-The optional `versioned` choice retains the earlier behavior. Each such run uploads a new immutable directory under `htdocs/_sparkboard/releases/<commit>-<run>-<attempt>/`, verifies the transferred file hashes, preserves existing hosting rules and makes the homepage point to that release only after the upload completes. Relative scripts, module imports, fonts and media use the same release through the HTML base URL. Existing open browsers can finish using their old release; refreshing loads the latest successfully published version.
+The optional manual `versioned` layout uploads immutable files to `/_sparkboard/releases/<commit>-<run>-<attempt>/`, then makes the homepage reference that release. Old release directories are retained. Deployments run serially and skip a superseded commit before upload starts.
 
-The SFTP server host key is pinned in `deploy/fasthosts_known_hosts`. A changed or unknown key fails closed. Confirm any legitimate hosting key change through Fasthosts before updating that file. The deployer requires the server's OpenSSH atomic-rename support; it never deletes the current homepage to make room for a new one.
+The final HTTPS check requires the expected commit marker and matching SHA-256 hashes for `app.js`, `board-model.js` and `src/connector-model.js`. Successful transfer alone is not reported as a live deployment. TLS errors, 404s and stale files fail verification. Never bypass certificate checks to mark a deployment successful.
 
-The workflow serializes deployments and skips a commit if a newer `main` exists when upload starts. Older release directories and the prior homepage are retained for recovery; nothing in the existing board storage or hosting's certificate verification directory is deleted. Deployment history will consume hosting space until old releases are intentionally removed.
+## Recovery and account setup
 
-The final check uses normal HTTPS certificate validation and verifies the public page's commit marker plus the SHA-256 hashes of `app.js`, `board-model.js`, and `src/connector-model.js`. A 404 or stale module fails verification. Direct uploads do not solve an incorrect hosting document root or storage mapping; the verification reports this rather than claiming success. DNS propagation, an inactive certificate or hosting caches can make that step fail even after the SFTP upload succeeded; the job logs distinguish publication from the public check. Do not bypass TLS errors to mark a deployment successful.
+Revert a faulty commit on `main` to publish a newly tested file set. Existing saved boards remain in browser storage; deployment does not delete them or hosting certificate verification files. Backups and immutable releases consume hosting space until intentionally removed.
 
-## Recovery
-
-Prefer reverting the faulty commit on `main`: the revert uploads a new tested file set in the selected layout. The previous homepage is also saved as `htdocs/_sparkboard/previous-index-<new-release-id>.html`, and its referenced old release files remain available. For versioned deployments, restoring that file to `htdocs/index.html` through SFTP is a manual recovery option. For direct uploads, redeploy the desired source revision to restore its assets as well. Older pre-deployment root files are retained as well.
-
-Social-login providers are configured separately in Supabase and in `src/auth-config.js`. A code deployment does not create provider credentials, enable a paused provider or sync users' local boards.
+Social-login providers are configured separately in Supabase and `src/auth-config.js`. Deployment does not create provider credentials, enable paused providers, or sync users' local boards. DNS and email records are unchanged by this workflow.

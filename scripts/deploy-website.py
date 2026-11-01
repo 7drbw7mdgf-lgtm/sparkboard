@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 import re
 import stat
 import sys
+import urllib.request
 
 BEGIN = b"# BEGIN SPARKBOARD DEPLOYMENT\n"
 END = b"# END SPARKBOARD DEPLOYMENT\n"
@@ -125,24 +126,34 @@ def deploy(sftp, build, remote_root='htdocs'):
     return revision
 
 
+def verify_live_root(remote):
+    """Refuse to write to a filesystem view that differs from the live website."""
+    with remote.open('index.html', 'rb') as stream:
+        remote_index = stream.read(1024 * 1024 + 1)
+    if len(remote_index) > 1024 * 1024:
+        raise ValueError('Existing homepage is unexpectedly large.')
+    request = urllib.request.Request(
+        'https://sparkboard.co.uk/index.html?root-check=' + os.environ.get('GITHUB_RUN_ID', 'local'),
+        headers={'Cache-Control': 'no-cache'},
+    )
+    with urllib.request.urlopen(request, timeout=25) as response:
+        public_index = response.read(1024 * 1024 + 1)
+    if digest(remote_index) != digest(public_index):
+        raise ValueError('FTP root differs from the live HTTPS homepage; no website files were changed.')
+    print('Confirmed FTP / matches the live HTTPS homepage by SHA-256.', flush=True)
+
+
 def main():
-    import paramiko
-    password = os.environ.get('FASTHOSTS_SFTP_PASSWORD', '')
+    from ftps_client import FTPSRemote
+    password = os.environ.get('FASTHOSTS_FTP_PASSWORD', '')
     if not password:
-        raise ValueError('Set the FASTHOSTS_SFTP_PASSWORD GitHub environment secret first.')
+        raise ValueError('Set the FASTHOSTS_FTP_PASSWORD GitHub environment secret first (FTP master account).')
     root = Path(__file__).resolve().parent.parent
-    client = paramiko.SSHClient()
-    client.load_host_keys(str(root / 'deploy/fasthosts_known_hosts'))
-    client.set_missing_host_key_policy(paramiko.RejectPolicy())
-    try:
-        client.connect('sftp.sparkboard.co.uk', port=22, username='csh3485371', password=password,
-                       look_for_keys=False, allow_agent=False, timeout=25, auth_timeout=25, banner_timeout=25)
-        with client.open_sftp() as sftp:
-            sftp.get_channel().settimeout(60)
-            revision = deploy(sftp, root / 'build/website')
+    with FTPSRemote(password) as remote:
+        remote.chdir('/')
+        verify_live_root(remote)
+        revision = deploy(remote, root / 'build/website', remote_root='/')
         print('Published verified website revision ' + revision)
-    finally:
-        client.close()
 
 
 if __name__ == '__main__':
@@ -153,5 +164,5 @@ if __name__ == '__main__':
         if isinstance(error, ValueError):
             print(str(error), file=sys.stderr)
         else:
-            print('Website deployment failed (' + type(error).__name__ + '). Check hosting access and the pinned host key.', file=sys.stderr)
+            print('Website deployment failed (' + type(error).__name__ + '). Check FTP access and the TLS connection.', file=sys.stderr)
         sys.exit(1)
