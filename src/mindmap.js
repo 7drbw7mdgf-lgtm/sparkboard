@@ -144,6 +144,7 @@ function changeMode(mode) {
     $('#inspector').hidden = true;
   }
   refreshWorkspace();
+  document.dispatchEvent(new Event('sparkboard:mode'));
   save();
 }
 function refreshWorkspace() {
