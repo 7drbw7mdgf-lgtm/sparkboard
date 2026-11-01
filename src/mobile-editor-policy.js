@@ -21,7 +21,7 @@ export function initialToolForLayout(compact) {
   return compact ? 'hand' : 'select';
 }
 
-/** Connector creation is a desktop tool; mobile uses direct Line drawing. */
+/** Connectors remain available on phones from selected objects, not the toolbar. */
 export function toolAvailableOnLayout(tool, compact) {
-  return !(compact && tool === 'connector');
+  return true;
 }
