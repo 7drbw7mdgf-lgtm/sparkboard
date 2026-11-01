@@ -13,7 +13,7 @@ The checked-in `src/auth-config.js` enables the email-link option via `emailEnab
 3. Confirm that Supabase's confirmation email template sends a link using the configured PKCE redirect/callback flow. Test requesting a link, following it, reload, and sign-out using a dedicated test account.
 4. If email sign-in is not ready, set `emailEnabled: false`. Social providers remain controlled by `providers`. With both options disabled, the startup screen clearly says sign-in is unavailable and lets users proceed as guests.
 
-**Important:** An account is for identity only. Boards remain in this browser's local IndexedDB storage. A guest and a signed-in user on the same browser profile can access the same local boards. Signing out does not erase, lock, or hide the boards, and signing in on another device does not restore them. Do not describe this screen as an access-control or privacy boundary until account-owned cloud storage and authorisation exist.
+**Important:** Account sign-in now supports **optional cloud board sync**, but only after the server migration in [CLOUD-SYNC-SETUP.md](CLOUD-SYNC-SETUP.md) is installed. Existing guest boards remain local until the user explicitly enables sync from the account dialog. Local copies are **still accessible in this browser profile after sign-out**, so signing out is not a privacy boundary. Failed sync attempts do not remove local boards.
 
 ## Project configuration
 
@@ -61,6 +61,8 @@ Test every enabled provider on the HTTPS domain using separate test accounts: fi
 
 The implementation uses PKCE, removes callback codes/errors from the address bar, and saves pending board changes before navigating to the provider. The SDK stores the account session in browser storage and refreshes it. No provider access token is needed by Sparkboard.
 
-## Storage scope
+## Storage scope and cross-device sync
 
-Accounts currently identify the signed-in user only. Existing IndexedDB boards remain local to this browser and are visible to anyone using this browser profile, including after sign-out or account switching. They are not uploaded, assigned to an account, synced or made private by signing in. The account dialog states this explicitly. Cloud boards require a separate migration with user ownership, row-level security, media storage policies and conflict handling before enabling sync.
+Supabase Auth identifies the user. **Opt-in** cloud board sync requires installing `supabase/migrations/20261101000000_board_sync.sql` in the configured Supabase project, verifying authenticated row-level security and testing with two devices. Use [CLOUD-SYNC-SETUP.md](CLOUD-SYNC-SETUP.md) for the activation, conflict handling and privacy limitations. Do not describe sync as enabled merely because the static website has been published.
+
+Signed-out and other browser users can still access local board caches, even after sync was previously enabled. Users should explicitly export, clear their browser data or use separate profiles for sensitive work.
