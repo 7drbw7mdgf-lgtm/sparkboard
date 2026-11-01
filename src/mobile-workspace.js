@@ -39,6 +39,9 @@ const mobileStyle = `
   #canvas{bottom:calc(145px + env(safe-area-inset-bottom))!important}
   #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(92px + env(safe-area-inset-bottom));z-index:35}
   #toast{bottom:calc(178px + env(safe-area-inset-bottom))}
+  #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
+  #inspector .format-heading{padding:7px 10px 12px}
+  #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
   #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #286a51;outline-offset:2px}
   body.workspace-empty #mobile-tool-sheet{display:none!important}
 }
