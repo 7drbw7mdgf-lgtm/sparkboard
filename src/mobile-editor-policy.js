@@ -16,9 +16,9 @@ export function allowDoubleClickEdit({ pointerType, firesTouchEvents, lastTouchA
   return !lastTouchAt || now - lastTouchAt > 900;
 }
 
-/** Compact editor should open in navigation mode, not object selection. */
+/** One finger selects/moves; two fingers navigate via the gesture layer. */
 export function initialToolForLayout(compact) {
-  return compact ? 'hand' : 'select';
+  return 'select';
 }
 
 /** Connectors remain available on phones from selected objects, not the toolbar. */

@@ -168,6 +168,11 @@ export function endPointer(e) {
   if (pointerId !== undefined && $('#canvas').hasPointerCapture(pointerId))
     $('#canvas').releasePointerCapture(pointerId);
   if (d.type === 'pan') return;
+  if (d.type === 'connector-waypoint') {
+    if (d.changed) save();
+    renderLines();
+    return;
+  }
   if (d.type === 'rebind-connector') {
     const draft = state.connectorDraft;
     state.connectorDraft = null;
@@ -355,6 +360,34 @@ export function setupCanvas() {
       };
       eraseAt(p);
       capture(e);
+      return;
+    }
+    const bendHandle = e.target.closest('[data-connector-waypoint]');
+    const addBendHandle = e.target.closest('[data-connector-add]');
+    if (bendHandle) {
+      const edge = state.board.objects.find(
+        (item) => item.id === bendHandle.dataset.id && item.type === 'connector',
+      );
+      const index = Number(bendHandle.dataset.connectorWaypoint);
+      if (!edge || edge.locked || !Array.isArray(edge.waypoints) || !edge.waypoints[index]) return;
+      if (e.altKey) {
+        commit(() => edge.waypoints.splice(index, 1));
+        return;
+      }
+      state.drag = { type: 'connector-waypoint', id: edge.id, index, changed: false };
+      capture(e);
+      return;
+    }
+    if (addBendHandle) {
+      const edge = state.board.objects.find(
+        (item) => item.id === addBendHandle.dataset.id && item.type === 'connector',
+      );
+      if (!edge || edge.locked || (edge.waypoints?.length || 0) >= 12) return;
+      commit(() => {
+        edge.waypoints ??= [];
+        edge.waypoints.push({ x: Math.round(p.x), y: Math.round(p.y) });
+        state.selected = new Set([edge.id]);
+      });
       return;
     }
     const bindingHandle = e.target.closest('[data-connector-end]');
@@ -660,6 +693,17 @@ export function setupCanvas() {
     if (!state.drag || (state.drag.pointerId !== undefined && e.pointerId !== state.drag.pointerId))
       return;
     const p = point(e);
+    if (state.drag.type === 'connector-waypoint') {
+      const edge = state.board.objects.find(
+        (item) => item.id === state.drag.id && item.type === 'connector',
+      );
+      if (!edge?.waypoints?.[state.drag.index]) return;
+      if (!state.drag.changed) snapshot();
+      state.drag.changed = true;
+      edge.waypoints[state.drag.index] = { x: Math.round(p.x), y: Math.round(p.y) };
+      renderLines();
+      return;
+    }
     if (state.drag.type === 'pan') {
       state.view.x = state.drag.x + e.clientX - state.drag.cx;
       state.view.y = state.drag.y + e.clientY - state.drag.cy;

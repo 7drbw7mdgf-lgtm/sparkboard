@@ -1,4 +1,5 @@
 import { embedDialog } from './embeds.js';
+import { openConnectorControls } from './connector-edit.js';
 import { modal } from './dialogs.js';
 import { save, scheduleSave } from './boards.js';
 import { $, esc, M } from './core.js';
@@ -11,7 +12,11 @@ export function startEdit(id) {
   finishEdit();
   const n = state.board.objects.find((n) => n.id === id);
   if (!n || n.locked || ['path', 'image', 'file'].includes(n.type)) return;
-  if (n.type === 'connector' || n.type === 'line') {
+  if (n.type === 'connector') {
+    openConnectorControls(n);
+    return;
+  }
+  if (n.type === 'line') {
     const route = n.route || 'straight',
       lineStyle = n.lineStyle || 'solid',
       startArrow = n.startArrow || 'none',
