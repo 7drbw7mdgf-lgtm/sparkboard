@@ -23,13 +23,15 @@ function isFrameInterior(n, p) {
 }
 
 function currentLineOptions(defaultRoute = 'straight') {
+  const flow = state.board?.diagramView === 'flowchart' && defaultRoute === 'curved';
   return {
-    route: $('#line-route')?.value || defaultRoute,
+    route: flow ? 'elbow' : $('#line-route')?.value || defaultRoute,
     lineStyle: $('#line-style')?.value || 'solid',
     startArrow: $('#line-start-arrow')?.value || 'none',
-    endArrow: $('#line-end-arrow')?.value || 'arrow',
-    color: $('#line-color')?.value || '#86917b',
-    strokeWidth: Number($('#line-width')?.value) || 2,
+    endArrow: flow ? 'filled' : $('#line-end-arrow')?.value || 'arrow',
+    color: flow ? '#64748b' : $('#line-color')?.value || '#86917b',
+    strokeWidth: flow ? 2.5 : Number($('#line-width')?.value) || 2,
+    ...(flow ? { flowEdge: true } : {}),
   };
 }
 
