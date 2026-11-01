@@ -88,3 +88,9 @@ export function openConnectorControls(target) {
       action === 'clear' ? 'Bend points reset' : 'Connector reversed');
   });
 }
+
+export function setupConnectorEdit() {
+  document.addEventListener('sparkboard:connector-edit', (event) =>
+    openConnectorControls(event.detail?.id),
+  );
+}
