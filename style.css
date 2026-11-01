@@ -2948,7 +2948,9 @@ body.is-panning #canvas {
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 800 22px/1.2 Manrope, sans-serif;
+  font:
+    800 22px/1.2 Manrope,
+    sans-serif;
   letter-spacing: -1px;
 }
 .start-brand span,
@@ -2970,7 +2972,9 @@ body.is-panning #canvas {
 }
 .start-intro h1 {
   margin: 0;
-  font: 750 clamp(38px, 4.3vw, 67px)/1.12 Manrope, sans-serif;
+  font:
+    750 clamp(38px, 4.3vw, 67px)/1.12 Manrope,
+    sans-serif;
   letter-spacing: -2.5px;
 }
 .start-intro h1 em {
@@ -3015,7 +3019,9 @@ body.is-panning #canvas {
   width: min(45%, 230px);
   min-height: 88px;
   padding: 19px;
-  font: 700 15px/1.4 Manrope, sans-serif;
+  font:
+    700 15px/1.4 Manrope,
+    sans-serif;
   border-radius: 12px 12px 19px 12px;
   box-shadow: 0 7px 14px #313a2611;
 }
@@ -3079,7 +3085,9 @@ body.is-panning #canvas {
 }
 .start-auth h2 {
   margin: 0;
-  font: 750 clamp(29px, 3vw, 43px)/1.17 Manrope, sans-serif;
+  font:
+    750 clamp(29px, 3vw, 43px)/1.17 Manrope,
+    sans-serif;
   letter-spacing: -1.5px;
 }
 .start-subtitle {

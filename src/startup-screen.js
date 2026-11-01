@@ -74,7 +74,9 @@ export function setupStartupScreen() {
   screen.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab' || screen.hidden) return;
     const controls = [
-      ...screen.querySelectorAll('button:not(:disabled):not([hidden]), input:not(:disabled):not([hidden])'),
+      ...screen.querySelectorAll(
+        'button:not(:disabled):not([hidden]), input:not(:disabled):not([hidden])',
+      ),
     ].filter((control) => control.getClientRects().length);
     if (!controls.length) return;
     const first = controls[0];
@@ -125,7 +127,14 @@ export function setupStartupScreen() {
     dismiss,
     open,
     signedIn: () => dismiss(),
-    ready({ user = null, emailEnabled = false, enabledProviders = [], onEmail, onProvider, error = '' } = {}) {
+    ready({
+      user = null,
+      emailEnabled = false,
+      enabledProviders = [],
+      onEmail,
+      onProvider,
+      error = '',
+    } = {}) {
       ready = true;
       signInEmail = emailEnabled ? onEmail : null;
       signInProvider = onProvider || null;

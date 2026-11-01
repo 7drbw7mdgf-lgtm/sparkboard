@@ -14,7 +14,12 @@ test('accounts stay disabled until configured and accept only public keys', () =
       publishableKey: 'sb_publishable_example',
       providers: ['google', 'facebook', 'google', 'evil'],
     }),
-    { url, publishableKey: 'sb_publishable_example', providers: ['google', 'facebook'], emailEnabled: false },
+    {
+      url,
+      publishableKey: 'sb_publishable_example',
+      providers: ['google', 'facebook'],
+      emailEnabled: false,
+    },
   );
   const jwt = (role) => 'e30.' + btoa(JSON.stringify({ role })).replace(/=+$/, '') + '.signature';
   assert.ok(authSettings({ url, publishableKey: jwt('anon'), providers: ['google'] }));
