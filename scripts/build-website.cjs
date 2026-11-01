@@ -36,6 +36,16 @@ function buildWebsite({ root, out, revision, releaseId, layout = 'versioned' }) 
     bytes: fs.readFileSync(path.join(root, name === 'LICENSE.txt' ? 'LICENSE' : name)),
   }));
   entries.push(...saiFiles);
+  const pulseDist = path.join(root, 'build/pulse-dist');
+  const pulseIndex = path.join(pulseDist, 'index.html');
+  if (process.env.REQUIRE_PULSE === '1' && !fs.existsSync(pulseIndex))
+    throw Error('Pulse public site build is required for this website release.');
+  if (fs.existsSync(pulseIndex)) {
+    const pulseHtml = fs.readFileSync(pulseIndex);
+    if (!pulseHtml.toString('utf8').includes('<title>Pulse'))
+      throw Error('Invalid Pulse homepage build.');
+    entries.push({ name: 'pulse/index.html', bytes: pulseHtml });
+  }
   const prefix = `/_sparkboard/releases/${releaseId}/`;
   const html = entries.find((entry) => entry.name === 'index.html');
   const source = html.bytes.toString('utf8');

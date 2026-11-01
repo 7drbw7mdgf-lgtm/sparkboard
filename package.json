@@ -9,6 +9,7 @@
     "vendor:auth": "node scripts/vendor-auth.cjs",
     "website:build": "node scripts/build-website.cjs",
     "sai:build": "node scripts/build-sai.cjs",
+    "pulse:build": "node scripts/build-pulse.cjs",
     "test": "node --test board-model.test.cjs updater.test.cjs tests/*.test.js tests/*.test.cjs",
     "sandbox:prepare": "node scripts/release.cjs --sandbox",
     "release:build": "node scripts/release.cjs",
