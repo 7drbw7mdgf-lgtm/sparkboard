@@ -4,7 +4,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { collectPublicFiles } = require('../lib/public-files.cjs');
 
-function buildWebsite({ root, out, revision, releaseId }) {
+function buildWebsite({ root, out, revision, releaseId, layout = 'versioned' }) {
+  if (!['direct', 'versioned'].includes(layout)) throw Error('Invalid website layout.');
   if (!/^[a-f0-9]{40}$/.test(revision || '')) throw Error('A full Git commit SHA is required.');
   if (!new RegExp(`^${revision}-(?:[0-9]+|local)-[0-9]+$`).test(releaseId || ''))
     throw Error('Invalid website release identifier.');
@@ -22,12 +23,12 @@ function buildWebsite({ root, out, revision, releaseId }) {
   html.bytes = Buffer.from(
     source.replace(
       '<head>',
-      `<head>\n    <base href="${prefix}" />\n    <meta name="sparkboard-build" content="${revision}" />`,
+      `<head>\n${layout === 'versioned' ? `    <base href="${prefix}" />\n` : ''}    <meta name="sparkboard-build" content="${revision}" />`,
     ),
   );
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(path.join(out, 'release'), { recursive: true });
-  const manifest = { revision, releaseId, files: [] };
+  const manifest = { revision, releaseId, layout, files: [] };
   for (const { name, bytes } of entries) {
     const destination = path.join(out, 'release', name);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
@@ -56,7 +57,10 @@ if (require.main === module) {
     out: path.join(root, 'build/website'),
     revision,
     releaseId,
+    layout: process.env.WEBSITE_LAYOUT || 'versioned',
   });
-  console.log(`Website built: ${manifest.files.length} public files; revision ${revision}.`);
+  console.log(
+    `Website built: ${manifest.files.length} public files; layout ${manifest.layout}; revision ${revision}.`,
+  );
 }
 module.exports = { buildWebsite };

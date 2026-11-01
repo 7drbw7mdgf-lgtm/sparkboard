@@ -46,6 +46,8 @@ class FakeSFTP:
 
     def open(self, path, mode):
         writing = 'w' in mode
+        if writing and self.fail_upload and path.startswith('src/'):
+            raise OSError('simulated direct upload failure')
         if not writing and path not in self.files:
             raise FileNotFoundError(errno.ENOENT, 'missing')
         return RemoteFile(self.files, path, writing)
@@ -110,6 +112,42 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.deploy(remote, self.build)
         self.assertEqual(remote.events, [])
+
+    def direct_manifest(self):
+        manifest = json.loads((self.build / 'manifest.json').read_text())
+        manifest['layout'] = 'direct'
+        (self.build / 'manifest.json').write_text(json.dumps(manifest))
+
+    def test_direct_upload_updates_root_modules_and_publishes_index_last(self):
+        self.direct_manifest()
+        remote = FakeSFTP()
+        remote.files['.well-known/verification'] = b'keep me'
+        module.deploy(remote, self.build)
+        self.assertEqual(remote.files['src/example.js'], b'export {};')
+        self.assertEqual(remote.files['app.js'], b'import "./src/example.js";')
+        self.assertEqual(remote.files['.well-known/verification'], b'keep me')
+        self.assertEqual(remote.events[-1], ('publish', 'index.html'))
+        self.assertNotIn('_sparkboard/releases', remote.directories)
+        self.assertEqual(remote.files['_sparkboard/previous-index-' + self.release_id + '.html'], b'old working homepage')
+        self.assertIn(b'RewriteEngine On', remote.files['.htaccess'])
+
+    def test_direct_failure_keeps_old_homepage_and_failed_asset(self):
+        self.direct_manifest()
+        remote = FakeSFTP(fail_upload=True)
+        remote.files['src/example.js'] = b'previous module'
+        with self.assertRaises(OSError):
+            module.deploy(remote, self.build)
+        self.assertEqual(remote.files['index.html'], b'old working homepage')
+        self.assertEqual(remote.files['src/example.js'], b'previous module')
+
+    def test_unknown_layout_is_rejected_before_remote_changes(self):
+        manifest = json.loads((self.build / 'manifest.json').read_text())
+        manifest['layout'] = 'unsupported'
+        (self.build / 'manifest.json').write_text(json.dumps(manifest))
+        remote = FakeSFTP()
+        with self.assertRaises(ValueError):
+            module.deploy(remote, self.build)
+        self.assertEqual(remote.directories, set())
 
 
 if __name__ == '__main__':

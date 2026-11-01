@@ -1,5 +1,6 @@
 """Verify that the public HTTPS origin serves the newly published release."""
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -37,6 +38,7 @@ def describe(url):
         except (subprocess.TimeoutExpired, OSError) as error:
             return False, f'Fetch failed: {type(error).__name__}'
         body = body_path.read_text(errors='replace') if body_path.exists() else ''
+        checksum = hashlib.sha256(body_path.read_bytes()).hexdigest() if body_path.exists() else ''
         info = response.stdout.strip().split('|', 2)
         status, final_url, remote_ip = (info + ['unknown'] * 3)[:3]
         base = BASE_PATTERN.search(body)
@@ -46,11 +48,23 @@ def describe(url):
         description = (
             f'HTTP {status}; destination={final_url}; address={remote_ip}; '
             f'revision={revision or "not found"}; base={base.group(1) if base else "not found"}; '
-            f'cache={cache_headers or "not reported"}'
+            f'cache={cache_headers or "not reported"}; sha256={checksum}'
         )
         if response.returncode:
             description += f'; curl error={response.stderr.strip()[:250]}'
         return response.returncode == 0 and status == '200', description
+
+
+def verify_modules(manifest, prefix):
+    files = {entry['path']: entry['sha256'] for entry in manifest['files']}
+    for name in ('app.js', 'board-model.js', 'src/connector-model.js'):
+        if name not in files:
+            raise ValueError('Required public module is missing from the manifest: ' + name)
+        ok, description = describe(f'{SITE}{prefix}{name}?deployment={manifest["revision"]}')
+        print(f'Public module {name}: {description}', flush=True)
+        if not ok or f'sha256={files[name]}' not in description:
+            return False
+    return True
 
 
 def verify():
@@ -66,22 +80,26 @@ def verify():
 
     root = f'{SITE}/?deployment={revision}'
     immutable = f'{SITE}/_sparkboard/releases/{release_id}/index.html'
+    direct = manifest.get('layout', 'versioned') == 'direct'
+    diagnostic_url = f'{SITE}/src/connector-model.js' if direct else immutable
     max_attempts = 7
     for attempt in range(1, max_attempts + 1):
         url = root + f'&probe={attempt}'
         ok, description = describe(url)
         print(f'Public homepage attempt {attempt}/{max_attempts}: {description}', flush=True)
         if ok and f'revision={revision};' in description:
-            print('HTTPS website is serving the newly deployed revision.', flush=True)
-            return 0
+            prefix = '/' if direct else f'/_sparkboard/releases/{release_id}/'
+            if verify_modules(manifest, prefix):
+                print('HTTPS website and core modules are serving the newly deployed revision.', flush=True)
+                return 0
         if attempt in (1, max_attempts):
-            direct_ok, direct_description = describe(immutable + f'?probe={attempt}')
-            print(f'Immutable release path: {direct_description}', flush=True)
+            direct_ok, direct_description = describe(diagnostic_url + f'?probe={attempt}')
+            print(f'{"Root connector module" if direct else "Immutable release path"}: {direct_description}', flush=True)
             if attempt == max_attempts:
-                if direct_ok and f'revision={revision};' in direct_description:
+                if not direct and direct_ok and f'revision={revision};' in direct_description:
                     print('The release is reachable at its immutable URL, but the homepage is stale. Check front-end caches or homepage routing.', flush=True)
                 else:
-                    print('The immutable release is not being served from this HTTPS origin. Check Fasthosts document root and the domain DNS/hosting mapping.', flush=True)
+                    print('The uploaded website is not being served from this HTTPS origin. Check Fasthosts document root and the domain DNS/hosting mapping.', flush=True)
                 _, www_description = describe(f'https://www.sparkboard.co.uk/?deployment={revision}')
                 print(f'WWW hostname diagnostic: {www_description}', flush=True)
         if attempt < max_attempts:

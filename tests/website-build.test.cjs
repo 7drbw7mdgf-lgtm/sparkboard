@@ -40,6 +40,17 @@ test('website packaging includes only public files and binds all relative assets
     for (const entry of result.files)
       assert.ok(!/private|server|updater|\.sparkboard/i.test(entry.path));
     assert.equal(fs.readFileSync(path.join(out, 'release/LICENSE.txt'), 'utf8'), 'MIT');
+    const direct = buildWebsite({ root, out, revision, releaseId, layout: 'direct' });
+    assert.equal(direct.layout, 'direct');
+    const directHtml = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+    assert.doesNotMatch(directHtml, /<base\b/i);
+    assert.match(directHtml, /src="app.js"/);
+    assert.match(directHtml, new RegExp(`content="${revision}"`));
+    assert.ok(fs.existsSync(path.join(out, 'release/src/example.js')));
+    assert.throws(
+      () => buildWebsite({ root, out, revision, releaseId, layout: 'unknown' }),
+      /layout/,
+    );
     assert.throws(
       () => buildWebsite({ root, out, revision, releaseId: '../../escape' }),
       /identifier/,

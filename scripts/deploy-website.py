@@ -1,4 +1,4 @@
-"""Publish a verified static release over SFTP; replace the live index last."""
+"""Publish verified public files over SFTP; replace the live index last."""
 import errno
 import hashlib
 import json
@@ -52,6 +52,9 @@ def deploy(sftp, build, remote_root='htdocs'):
     build = Path(build)
     manifest = json.loads((build / 'manifest.json').read_text())
     revision, release_id = manifest['revision'], manifest['releaseId']
+    layout = manifest.get('layout', 'versioned')
+    if layout not in ('direct', 'versioned'):
+        raise ValueError('Invalid website layout.')
     if not re.fullmatch(r'[a-f0-9]{40}', revision) or not re.fullmatch(revision + r'-(?:\d+|local)-\d+', release_id):
         raise ValueError('Invalid release identity.')
     # Validate the complete package before any remote mutations.
@@ -72,31 +75,40 @@ def deploy(sftp, build, remote_root='htdocs'):
     index = (build / 'index.html').read_bytes()
     if 'index.html' not in seen or index != (build / 'release/index.html').read_bytes():
         raise ValueError('Homepage differs from the verified release.')
+    if layout == 'direct' and re.search(rb'<base\b', index, re.I):
+        raise ValueError('Direct uploads must use relative asset paths without a base URL.')
     configuration = (build / '.htaccess').read_bytes()
     sftp.chdir(remote_root)
     ensure_directory(sftp, '_sparkboard')
-    ensure_directory(sftp, '_sparkboard/releases')
-    release_path = '_sparkboard/releases/' + release_id
-    # A unique run/attempt ID prevents modifying files used by an earlier deployment.
-    sftp.mkdir(release_path)
+    release_path = ''
+    if layout == 'versioned':
+        ensure_directory(sftp, '_sparkboard/releases')
+        release_path = '_sparkboard/releases/' + release_id
+        # A unique run/attempt ID prevents modifying earlier immutable releases.
+        sftp.mkdir(release_path)
     directories = {release_path}
+    # Save the current homepage before updating any root assets.
+    previous = read_optional(sftp, 'index.html')
+    if previous is not None:
+        with sftp.open('_sparkboard/previous-index-' + release_id + '.html', 'wb') as stream:
+            stream.write(previous)
     for name, local in entries:
-        remote = release_path + '/' + name
+        if layout == 'direct' and name == 'index.html':
+            continue
+        remote = release_path + '/' + name if release_path else name
         parent = PurePosixPath(remote).parent
         for directory in reversed([parent, *parent.parents]):
             directory = str(directory)
             if directory != '.' and directory not in directories:
                 ensure_directory(sftp, directory)
                 directories.add(directory)
+        if layout == 'direct':
+            atomic_write(sftp, remote, local.read_bytes(), release_id)
+            continue
         sftp.put(str(local), remote, confirm=True)
         with sftp.open(remote, 'rb') as stream:
             if digest(stream.read()) != digest(local.read_bytes()):
                 raise ValueError('Remote website checksum mismatch.')
-    # Keep both prior release directories and the pre-deployment homepage for recovery.
-    previous = read_optional(sftp, 'index.html')
-    if previous is not None:
-        with sftp.open('_sparkboard/previous-index-' + release_id + '.html', 'wb') as stream:
-            stream.write(previous)
     existing = read_optional(sftp, '.htaccess') or b''
     if BEGIN in existing:
         before, rest = existing.split(BEGIN, 1)
@@ -105,7 +117,9 @@ def deploy(sftp, build, remote_root='htdocs'):
         existing = before + rest.split(END, 1)[1]
     merged = existing.rstrip() + b'\n\n' + BEGIN + configuration.rstrip() + b'\n' + END
     atomic_write(sftp, '.htaccess', merged, release_id)
-    with sftp.open(release_path + '/deploy-manifest.json', 'wb') as stream:
+    manifest_path = (release_path + '/deploy-manifest.json' if release_path
+                     else '_sparkboard/direct-manifest-' + release_id + '.json')
+    with sftp.open(manifest_path, 'wb') as stream:
         stream.write((build / 'manifest.json').read_bytes())
     atomic_write(sftp, 'index.html', index, release_id)
     return revision
