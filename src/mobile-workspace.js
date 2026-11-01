@@ -179,9 +179,15 @@ function syncDock() {
   if (status) {
     const busy = state.tool && state.tool !== 'select';
     status.hidden = !busy;
-    if (busy) status.querySelector('[data-mw-active-name]').textContent =
-      ({ connector: 'Linking nodes', pen: 'Drawing', line: 'Drawing a line',
-         eraser: 'Erasing', hand: 'Navigation' })[state.tool] || 'Placing ' + state.tool;
+    if (busy)
+      status.querySelector('[data-mw-active-name]').textContent =
+        {
+          connector: 'Linking nodes',
+          pen: 'Drawing',
+          line: 'Drawing a line',
+          eraser: 'Erasing',
+          hand: 'Navigation',
+        }[state.tool] || 'Placing ' + state.tool;
   }
 }
 function choose(action, value) {
@@ -207,11 +213,12 @@ function choose(action, value) {
   } else if (action === 'tool') {
     if (value === 'sticky' || value === 'text') {
       const center = centerPoint();
-      addAt(value, { x: center.x - (value === 'text' ? 140 : 95),
-                     y: center.y - (value === 'text' ? 40 : 85) });
+      addAt(value, {
+        x: center.x - (value === 'text' ? 140 : 95),
+        y: center.y - (value === 'text' ? 40 : 85),
+      });
     } else setTool(value);
-  }
-  else if (action === 'picker') {
+  } else if (action === 'picker') {
     const trigger =
       value === 'shapes' ? $('#shape-toggle') : $('#tools [data-tool="' + value + '"]');
     if (trigger) trigger.click();
@@ -241,14 +248,18 @@ export function setupMobileWorkspace() {
   status.id = 'mobile-tool-active';
   status.hidden = true;
   status.setAttribute('role', 'status');
-  status.innerHTML = '<span data-mw-active-name></span><button type="button" data-mw-finish>Done</button>';
+  status.innerHTML =
+    '<span data-mw-active-name></span><button type="button" data-mw-finish>Done</button>';
   const sheet = document.createElement('section');
   sheet.id = 'mobile-tool-sheet';
   sheet.hidden = true;
   sheet.setAttribute('aria-label', 'Mobile tools and shapes');
   document.body.append(header, dock, sheet, status);
   status.addEventListener('click', (event) => {
-    if (event.target.closest('[data-mw-finish]')) { setTool('select'); syncDock(); }
+    if (event.target.closest('[data-mw-finish]')) {
+      setTool('select');
+      syncDock();
+    }
   });
   header.querySelector('select').addEventListener('change', (event) => {
     closeSheet();

@@ -188,9 +188,11 @@ export function setupControls() {
     } else if (action === 'mind-child') {
       $('#mindmap-toolbar [data-mm-action="child"]')?.click();
     } else if (action === 'mind-style') {
-      document.dispatchEvent(new CustomEvent('sparkboard:mind-style', {
-        detail: { id: [...state.selected][0] },
-      }));
+      document.dispatchEvent(
+        new CustomEvent('sparkboard:mind-style', {
+          detail: { id: [...state.selected][0] },
+        }),
+      );
     } else if (action === 'flow-next') {
       const id = [...state.selected][0];
       if (state.selected.size === 1) addFlowStep('process', id);

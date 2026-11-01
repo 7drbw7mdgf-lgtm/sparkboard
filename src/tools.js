@@ -66,9 +66,11 @@ function showMobileShapePicker() {
     if (!button) return;
     $('#dialog').close();
     // Mobile shape selection creates an object immediately. No invisible second tap.
-    document.dispatchEvent(new CustomEvent('sparkboard:mobile-shape', {
-      detail: { type: button.dataset.mobileShape },
-    }));
+    document.dispatchEvent(
+      new CustomEvent('sparkboard:mobile-shape', {
+        detail: { type: button.dataset.mobileShape },
+      }),
+    );
   };
 }
 

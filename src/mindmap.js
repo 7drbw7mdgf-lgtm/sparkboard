@@ -187,9 +187,17 @@ function syncActionButtons() {
   const fold = bar.querySelector('[data-mm-action="collapse"]');
   fold.disabled = !selected;
   const hasBranches = Boolean(selected && index.children.get(selected.id)?.length);
-  fold.textContent = !selected ? 'Collapse' : !hasBranches ? '＋ Branch' : selected.mindCollapsed ? 'Expand' : 'Collapse';
+  fold.textContent = !selected
+    ? 'Collapse'
+    : !hasBranches
+      ? '＋ Branch'
+      : selected.mindCollapsed
+        ? 'Expand'
+        : 'Collapse';
   fold.title = selected
-    ? hasBranches ? `${selected.mindCollapsed ? 'Expand' : 'Collapse'} this topic` : 'Add a child topic'
+    ? hasBranches
+      ? `${selected.mindCollapsed ? 'Expand' : 'Collapse'} this topic`
+      : 'Add a child topic'
     : 'Select a mind-map topic';
   bar.querySelector('[data-mm-action="adopt"]').disabled =
     state.selected.size !== 1 || Boolean(selected);

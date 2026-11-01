@@ -39,9 +39,13 @@ test('mobile node labels and mind-map branches have direct actions', () => {
   const editor = source('src/editor.js');
   assert.match(editor, /id="mobile-node-text-form"/);
   assert.match(editor, /id="mobile-node-text"/);
-  const actions = mobileActionMarkup([
-    { id: 'topic', type: 'shape', mindmap: true, text: 'Research', x: 10, y: 10, w: 190, h: 74 },
-  ], null, 'points', null, 'mindmap');
+  const actions = mobileActionMarkup(
+    [{ id: 'topic', type: 'shape', mindmap: true, text: 'Research', x: 10, y: 10, w: 190, h: 74 }],
+    null,
+    'points',
+    null,
+    'mindmap',
+  );
   assert.match(actions, /data-mobile-action="edit"/);
   assert.match(actions, /data-mobile-action="mind-child"/);
   assert.match(actions, /data-mobile-action="mind-style"/);
