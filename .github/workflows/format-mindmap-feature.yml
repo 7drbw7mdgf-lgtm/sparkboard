@@ -1,0 +1,30 @@
+name: Format feature branch
+on:
+  push:
+    branches:
+      - feature/mindmap-diagram-workspace
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Apply repository Prettier rules to changed source files
+        run: npx prettier --write app.js src/mindmap-model.js src/mindmap.js src/controls.js src/rendering.js src/templates.js src/viewport.js tests/mindmap.test.js
+      - name: Commit formatted source
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app.js src/mindmap-model.js src/mindmap.js src/controls.js src/rendering.js src/templates.js src/viewport.js tests/mindmap.test.js
+            git commit -m "style: format mind-map feature with Prettier"
+            git push
+          fi
