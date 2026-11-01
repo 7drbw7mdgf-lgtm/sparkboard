@@ -32,6 +32,20 @@ export function cloudBoardAccess() {
     load: (id) => repository.loadBoard(id),
     flush: () => flushSaves(),
     isEditing: () => Boolean(state.editing || saves?.dirty),
+    async claim(id, owner) {
+      const board = await repository.loadBoard(id);
+      if (board.cloudOwner && board.cloudOwner !== owner)
+        throw Error('This board belongs to a different account. Export it to make a personal copy.');
+      if (board.cloudOwner === owner) return;
+      board.cloudOwner = owner;
+      const saved = await repository.saveBoard(board);
+      if (state.board?.id === id) {
+        state.board.cloudOwner = owner;
+        state.board.revision = saved.revision;
+      }
+      state.boards = await repository.listBoards();
+      renderBoardTabs();
+    },
     async import(board) {
       const exists = state.boards.some((item) => item.id === board.id);
       if (exists) await repository.loadBoard(board.id);
