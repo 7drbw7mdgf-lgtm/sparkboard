@@ -425,6 +425,7 @@ export function setupMindmapWorkspace() {
       });
   });
   document.addEventListener('sparkboard:render', refreshWorkspace);
+  document.addEventListener('sparkboard:mind-style', (event) => showMindMaster(event.detail?.id));
   document.addEventListener('pointerup', () => {
     if (state.diagramMode === 'mindmap' || state.diagramMode === 'outline') syncActionButtons();
   });
