@@ -19,8 +19,12 @@ function buildWebsite({ root, out, revision, releaseId, layout = 'versioned' }) 
       const relative = path.posix.join(prefix, entry.name);
       const absolute = path.join(directory, entry.name);
       if (entry.isDirectory()) collectSai(absolute, relative);
-      else if (entry.isFile() && !fs.lstatSync(absolute).isSymbolicLink() &&
-        /^[a-zA-Z0-9_./-]+$/.test(relative) && !relative.split('/').includes('..')) {
+      else if (
+        entry.isFile() &&
+        !fs.lstatSync(absolute).isSymbolicLink() &&
+        /^[a-zA-Z0-9_./-]+$/.test(relative) &&
+        !relative.split('/').includes('..')
+      ) {
         saiFiles.push({ name: 'sai/' + relative, bytes: fs.readFileSync(absolute) });
       } else throw Error('Unsafe file in Sai build: ' + relative);
     }

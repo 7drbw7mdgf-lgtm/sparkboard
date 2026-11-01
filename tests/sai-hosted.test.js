@@ -31,7 +31,7 @@ test('staging patches fail closed if upstream Sai layout changes', () => {
   const file = dir + '/App.tsx';
   try {
     fs.writeFileSync(file, 'import App from "./App";');
-    assert.throws(() => replaceRequired(file, "import AIAssistantPanel", ''), /source changed/);
+    assert.throws(() => replaceRequired(file, 'import AIAssistantPanel', ''), /source changed/);
     assert.equal(fs.readFileSync(file, 'utf8'), 'import App from "./App";');
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

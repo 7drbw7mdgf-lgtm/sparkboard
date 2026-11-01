@@ -15,8 +15,14 @@ export function loadHostedProject(): ProjectData | null {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const data = JSON.parse(raw) as ProjectData;
-    if (!data || !Array.isArray(data.tasks) || !Array.isArray(data.groups) ||
-        !Array.isArray(data.people) || !Array.isArray(data.notes)) return null;
+    if (
+      !data ||
+      !Array.isArray(data.tasks) ||
+      !Array.isArray(data.groups) ||
+      !Array.isArray(data.people) ||
+      !Array.isArray(data.notes)
+    )
+      return null;
     data.projectStartDate = asDate(data.projectStartDate);
     data.projectEndDate = asDate(data.projectEndDate);
     for (const task of data.tasks) {
