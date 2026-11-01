@@ -150,11 +150,36 @@ function defaultVertices(type) {
 
 function defaultShapeSize(type) {
   if (type === 'frame') return { w: 420, h: 320 };
-  if (['circle', 'triangle', 'pentagon', 'hexagon', 'octagon', 'star', 'burst',
-    'heart', 'gear', 'shield', 'house', 'diamond', 'right-triangle'].includes(type))
+  if (
+    [
+      'circle',
+      'triangle',
+      'pentagon',
+      'hexagon',
+      'octagon',
+      'star',
+      'burst',
+      'heart',
+      'gear',
+      'shield',
+      'house',
+      'diamond',
+      'right-triangle',
+    ].includes(type)
+  )
     return { w: 174, h: 174 };
-  if (['arrow', 'left-arrow', 'double-arrow', 'chevron', 'flow-data',
-    'parallelogram', 'trapezoid', 'ribbon'].includes(type))
+  if (
+    [
+      'arrow',
+      'left-arrow',
+      'double-arrow',
+      'chevron',
+      'flow-data',
+      'parallelogram',
+      'trapezoid',
+      'ribbon',
+    ].includes(type)
+  )
     return { w: 210, h: 134 };
   if (['up-arrow', 'down-arrow', 'bookmark'].includes(type)) return { w: 138, h: 198 };
   return { w: 190, h: 170 };
