@@ -277,6 +277,11 @@ export function formatPanel(ns, reshapeId = null, { compact = false, expanded = 
         : '') +
       '</div>';
     if (M.shapes.includes(n.type))
+      layout += '<div class="format-grid two">' +
+        selectButton(n.lockAspect === false ? 'Free stretch' : 'Proportional scaling',
+          'aspect', 'lock', n.lockAspect !== false, disabled) +
+        '<span class="format-hint">Drag corners to scale; switch off for independent width/height.</span></div>';
+    if (M.shapes.includes(n.type))
       layout += choices(
         'Shape',
         'type',
@@ -323,13 +328,19 @@ export function formatPanel(ns, reshapeId = null, { compact = false, expanded = 
   }
   if (canReshape) {
     layout += action(
-      reshapeId === n.id ? '✓ Finish reshaping' : '◇ Reshape points',
+      reshapeId === n.id ? '✓ Finish outline editing' : '◇ Edit outline nodes',
       'reshape',
       disabled,
       reshapeId === n.id ? 'active' : '',
     );
-    if (M.shapes.includes(n.type) && Array.isArray(n.vertices)) {
-      layout += action('Reset shape', 'reset-vertices', disabled);
+    if (reshapeId === n.id && M.shapes.includes(n.type)) {
+      layout += '<div class="format-button-row" role="group" aria-label="Outline edit mode">' +
+        selectButton('Points', 'outline-mode', 'points', true, disabled) +
+        selectButton('Bend', 'outline-mode', 'bend', false, disabled) + '</div>' +
+        '<p class="format-hint">Points: drag anchors and add nodes at edges. Bend: drag curve handles to sculpt the outline.</p>';
+    }
+    if (M.shapes.includes(n.type) && (Array.isArray(n.vertices) || Array.isArray(n.curves))) {
+      layout += action('Reset outline', 'reset-vertices', disabled);
     }
   }
   layout = panelSection('Layout', '□', layout);
