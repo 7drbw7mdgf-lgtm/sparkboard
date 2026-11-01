@@ -175,6 +175,8 @@ export class CloudSync {
       );
     }
     const text = await response.text();
+    if (account !== this.userId || epoch !== this.epoch)
+      throw Error('Account changed during cloud request; response discarded.');
     return text ? JSON.parse(text) : [];
   }
 
