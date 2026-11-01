@@ -67,7 +67,8 @@ export function setupStartupScreen() {
     screen.hidden = false;
     screen.setAttribute('aria-busy', 'false');
     setBackgroundInert(true);
-    guest.focus({ preventScroll: true });
+    screen.scrollTop = 0;
+    screen.querySelector('#landing-headline')?.focus({ preventScroll: true });
   }
 
   // A real modal barrier: keyboard navigation cannot reach an unseen canvas.
@@ -75,7 +76,7 @@ export function setupStartupScreen() {
     if (event.key !== 'Tab' || screen.hidden) return;
     const controls = [
       ...screen.querySelectorAll(
-        'button:not(:disabled):not([hidden]), input:not(:disabled):not([hidden])',
+        'a[href], button:not(:disabled):not([hidden]), input:not(:disabled):not([hidden])',
       ),
     ].filter((control) => control.getClientRects().length);
     if (!controls.length) return;

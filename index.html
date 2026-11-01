@@ -16,65 +16,582 @@
       aria-labelledby="start-title"
       aria-busy="true"
     >
-      <div class="start-shell">
-        <div class="start-intro">
-          <div class="start-brand"><span aria-hidden="true">✳</span> Sparkboard</div>
-          <div class="start-intro-copy">
-            <p class="start-kicker">A SPACE FOR EVERY IDEA</p>
-            <h1>Think it. Sketch it. <em>Make it happen.</em></h1>
-            <p>Turn scattered thoughts into something brilliant with your own visual workspace.</p>
-          </div>
-          <div class="start-preview" aria-hidden="true">
-            <span class="start-preview-caption">YOUR NEXT BIG IDEA</span>
-            <div class="start-note start-note-one">A little inspiration <span>✧</span></div>
-            <div class="start-note start-note-two">Connect the dots <span>↗</span></div>
-            <div class="start-note start-note-three">Make some magic ✳</div>
-            <div class="start-preview-link"></div>
-          </div>
-          <p class="start-local">
-            <span aria-hidden="true">◉</span> Local-first · Your ideas stay on this device
-          </p>
+      <div class="landing-page">
+        <div class="landing-nav">
+          <a class="landing-logo" href="#landing-top" aria-label="Sparkboard homepage"
+            ><span class="landing-spark" aria-hidden="true">✳</span> sparkboard<span
+              class="landing-logo-dot"
+              >.</span
+            ></a
+          >
+          <nav class="landing-nav-links" aria-label="Explore Sparkboard">
+            <a href="#start-features">Features</a>
+            <a href="#start-steps">How it works</a>
+            <a href="#start-uses">Use cases</a>
+          </nav>
+          <a class="landing-nav-cta" href="#start-auth"
+            >Get started <span aria-hidden="true">↗</span></a
+          >
         </div>
-        <div class="start-auth">
-          <div class="start-auth-inner">
-            <span class="start-mark" aria-hidden="true">✳</span>
-            <p class="start-kicker">WELCOME TO YOUR WORKSPACE</p>
-            <h2 id="start-title">Your ideas are waiting.</h2>
-            <p class="start-subtitle">Sign in to your account, or start creating without one.</p>
-            <form id="start-email-form" class="start-email-form" hidden>
-              <label for="start-email">Email address</label>
-              <input
-                id="start-email"
-                name="email"
-                type="email"
-                autocomplete="email"
-                inputmode="email"
-                placeholder="you@example.com"
-                maxlength="254"
-                required
-              />
-              <button id="start-email-submit" class="start-submit" type="submit">
-                Continue with email <span aria-hidden="true">→</span>
+        <main id="landing-top" class="landing-content">
+          <section class="landing-hero" aria-labelledby="landing-headline">
+            <div class="landing-hero-copy">
+              <div class="landing-pill">
+                <span class="landing-pill-dot" aria-hidden="true"></span> YOUR IDEAS DESERVE MORE
+                SPACE
+              </div>
+              <h1 id="landing-headline" tabindex="-1">Make room for <em>the big picture.</em></h1>
+              <p class="landing-lede">
+                A visual workspace for everything in your head. Sketch ideas, connect the dots,
+                shape plans and see where your thinking takes you.
+              </p>
+              <div class="landing-hero-cta">
+                <a class="landing-primary-cta" href="#start-auth"
+                  >Start creating <span aria-hidden="true">↗</span></a
+                >
+                <a class="landing-secondary-cta" href="#start-features"
+                  >Explore features <span aria-hidden="true">↓</span></a
+                >
+              </div>
+              <p class="landing-hero-footnote">
+                <span aria-hidden="true">✳</span> Start without an account · Save locally · Optional
+                account sync
+              </p>
+            </div>
+            <div
+              class="landing-hero-art"
+              role="img"
+              aria-label="Illustration of a Sparkboard canvas with colourful sticky notes, a mind map, diagram shapes and connector lines"
+            >
+              <div class="landing-art-title">
+                <span class="landing-art-spark" aria-hidden="true">✳</span> Your idea board
+                <span class="landing-art-menu" aria-hidden="true">···</span>
+              </div>
+              <svg
+                class="landing-board-svg"
+                viewBox="0 0 850 550"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <defs>
+                  <pattern id="landing-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1.1" fill="#d5dfd3" />
+                  </pattern>
+                  <filter id="landing-shadow" x="-30%" y="-35%" width="170%" height="180%">
+                    <feDropShadow
+                      dx="0"
+                      dy="10"
+                      stdDeviation="13"
+                      flood-color="#2c3b33"
+                      flood-opacity=".13"
+                    />
+                  </filter>
+                  <marker
+                    id="landing-arrow"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M0 0 L10 5 L0 10Z" fill="#739a80" />
+                  </marker>
+                </defs>
+                <rect width="850" height="550" fill="#f7f9f4" />
+                <rect width="850" height="550" fill="url(#landing-dots)" />
+                <path
+                  d="M270 260 C316 260 310 137 373 137 M268 268 C328 268 316 308 385 308 M548 139 C619 139 596 269 658 269"
+                  stroke="#80a88b"
+                  stroke-width="3.5"
+                  fill="none"
+                  marker-end="url(#landing-arrow)"
+                  stroke-linecap="round"
+                />
+                <g filter="url(#landing-shadow)">
+                  <rect
+                    x="76"
+                    y="183"
+                    width="203"
+                    height="160"
+                    rx="21"
+                    fill="#ffe49a"
+                    transform="rotate(-4 176 263)"
+                  />
+                  <text
+                    x="103"
+                    y="228"
+                    font-size="14"
+                    font-weight="700"
+                    fill="#7d603b"
+                    font-family="sans-serif"
+                  >
+                    THE START
+                  </text>
+                  <text
+                    x="104"
+                    y="267"
+                    font-size="23"
+                    font-weight="800"
+                    fill="#443c2b"
+                    font-family="sans-serif"
+                  >
+                    Big idea
+                  </text>
+                  <text x="104" y="293" font-size="15" fill="#665c41" font-family="sans-serif">
+                    What if we...
+                  </text>
+                  <path
+                    d="M218 310l12 8 18-25"
+                    stroke="#d39845"
+                    stroke-width="4"
+                    fill="none"
+                    stroke-linecap="round"
+                  />
+                </g>
+                <g filter="url(#landing-shadow)">
+                  <rect x="370" y="69" width="180" height="138" rx="23" fill="#d6e8f6" />
+                  <text
+                    x="393"
+                    y="109"
+                    font-size="14"
+                    font-weight="700"
+                    fill="#426882"
+                    font-family="sans-serif"
+                  >
+                    EXPLORE
+                  </text>
+                  <text
+                    x="391"
+                    y="143"
+                    font-size="23"
+                    font-weight="800"
+                    fill="#274559"
+                    font-family="sans-serif"
+                  >
+                    Connect
+                  </text>
+                  <text x="391" y="167" font-size="16" fill="#44637a" font-family="sans-serif">
+                    the dots
+                  </text>
+                  <circle cx="516" cy="167" r="9" fill="#96c8e8" />
+                </g>
+                <g filter="url(#landing-shadow)">
+                  <rect
+                    x="382"
+                    y="249"
+                    width="195"
+                    height="145"
+                    rx="19"
+                    fill="#f5ddef"
+                    transform="rotate(3 477 320)"
+                  />
+                  <text
+                    x="413"
+                    y="290"
+                    font-size="14"
+                    font-weight="700"
+                    fill="#8c5882"
+                    font-family="sans-serif"
+                  >
+                    MAKE IT VISUAL
+                  </text>
+                  <text
+                    x="412"
+                    y="324"
+                    font-size="22"
+                    font-weight="800"
+                    fill="#5c3658"
+                    font-family="sans-serif"
+                  >
+                    Map it out
+                  </text>
+                  <path d="M413 348 h99" stroke="#c287b3" stroke-width="4" stroke-linecap="round" />
+                  <path d="M413 364 h66" stroke="#d4a4c7" stroke-width="4" stroke-linecap="round" />
+                </g>
+                <g filter="url(#landing-shadow)">
+                  <rect x="651" y="222" width="145" height="108" rx="18" fill="#d5ebd6" />
+                  <text
+                    x="672"
+                    y="254"
+                    font-size="13"
+                    font-weight="700"
+                    fill="#426b50"
+                    font-family="sans-serif"
+                  >
+                    NEXT STEP
+                  </text>
+                  <text
+                    x="673"
+                    y="289"
+                    font-size="22"
+                    font-weight="800"
+                    fill="#285039"
+                    font-family="sans-serif"
+                  >
+                    Make it
+                  </text>
+                  <text
+                    x="673"
+                    y="313"
+                    font-size="22"
+                    font-weight="800"
+                    fill="#285039"
+                    font-family="sans-serif"
+                  >
+                    happen ↗
+                  </text>
+                </g>
+                <g transform="translate(120 415)" filter="url(#landing-shadow)">
+                  <rect width="330" height="70" rx="17" fill="#fff" />
+                  <circle cx="39" cy="35" r="17" fill="#e6efd9" />
+                  <path
+                    d="M32 35l5 5 10-12"
+                    stroke="#4b9b66"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
+                  <text
+                    x="70"
+                    y="31"
+                    font-size="15"
+                    font-weight="800"
+                    fill="#344c3c"
+                    font-family="sans-serif"
+                  >
+                    Ideas become plans.
+                  </text>
+                  <text x="70" y="51" font-size="13" fill="#758476" font-family="sans-serif">
+                    And plans become real.
+                  </text>
+                </g>
+                <g transform="translate(625 412)" filter="url(#landing-shadow)">
+                  <rect width="130" height="62" rx="15" fill="#fff" />
+                  <path
+                    d="M22 32h17m-8-9 9 9-9 9"
+                    stroke="#39845b"
+                    stroke-width="3"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <text
+                    x="51"
+                    y="37"
+                    font-size="15"
+                    font-weight="750"
+                    fill="#385a43"
+                    font-family="sans-serif"
+                  >
+                    Keep going
+                  </text>
+                </g>
+                <circle cx="358" cy="140" r="7" fill="#5d9b72" stroke="#fff" stroke-width="3" />
+                <circle cx="359" cy="307" r="7" fill="#5d9b72" stroke="#fff" stroke-width="3" />
+              </svg>
+              <div class="landing-floating-label">
+                <span aria-hidden="true">●</span> A canvas for thinking bigger
+              </div>
+            </div>
+          </section>
+
+          <section id="start-auth" class="start-auth landing-auth" aria-labelledby="start-title">
+            <div class="start-auth-inner">
+              <span class="start-mark" aria-hidden="true">✳</span>
+              <p class="start-kicker">YOUR SPACE STARTS HERE</p>
+              <h2 id="start-title" tabindex="-1">Ready to make something?</h2>
+              <p class="start-subtitle">
+                Sign in to your account or jump straight into a local board. No lengthy setup
+                required.
+              </p>
+              <form id="start-email-form" class="start-email-form" hidden>
+                <label for="start-email">Email address</label>
+                <input
+                  id="start-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  inputmode="email"
+                  placeholder="you@example.com"
+                  maxlength="254"
+                  required
+                />
+                <button id="start-email-submit" class="start-submit" type="submit">
+                  Continue with email <span aria-hidden="true">→</span>
+                </button>
+              </form>
+              <div id="start-providers" class="start-providers" hidden></div>
+              <p id="start-unavailable" class="start-unavailable" hidden>
+                Account sign-in is not configured yet. You can still use your local boards.
+              </p>
+              <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">
+                Preparing your workspace…
+              </p>
+              <div class="start-divider"><span>OR</span></div>
+              <button id="start-guest" class="start-guest" type="button" disabled>
+                Continue without an account <span aria-hidden="true">↗</span>
               </button>
-            </form>
-            <div id="start-providers" class="start-providers" hidden></div>
-            <p id="start-unavailable" class="start-unavailable" hidden>
-              Account sign-in is not configured yet. You can still use your local boards.
-            </p>
-            <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">
-              Preparing your workspace…
-            </p>
-            <div class="start-divider"><span>OR</span></div>
-            <button id="start-guest" class="start-guest" type="button" disabled>
-              Continue without an account <span aria-hidden="true">↗</span>
-            </button>
-            <p class="start-privacy">
-              Guest boards are saved on this browser. After signing in, enable cross-device sync
-              from your account menu to back up boards to your account. Local copies remain
-              accessible to others using this browser profile after sign-out.
-            </p>
-          </div>
-        </div>
+              <p class="start-privacy">
+                Guest boards are saved in this browser. Account sync is optional and must be enabled
+                after signing in. Local copies remain on this device and are accessible to others
+                using this browser profile after sign-out. Sparkboard is a personal visual
+                workspace, not live multiuser collaboration.
+              </p>
+            </div>
+          </section>
+          <section class="landing-value-strip" aria-label="Sparkboard highlights">
+            <span>✳ Free to start</span><span>◇ 34 editable shapes</span
+            ><span>↗ Connected diagrams</span><span>▧ Media &amp; PDF support</span
+            ><span>☁ Optional board sync</span>
+          </section>
+
+          <section
+            id="start-features"
+            class="landing-section landing-features"
+            aria-labelledby="landing-features-title"
+          >
+            <div class="landing-section-heading">
+              <p class="landing-eyebrow">EVERYTHING IN ONE CANVAS</p>
+              <h2 id="landing-features-title">
+                Less juggling tabs.<br /><em>More connecting ideas.</em>
+              </h2>
+              <p>
+                From the first messy thought to a finished visual plan, Sparkboard gives you room to
+                figure things out.
+              </p>
+            </div>
+            <div class="landing-feature-grid">
+              <article class="landing-feature landing-feature-yellow">
+                <div class="landing-feature-graphic" aria-hidden="true">
+                  <div class="landing-sticky-mini">
+                    <b>Research notes</b><span>Start somewhere ✳</span>
+                  </div>
+                  <div class="landing-sticky-mini landing-sticky-mini-two">
+                    <b>Next idea</b><span>→ build on it</span>
+                  </div>
+                </div>
+                <div class="landing-feature-body">
+                  <span class="landing-feature-index">01 / THINK</span>
+                  <h3>Capture every little spark.</h3>
+                  <p>
+                    Drop sticky notes and text onto an open board. Move them around as your thinking
+                    changes.
+                  </p>
+                </div>
+              </article>
+              <article class="landing-feature landing-feature-blue">
+                <div class="landing-feature-graphic" aria-hidden="true">
+                  <svg viewBox="0 0 320 158" class="landing-feature-svg">
+                    <path
+                      d="M104 80 H165 Q179 80 179 64 V38 H221 M179 92V120 H221"
+                      fill="none"
+                      stroke="#689fbf"
+                      stroke-width="3.5"
+                    />
+                    <rect
+                      x="22"
+                      y="56"
+                      width="102"
+                      height="49"
+                      rx="14"
+                      fill="#e8f6ff"
+                      stroke="#73a6c6"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="218"
+                      y="12"
+                      width="82"
+                      height="49"
+                      rx="14"
+                      fill="#fff"
+                      stroke="#83b7d0"
+                      stroke-width="2"
+                    />
+                    <rect
+                      x="218"
+                      y="103"
+                      width="82"
+                      height="49"
+                      rx="14"
+                      fill="#fff"
+                      stroke="#83b7d0"
+                      stroke-width="2"
+                    />
+                    <text
+                      x="73"
+                      y="85"
+                      text-anchor="middle"
+                      font-size="14"
+                      font-weight="700"
+                      fill="#3c739b"
+                    >
+                      Idea
+                    </text>
+                    <text
+                      x="259"
+                      y="42"
+                      text-anchor="middle"
+                      font-size="13"
+                      font-weight="700"
+                      fill="#3c739b"
+                    >
+                      Option A
+                    </text>
+                    <text
+                      x="259"
+                      y="133"
+                      text-anchor="middle"
+                      font-size="13"
+                      font-weight="700"
+                      fill="#3c739b"
+                    >
+                      Option B
+                    </text>
+                  </svg>
+                </div>
+                <div class="landing-feature-body">
+                  <span class="landing-feature-index">02 / CONNECT</span>
+                  <h3>See how it all fits.</h3>
+                  <p>
+                    Draw lines and connectors, map relationships and build flows that make sense at
+                    a glance.
+                  </p>
+                </div>
+              </article>
+              <article class="landing-feature landing-feature-green">
+                <div class="landing-feature-graphic" aria-hidden="true">
+                  <svg viewBox="0 0 320 160" class="landing-feature-svg">
+                    <path
+                      d="M61 123V59L127 20L190 59V123Z"
+                      fill="#fff"
+                      stroke="#448966"
+                      stroke-width="3"
+                    />
+                    <circle cx="61" cy="59" r="6" fill="#fff" stroke="#34764e" stroke-width="3" />
+                    <circle cx="127" cy="20" r="6" fill="#fff" stroke="#34764e" stroke-width="3" />
+                    <circle cx="190" cy="59" r="6" fill="#fff" stroke="#34764e" stroke-width="3" />
+                    <path
+                      d="M224 42L288 56L272 127L214 103Z"
+                      fill="#d9ecda"
+                      stroke="#448966"
+                      stroke-width="3"
+                    />
+                    <circle cx="288" cy="56" r="7" fill="#5c9a70" stroke="#fff" stroke-width="3" />
+                    <circle cx="214" cy="103" r="7" fill="#5c9a70" stroke="#fff" stroke-width="3" />
+                  </svg>
+                </div>
+                <div class="landing-feature-body">
+                  <span class="landing-feature-index">03 / SHAPE</span>
+                  <h3>Make it your own.</h3>
+                  <p>
+                    Choose from 34 vector shapes, scale them and reshape their outlines using
+                    editable nodes and curves.
+                  </p>
+                </div>
+              </article>
+              <article class="landing-feature landing-feature-lilac">
+                <div class="landing-feature-graphic" aria-hidden="true">
+                  <div class="landing-media-mini">
+                    <div class="landing-media-sky"><span>☼</span><i></i></div>
+                    <div class="landing-media-caption">Inspiration.pdf <span>↗</span></div>
+                  </div>
+                  <div class="landing-media-tag">Add context, not clutter</div>
+                </div>
+                <div class="landing-feature-body">
+                  <span class="landing-feature-index">04 / GATHER</span>
+                  <h3>Keep the context close.</h3>
+                  <p>
+                    Add images, PDFs, links and embeds to the same board as your notes and diagrams.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section
+            id="start-steps"
+            class="landing-section landing-steps"
+            aria-labelledby="landing-steps-title"
+          >
+            <div class="landing-section-heading">
+              <p class="landing-eyebrow">HOW IT WORKS</p>
+              <h2 id="landing-steps-title">From blank board to <em>brainwave.</em></h2>
+            </div>
+            <div class="landing-step-grid">
+              <article>
+                <span class="landing-step-number">01</span>
+                <h3>Open a board.</h3>
+                <p>Start blank or choose a template for brainstorming, mind maps and more.</p>
+              </article>
+              <article>
+                <span class="landing-step-number">02</span>
+                <h3>Make a little mess.</h3>
+                <p>Sketch, write, connect and rearrange as your ideas take shape.</p>
+              </article>
+              <article>
+                <span class="landing-step-number">03</span>
+                <h3>Take it further.</h3>
+                <p>Save locally, export your board or opt into account sync across devices.</p>
+              </article>
+            </div>
+          </section>
+
+          <section
+            id="start-uses"
+            class="landing-section landing-uses"
+            aria-labelledby="landing-uses-title"
+          >
+            <div class="landing-section-heading">
+              <p class="landing-eyebrow">MADE FOR YOUR NEXT PROJECT</p>
+              <h2 id="landing-uses-title">Whatever you're working on, <em>see it clearly.</em></h2>
+            </div>
+            <div class="landing-use-grid">
+              <div>
+                <span aria-hidden="true">◎</span>
+                <h3>Mind mapping</h3>
+                <p>Follow ideas, branches and unexpected connections.</p>
+              </div>
+              <div>
+                <span aria-hidden="true">▤</span>
+                <h3>Study &amp; research</h3>
+                <p>Group concepts, evidence, notes and resources.</p>
+              </div>
+              <div>
+                <span aria-hidden="true">⌁</span>
+                <h3>Planning &amp; flows</h3>
+                <p>Turn rough steps into diagrams you can refine.</p>
+              </div>
+              <div>
+                <span aria-hidden="true">✦</span>
+                <h3>Creative thinking</h3>
+                <p>Collect inspiration and develop the next direction.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="landing-bottom-cta" aria-labelledby="landing-cta-title">
+            <span class="landing-bottom-spark" aria-hidden="true">✳</span>
+            <h2 id="landing-cta-title">Good ideas deserve<br />room to grow.</h2>
+            <p>Your next thought can turn into something bigger. Give it a board.</p>
+            <a class="landing-primary-cta" href="#start-auth"
+              >Open your workspace <span aria-hidden="true">↗</span></a
+            >
+          </section>
+        </main>
+        <footer class="landing-footer">
+          <span class="landing-logo"
+            ><span class="landing-spark" aria-hidden="true">✳</span> sparkboard<span
+              class="landing-logo-dot"
+              >.</span
+            ></span
+          ><span>Your ideas. Your space.</span
+          ><span>Made for visual thinking · <a href="#start-features">Explore features ↑</a></span>
+        </footer>
       </div>
     </section>
     <header class="workspace-header">
