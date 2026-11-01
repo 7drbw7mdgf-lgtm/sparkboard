@@ -382,12 +382,12 @@ export function setupCanvas() {
       capture(e);
       return;
     }
-    const curveEl = e.target.closest('.shape-curve-handle');
-    if (curveEl && n && M.shapes.includes(n.type) && !n.locked) {
+    const shapeCurveEl = e.target.closest('.shape-curve-handle');
+    if (shapeCurveEl && n && M.shapes.includes(n.type) && !n.locked) {
       state.drag = {
         type: 'curve-edge',
         id: n.id,
-        index: Number(curveEl.dataset.curveEdge),
+        index: Number(shapeCurveEl.dataset.curveEdge),
         changed: false,
       };
       capture(e);
