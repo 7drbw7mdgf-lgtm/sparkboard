@@ -1,6 +1,7 @@
 import { polygons } from '../board-model.js';
 export const icons = {
   close: '<path d="m7 7 10 10M17 7 7 17"/>',
+  more: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
   undo: '<path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 6 6v3"/>',
   redo: '<path d="m15 5 5 5-5 5m5-5H10a6 6 0 0 0-6 6v3"/>',
   grid: '<circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/>',
