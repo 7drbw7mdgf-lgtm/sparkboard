@@ -1,0 +1,39 @@
+name: Format cloud-sync feature branch
+
+on:
+  push:
+    branches: [feature/board-cloud-sync-2026-11-01]
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Normalize formatting
+        run: npx prettier --write .
+      - name: Commit normalized sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          if ! git diff --cached --quiet; then
+            git commit -m "style(sync): apply repository formatting rules"
+            git push origin HEAD:feature/board-cloud-sync-2026-11-01
+          fi
+      - name: Verify checks and builds
+        run: |
+          npm run check
+          npm run format:check
+          npm test
+          npm run build
+          npm run website:build
