@@ -10,6 +10,7 @@ export const state = {
   editing: null,
   reshapeId: null,
   reshapeMode: 'points',
+  selectedVertex: null,
   guides: [],
   connectorDraft: null,
   history: [],
