@@ -3500,3 +3500,107 @@ body.is-panning #canvas {
     font-size: 10px;
   }
 }
+
+/* Mobile Format is an intentional compact popover, not a panel covering the canvas. */
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  #inspector {
+    position: fixed;
+    top: auto;
+    bottom: calc(85px + env(safe-area-inset-bottom));
+    right: 10px;
+    left: auto;
+    width: min(326px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    max-height: min(44dvh, 355px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 9px 34px #27341c2c;
+    z-index: 23;
+  }
+  #inspector .format-heading {
+    align-items: center;
+    padding: 2px 3px 9px;
+    gap: 6px;
+  }
+  #inspector .format-heading h3 {
+    font-size: 17px;
+    margin: 2px 0;
+  }
+  #inspector .format-heading .eyebrow {
+    font-size: 9px;
+  }
+  #inspector .format-subtitle {
+    display: none;
+  }
+  #inspector .format-panels {
+    gap: 6px;
+    padding-bottom: 2px;
+  }
+  #inspector details.format-card {
+    border-radius: 10px;
+    padding: 0;
+    background: #fbfcf9;
+  }
+  #inspector details.format-card > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    cursor: pointer;
+    min-height: 41px;
+    padding: 9px 11px;
+    font: 750 12px Manrope, sans-serif;
+    color: #2a402f;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #inspector details.format-card > summary::-webkit-details-marker {
+    display: none;
+  }
+  #inspector details.format-card > summary > span:first-child {
+    color: #27804d;
+    font-size: 16px;
+  }
+  #inspector .format-chevron {
+    margin-left: auto;
+    font-size: 16px;
+    transition: transform 0.15s ease;
+    color: #6f836e;
+  }
+  #inspector details[open] .format-chevron {
+    transform: rotate(180deg);
+  }
+  #inspector details.format-card > .format-card-content {
+    gap: 9px;
+    padding: 0 10px 10px;
+  }
+  #inspector .format-grid {
+    gap: 7px;
+  }
+  #inspector .format-field > span {
+    font-size: 11px;
+  }
+  #inspector .format-field > input:not([type='range']),
+  #inspector .format-field > select {
+    height: 39px;
+    font-size: 16px; /* Prevent iPhone Safari from zooming when fields receive focus. */
+  }
+  #inspector .format-button-row button,
+  #inspector button.format-action,
+  #inspector .format-grid > button {
+    min-height: 40px;
+  }
+  #inspector details.format-card > summary:focus-visible {
+    outline: 2px solid #26834b;
+    outline-offset: -2px;
+    border-radius: 10px;
+  }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  #inspector {
+    max-height: min(55dvh, 220px);
+    bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+}
