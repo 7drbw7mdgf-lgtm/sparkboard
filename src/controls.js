@@ -184,8 +184,12 @@ export function setupControls() {
       }
     } else if (action === 'connect') {
       const source = editableNodes()[0];
-      if (state.selected.size !== 1 || !source ||
-          ['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(source.type)) return;
+      if (
+        state.selected.size !== 1 ||
+        !source ||
+        ['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(source.type)
+      )
+        return;
       setTool('connector');
       state.connectorStart = source.id;
       toast('Tap the object you want to connect to. Tap Select to cancel.');

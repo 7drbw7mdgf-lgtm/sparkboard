@@ -3,8 +3,11 @@ import { shapeNames } from './icons.js';
 
 /** Connectors can originate from spatial objects, not existing paths or lines. */
 export function canConnectNode(node) {
-  return !!node && !node.locked &&
-    !['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(node.type);
+  return (
+    !!node &&
+    !node.locked &&
+    !['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(node.type)
+  );
 }
 
 /** One contextual mobile row: the rest of the canvas stays clear for dragging. */
