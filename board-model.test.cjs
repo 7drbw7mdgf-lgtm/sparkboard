@@ -182,7 +182,7 @@ test('Illustrator-style shape vertex editing moves, inserts, removes and validat
   assert.equal(validated.objects[0].vertices.length, 3);
 });
 test('expanded shape library, standalone lines, arrowheads, dash styles and connector deduplication', () => {
-  assert.equal(M.shapes.length, 18);
+  assert.equal(M.shapes.length, 34);
   for (const type of M.shapes) {
     assert.ok(M.defaultVertices(type).length >= 3, `Expected vertices for ${type}`);
   }
