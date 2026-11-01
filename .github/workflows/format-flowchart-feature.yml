@@ -15,13 +15,13 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: npx prettier --write app.js src/flowchart-model.js src/flowchart.js src/mobile-workspace.js src/mindmap.js src/rendering.js src/tools.js src/mobile-actions.js src/inspector.js src/controls.js tests/flowchart-redesign.test.js
+      - run: npx prettier --write app.js src/canvas.js src/flowchart-model.js src/flowchart.js src/mobile-workspace.js src/mindmap.js src/rendering.js src/tools.js src/mobile-actions.js src/inspector.js src/controls.js tests/flowchart-redesign.test.js
       - name: Commit formatted changes
         run: |
           if ! git diff --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add app.js src/flowchart-model.js src/flowchart.js src/mobile-workspace.js src/mindmap.js src/rendering.js src/tools.js src/mobile-actions.js src/inspector.js src/controls.js tests/flowchart-redesign.test.js
+            git add app.js src/canvas.js src/flowchart-model.js src/flowchart.js src/mobile-workspace.js src/mindmap.js src/rendering.js src/tools.js src/mobile-actions.js src/inspector.js src/controls.js tests/flowchart-redesign.test.js
             git commit -m "style: format flowchart and mobile workspace changes"
             git push
           fi
