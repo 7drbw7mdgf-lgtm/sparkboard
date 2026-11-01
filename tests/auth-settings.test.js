@@ -14,7 +14,12 @@ test('accounts stay disabled until configured and accept only public keys', () =
       publishableKey: 'sb_publishable_example',
       providers: ['google', 'facebook', 'google', 'evil'],
     }),
-    { url, publishableKey: 'sb_publishable_example', providers: ['google', 'facebook'] },
+    {
+      url,
+      publishableKey: 'sb_publishable_example',
+      providers: ['google', 'facebook'],
+      emailEnabled: false,
+    },
   );
   const jwt = (role) => 'e30.' + btoa(JSON.stringify({ role })).replace(/=+$/, '') + '.signature';
   assert.ok(authSettings({ url, publishableKey: jwt('anon'), providers: ['google'] }));
@@ -41,5 +46,26 @@ test('auth configuration rejects unsafe server origins and unsupported providers
   assert.throws(
     () => authSettings({ url, publishableKey: 'sb_publishable_example', providers: ['evil'] }),
     /provider/,
+  );
+});
+
+test('email magic links can be enabled without social providers', () => {
+  assert.deepEqual(
+    authSettings({
+      url,
+      publishableKey: 'sb_publishable_example',
+      providers: [],
+      emailEnabled: true,
+    }),
+    { url, publishableKey: 'sb_publishable_example', providers: [], emailEnabled: true },
+  );
+  assert.equal(
+    authSettings({
+      url,
+      publishableKey: 'sb_publishable_example',
+      providers: [],
+      emailEnabled: false,
+    }),
+    null,
   );
 });

@@ -8,6 +8,74 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <section
+      id="start-screen"
+      class="start-screen"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="start-title"
+      aria-busy="true"
+    >
+      <div class="start-shell">
+        <div class="start-intro">
+          <div class="start-brand"><span aria-hidden="true">✳</span> Sparkboard</div>
+          <div class="start-intro-copy">
+            <p class="start-kicker">A SPACE FOR EVERY IDEA</p>
+            <h1>Think it. Sketch it. <em>Make it happen.</em></h1>
+            <p>Turn scattered thoughts into something brilliant with your own visual workspace.</p>
+          </div>
+          <div class="start-preview" aria-hidden="true">
+            <span class="start-preview-caption">YOUR NEXT BIG IDEA</span>
+            <div class="start-note start-note-one">A little inspiration <span>✧</span></div>
+            <div class="start-note start-note-two">Connect the dots <span>↗</span></div>
+            <div class="start-note start-note-three">Make some magic ✳</div>
+            <div class="start-preview-link"></div>
+          </div>
+          <p class="start-local">
+            <span aria-hidden="true">◉</span> Local-first · Your ideas stay on this device
+          </p>
+        </div>
+        <div class="start-auth">
+          <div class="start-auth-inner">
+            <span class="start-mark" aria-hidden="true">✳</span>
+            <p class="start-kicker">WELCOME TO YOUR WORKSPACE</p>
+            <h2 id="start-title">Your ideas are waiting.</h2>
+            <p class="start-subtitle">Sign in to your account, or start creating without one.</p>
+            <form id="start-email-form" class="start-email-form" hidden>
+              <label for="start-email">Email address</label>
+              <input
+                id="start-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                inputmode="email"
+                placeholder="you@example.com"
+                maxlength="254"
+                required
+              />
+              <button id="start-email-submit" class="start-submit" type="submit">
+                Continue with email <span aria-hidden="true">→</span>
+              </button>
+            </form>
+            <div id="start-providers" class="start-providers" hidden></div>
+            <p id="start-unavailable" class="start-unavailable" hidden>
+              Account sign-in is not configured yet. You can still use your local boards.
+            </p>
+            <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">
+              Preparing your workspace…
+            </p>
+            <div class="start-divider"><span>OR</span></div>
+            <button id="start-guest" class="start-guest" type="button" disabled>
+              Continue without an account <span aria-hidden="true">↗</span>
+            </button>
+            <p class="start-privacy">
+              Your boards are stored in this browser, not your account. They do not sync across
+              devices, and signing out does not hide them from other users of this browser.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
     <header class="workspace-header">
       <div class="board-tab-bar">
         <button

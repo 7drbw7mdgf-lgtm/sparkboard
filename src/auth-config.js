@@ -6,4 +6,7 @@ export const authConfig = {
   // Available: google, facebook, apple, azure (Microsoft).
   // Add providers only once their credentials have been enabled in Supabase.
   providers: [],
+  // Email sign-in sends a one-time link through Supabase Auth (no password is stored here).
+  // Supabase must have email authentication and the site redirect enabled.
+  emailEnabled: true,
 };
