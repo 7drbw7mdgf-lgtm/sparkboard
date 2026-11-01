@@ -76,6 +76,7 @@ function sheetContents(section) {
       ['Shapes', '◇', 'picker', 'shapes'],
       ['Draw', '✎', 'tool', 'pen'],
       ['Line', '╱', 'tool', 'line'],
+      ['Connector styles', '↝', 'connection', ''],
       ['Erase', '⌫', 'tool', 'eraser'],
       ['Photo / PDF', '▧', 'picker', 'media'],
       ['Embed', '▣', 'picker', 'embed'],
@@ -102,6 +103,8 @@ function sheetContents(section) {
       ['Sibling topic', '⊕', 'map', 'sibling'],
       ['Arrange', '☷', 'map', 'layout'],
       ['Collapse / expand', '⊟', 'map', 'collapse'],
+      ['Branch styles', '🎨', 'map-style', ''],
+      ['Connection styles', '↝', 'connection', ''],
       ['Shapes', '◇', 'picker', 'shapes'],
     ];
   } else {
@@ -162,6 +165,16 @@ function choose(action, value) {
   closeSheet();
   if (action === 'flow') addFlowStep(value);
   else if (action === 'connect') startFlowLink();
+  else if (action === 'connection') {
+    const edge = state.board?.objects.find((item) => state.selected.has(item.id) && item.type === 'connector');
+    if (edge) document.dispatchEvent(new CustomEvent('sparkboard:connector-edit', { detail: { id: edge.id } }));
+    else toast('Select a connector first');
+  }
+  else if (action === 'map-style') {
+    const topic = state.board?.objects.find((item) => state.selected.has(item.id) && item.mindmap);
+    if (topic) document.dispatchEvent(new CustomEvent('sparkboard:mind-style', { detail: { id: topic.id } }));
+    else toast('Select a mind-map topic first');
+  }
   else if (action === 'tool') setTool(value);
   else if (action === 'picker') {
     const trigger =
