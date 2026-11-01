@@ -533,8 +533,7 @@ export function setupCanvas() {
     if (M.shapes.includes(state.tool)) {
       snapshot();
       const type = state.tool,
-        defaultW = type === 'frame' ? 420 : 190,
-        defaultH = type === 'frame' ? 320 : 170,
+        { w: defaultW, h: defaultH } = M.defaultShapeSize(type),
         created = node(
           type,
           p.x,
@@ -822,11 +821,14 @@ export function setupCanvas() {
     }
     if (state.drag.type === 'curve-edge') {
       const local = localShapePoint(n, p);
-      const existing = n.curves?.[state.drag.index];
-      if (
-        !state.drag.changed &&
-        Math.hypot((existing?.x ?? 50) - local.x, (existing?.y ?? 50) - local.y) < 0.25
-      )
+      const verts = M.shapeVertices(n);
+      const start = verts[state.drag.index];
+      const end = verts[(state.drag.index + 1) % verts.length];
+      const existing = n.curves?.[state.drag.index] || {
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2,
+      };
+      if (!state.drag.changed && Math.hypot(existing.x - local.x, existing.y - local.y) < 0.25)
         return;
       if (!state.drag.changed) {
         snapshot();
