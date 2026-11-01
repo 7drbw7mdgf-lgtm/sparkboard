@@ -15,7 +15,7 @@ const mobileStyle = `
   #mindmap-toolbar{display:none!important}
   #mobile-workspace-mode{position:fixed;top:calc(124px + env(safe-area-inset-top));left:12px;z-index:19;align-items:center;gap:8px;border:1px solid #d8e1db;background:#fff;box-shadow:0 6px 20px #152d251b;border-radius:13px;min-height:40px;padding:0 11px;font:700 12px/1 Manrope,sans-serif;color:#476354}
   #mobile-workspace-mode select{border:0;outline:0;background:transparent;color:#264c40;font:700 14px/1 Manrope,sans-serif;min-height:40px;padding:0 16px 0 0;font-size:16px}
-  #mobile-workspace-dock{position:fixed;bottom:calc(9px + env(safe-area-inset-bottom));left:9px;right:9px;z-index:45;height:68px;padding:7px;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border:1px solid #d7e0d9;border-radius:20px;background:#fff;box-shadow:0 12px 36px #20382e35;align-items:stretch}
+  #mobile-workspace-dock{position:fixed;bottom:calc(9px + env(safe-area-inset-bottom));left:9px;right:9px;z-index:45;height:68px;padding:7px;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border:1px solid #d7e0d9;border-radius:20px;background:#fff;box-shadow:0 12px 36px #20382e35;align-items:stretch}
   #mobile-workspace-dock button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:13px;color:#63736b;font:700 10px/1.1 Manrope,sans-serif;padding:4px 1px;touch-action:manipulation}
   #mobile-workspace-dock button .mwd-icon{font:700 21px/1 sans-serif}
   #mobile-workspace-dock button[aria-pressed="true"]{background:#e5f1e9;color:#24694e}
@@ -126,7 +126,7 @@ function sheetContents(section) {
           : 'Add to canvas';
   $('#mobile-tool-sheet').innerHTML = `
     <div class="mw-sheet-head"><h3>${label}</h3><button class="mw-close" type="button" data-mw-close aria-label="Close tools">×</button></div>
-    <p>${section === 'more' ? 'Everything else stays here — the canvas is for your work.' : current === 'flowchart' ? 'Select a node first to create an automatically linked next step.' : 'Choose an item or tool to continue on your board.'}</p>
+    <p>${section === 'more' ? 'Everything else stays here — the canvas is for your work.' : current === 'flowchart' ? 'Select a node first to create an automatically linked next step.' : 'One finger selects or moves · two fingers pan and zoom.'}</p>
     <div class="mw-tool-grid">${choices.map(([name, symbol, action, value]) => makeButton(name, symbol, action, value)).join('')}</div>`;
 }
 function showSheet(section) {
@@ -186,9 +186,7 @@ export function setupMobileWorkspace() {
   const dock = document.createElement('nav');
   dock.id = 'mobile-workspace-dock';
   dock.setAttribute('aria-label', 'Mobile editing tools');
-  dock.innerHTML = `<button type="button" data-mw-tool="hand" aria-pressed="false"><span class="mwd-icon">✋</span>Pan</button>
-    <button type="button" data-mw-tool="select" aria-pressed="false"><span class="mwd-icon">↖</span>Select</button>
-    <button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
+  dock.innerHTML = `<button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
     <button type="button" data-mw-action="connect"><span class="mwd-icon">↗</span>Link</button>
     <button type="button" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">☷</span>Tools</button>`;
   const sheet = document.createElement('section');
@@ -226,7 +224,7 @@ export function setupMobileWorkspace() {
     if (event.key === 'Escape' && !sheet.hidden) closeSheet();
   });
   document.addEventListener('sparkboard:render', syncDock);
-  document.addEventListener('sparkboard:mode', syncDock);
+  document.addEventListener('sparkboard:mode', () => { if (state.tool === 'hand') setTool('select'); syncDock(); });
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
   window.addEventListener('resize', () => {
