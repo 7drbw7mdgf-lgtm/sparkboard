@@ -40,6 +40,12 @@ function setup({ initial = [board()], remote = [], fail = null } = {}) {
     load: async (key) => structuredClone(local.get(key)),
     flush: async () => {},
     isEditing: () => false,
+    claim: async (key, userId) => {
+      const b = local.get(key);
+      if (b.cloudOwner && b.cloudOwner !== userId) throw Error('Wrong account');
+      b.cloudOwner = userId;
+      actions.push('claim:' + key);
+    },
     import: async (b) => {
       actions.push('import:' + b.id);
       local.set(b.id, structuredClone(b));
@@ -123,12 +129,13 @@ test('consent is required, and a missing Supabase migration does not enable uplo
 });
 
 test('explicit enable uploads local boards with account JWT and no service key', async () => {
-  const { client, cloud, requests } = setup();
+  const { client, cloud, requests, local } = setup();
   assert.equal(client.enabled, false);
   await client.enable();
   assert.equal(cloud.get(id).payload.title, 'Research');
   assert.equal(cloud.get(id).payload.cloudOwner, owner);
   assert.equal(cloud.get(id).version, 1);
+  assert.equal(local.get(id).cloudOwner, owner, 'ownership must be persisted before sync');
   assert.equal(client.storage.getItem(client.prefKey(owner)), 'yes');
   assert.ok(requests.every((r) => r.headers.apikey === 'sb_publishable_test'));
   assert.ok(requests.every((r) => r.headers.Authorization === 'Bearer session-access-token'));
@@ -175,6 +182,15 @@ test('offline deletion creates version-checked cloud tombstone on next sync', as
   assert.equal(cloud.get(id).version, 2);
   assert.equal(cloud.get(id).payload, null);
   assert.equal(local.size, 0);
+  client.stop();
+});
+
+
+test('account switching cannot adopt a board already owned by another user', async () => {
+  const { client, local, cloud } = setup({ initial: [board(id, 100, other)] });
+  await client.enable();
+  assert.equal(cloud.size, 0, 'no cross-account cloud upload');
+  assert.equal(local.get(id).cloudOwner, other);
   client.stop();
 });
 
