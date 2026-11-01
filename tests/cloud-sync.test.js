@@ -208,17 +208,24 @@ test('a newer remote edit defeats a stale deletion instead of being destroyed', 
 
 test('signing out during an authentication lookup blocks the stale cloud request', async () => {
   let resolveSession;
-  const pendingSession = new Promise((resolve) => { resolveSession = resolve; });
+  const pendingSession = new Promise((resolve) => {
+    resolveSession = resolve;
+  });
   const requests = [];
   const client = new CloudSync({
     url: 'https://project.supabase.co',
     key: 'sb_publishable_test',
     auth: { getSession: () => pendingSession },
     access: {
-      list: async () => [], flush: async () => {}, isEditing: () => false,
+      list: async () => [],
+      flush: async () => {},
+      isEditing: () => false,
     },
     storage: storage(),
-    request: async (...args) => { requests.push(args); throw Error('Should not fetch'); },
+    request: async (...args) => {
+      requests.push(args);
+      throw Error('Should not fetch');
+    },
   });
   client.configure(owner);
   const request = client.requestJSON('GET', '?select=board_id');

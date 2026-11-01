@@ -116,7 +116,8 @@ export class CloudSync {
 
   async enable() {
     if (!this.userId) throw Error('Sign in before enabling sync.');
-    const account = this.userId, epoch = this.epoch;
+    const account = this.userId,
+      epoch = this.epoch;
     const assertAccount = () => {
       if (this.userId !== account || this.epoch !== epoch)
         throw Error('Account changed during sync setup; try again after signing in.');
@@ -145,11 +146,18 @@ export class CloudSync {
   }
 
   async requestJSON(method, query, body, preference = '') {
-    const account = this.userId, epoch = this.epoch;
+    const account = this.userId,
+      epoch = this.epoch;
     const { data, error } = await this.auth.getSession();
     const session = data?.session;
-    if (error || !session?.access_token || !account || session.user.id !== account ||
-      account !== this.userId || epoch !== this.epoch)
+    if (
+      error ||
+      !session?.access_token ||
+      !account ||
+      session.user.id !== account ||
+      account !== this.userId ||
+      epoch !== this.epoch
+    )
       throw Error('Sign-in expired. Sign in again to resume cloud sync.');
     this.controller ??= new AbortController();
     const response = await this.request(this.url + '/rest/v1/sparkboard_boards' + query, {
