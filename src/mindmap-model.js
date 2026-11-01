@@ -51,8 +51,15 @@ export function outlineMindmap(objects = []) {
   function visit(item, depth, concealed) {
     if (seen.has(item.id)) return;
     seen.add(item.id);
-    rows.push({ id: item.id, depth, node: item, concealed, childCount: children.get(item.id).length });
-    for (const child of children.get(item.id)) visit(child, depth + 1, concealed || !!item.mindCollapsed);
+    rows.push({
+      id: item.id,
+      depth,
+      node: item,
+      concealed,
+      childCount: children.get(item.id).length,
+    });
+    for (const child of children.get(item.id))
+      visit(child, depth + 1, concealed || !!item.mindCollapsed);
   }
   roots.forEach((item) => visit(item, 0, false));
   nodes.forEach((item) => visit(item, 0, false)); // Also recover malformed cycles.
@@ -90,8 +97,9 @@ export function layoutMindmap(objects = [], options = {}) {
     }
     if (item.mindCollapsed) return;
     const descendants = (children.get(item.id) || []).filter((child) => !placed.has(child.id));
-    const total = descendants.reduce((acc, child) => acc + height(child), 0)
-      + Math.max(0, descendants.length - 1) * vgap;
+    const total =
+      descendants.reduce((acc, child) => acc + height(child), 0) +
+      Math.max(0, descendants.length - 1) * vgap;
     let cursor = top + (span - total) / 2;
     for (const child of descendants) {
       place(child, item.x + item.w + hgap, cursor);
@@ -117,13 +125,24 @@ export function layoutMindmap(objects = [], options = {}) {
 }
 
 /** One topic and one standard Sparkboard connector: export/sync stays compatible. */
-export function appendMindNode(objects, { id, connectorId, parentId = null, text = 'New topic', x = 280, y = 220, color = '#dce7cc' }) {
+export function appendMindNode(
+  objects,
+  { id, connectorId, parentId = null, text = 'New topic', x = 280, y = 220, color = '#dce7cc' },
+) {
   if (!id || objects.some((item) => item.id === id)) throw Error('A unique topic ID is required.');
   const parent = objects.find((item) => item.id === parentId && isMindNode(item));
   const topic = {
-    id, type: 'shape', text, x: parent ? parent.x + parent.w + 105 : x,
-    y: parent ? parent.y : y, w: 190, h: 74, color,
-    mindmap: true, mindParent: parent?.id || null, mindCollapsed: false,
+    id,
+    type: 'shape',
+    text,
+    x: parent ? parent.x + parent.w + 105 : x,
+    y: parent ? parent.y : y,
+    w: 190,
+    h: 74,
+    color,
+    mindmap: true,
+    mindParent: parent?.id || null,
+    mindCollapsed: false,
     mindOrder: parent ? objects.filter((item) => item.mindParent === parent.id).length : 0,
   };
   objects.push(topic);
@@ -131,8 +150,15 @@ export function appendMindNode(objects, { id, connectorId, parentId = null, text
     if (!connectorId || objects.some((item) => item.id === connectorId))
       throw Error('A unique connector ID is required.');
     objects.push({
-      id: connectorId, type: 'connector', from: parent.id, to: id,
-      route: 'curved', endArrow: 'none', mindBranch: true, color: '#7a8e81', strokeWidth: 2,
+      id: connectorId,
+      type: 'connector',
+      from: parent.id,
+      to: id,
+      route: 'curved',
+      endArrow: 'none',
+      mindBranch: true,
+      color: '#7a8e81',
+      strokeWidth: 2,
     });
   }
   return topic;
@@ -140,7 +166,11 @@ export function appendMindNode(objects, { id, connectorId, parentId = null, text
 
 /** Convert an existing node and its existing connector descendants, without cloning art. */
 export function adoptMindTree(objects, rootId) {
-  const byId = new Map(objects.filter((item) => !['connector', 'line', 'path'].includes(item.type)).map((item) => [item.id, item]));
+  const byId = new Map(
+    objects
+      .filter((item) => !['connector', 'line', 'path'].includes(item.type))
+      .map((item) => [item.id, item]),
+  );
   const root = byId.get(rootId);
   if (!root) return 0;
   const visited = new Set();
@@ -149,7 +179,9 @@ export function adoptMindTree(objects, rootId) {
     visited.add(item.id);
     item.mindmap = true;
     item.mindParent = parentId;
-    const outgoing = objects.filter((edge) => edge.type === 'connector' && edge.from === item.id && byId.has(edge.to));
+    const outgoing = objects.filter(
+      (edge) => edge.type === 'connector' && edge.from === item.id && byId.has(edge.to),
+    );
     outgoing.forEach((edge, index) => {
       const child = byId.get(edge.to);
       if (visited.has(child.id)) return;

@@ -8,11 +8,19 @@ import { centerPoint } from './viewport.js';
 import { setTool } from './tools.js';
 import { toast } from './notifications.js';
 import {
-  appendMindNode, adoptMindTree, indexMindmap, layoutMindmap, outlineMindmap, isMindNode,
+  appendMindNode,
+  adoptMindTree,
+  indexMindmap,
+  layoutMindmap,
+  outlineMindmap,
+  isMindNode,
 } from './mindmap-model.js';
 
 const modes = [
-  ['canvas', 'Canvas'], ['mindmap', 'Mind map'], ['flowchart', 'Flowchart'], ['outline', 'Outline'],
+  ['canvas', 'Canvas'],
+  ['mindmap', 'Mind map'],
+  ['flowchart', 'Flowchart'],
+  ['outline', 'Outline'],
 ];
 const style = `
 #mindmap-toolbar{position:fixed;top:94px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 30px);padding:6px;background:#fff;border:1px solid #e6e8e5;box-shadow:0 8px 25px #2c3a3019;border-radius:13px;color:#303931;font-size:12px}
@@ -63,7 +71,11 @@ function placeTopic(parentId = null) {
   const p = centerPoint();
   commit(() => {
     topic = appendMindNode(state.board.objects, {
-      id: uid(), connectorId: uid(), parentId, x: p.x - 95, y: p.y - 37,
+      id: uid(),
+      connectorId: uid(),
+      parentId,
+      x: p.x - 95,
+      y: p.y - 37,
     });
     const parent = state.board.objects.find((item) => item.id === parentId);
     if (parent) parent.mindCollapsed = false;
@@ -82,15 +94,24 @@ function addFlowchart(shape) {
   const p = centerPoint();
   commit(() => {
     const created = node(
-      shape, source ? source.x + source.w + 130 : p.x - 100,
-      source ? source.y : p.y - 50, 195, 100,
-      shape === 'diamond' ? 'Decision?' : 'Process', shape === 'diamond' ? '#f8df87' : '#dce7cc',
+      shape,
+      source ? source.x + source.w + 130 : p.x - 100,
+      source ? source.y : p.y - 50,
+      195,
+      100,
+      shape === 'diamond' ? 'Decision?' : 'Process',
+      shape === 'diamond' ? '#f8df87' : '#dce7cc',
     );
     state.board.objects.push(created);
-    if (source) state.board.objects.push({
-      id: uid(), type: 'connector', from: source.id, to: created.id,
-      route: 'elbow', endArrow: 'arrow',
-    });
+    if (source)
+      state.board.objects.push({
+        id: uid(),
+        type: 'connector',
+        from: source.id,
+        to: created.id,
+        route: 'elbow',
+        endArrow: 'arrow',
+      });
     state.selected = new Set([created.id]);
   });
   if (window.matchMedia('(min-width:651px)').matches) setTool('select');
@@ -118,9 +139,11 @@ function refreshWorkspace() {
   if (!bar || !board) return;
   const mode = board.diagramView || (board.kind === 'mindmap' ? 'mindmap' : 'canvas');
   state.diagramMode = mode;
-  bar.querySelectorAll('[data-mm-mode]').forEach((button) =>
-    button.setAttribute('aria-pressed', String(button.dataset.mmMode === mode)),
-  );
+  bar
+    .querySelectorAll('[data-mm-mode]')
+    .forEach((button) =>
+      button.setAttribute('aria-pressed', String(button.dataset.mmMode === mode)),
+    );
   bar.querySelector('[data-mm-actions="mindmap"]').hidden = !['mindmap', 'outline'].includes(mode);
   bar.querySelector('[data-mm-actions="flowchart"]').hidden = mode !== 'flowchart';
   $('#mindmap-panel').hidden = mode !== 'outline';
@@ -136,12 +159,16 @@ function drawOutline() {
   if (!host || !state.board) return;
   const rows = outlineMindmap(state.board.objects).filter((item) => !item.concealed);
   host.innerHTML = rows.length
-    ? rows.map(({ id, depth, node: topic, childCount }) =>
-      `<div class="mmw-row" style="padding-left:${Math.min(depth, 12) * 13}px" data-mm-row="${esc(id)}">
-        <button type="button" class="mmw-toggle" data-mm-toggle="${esc(id)}" aria-label="${topic.mindCollapsed ? 'Expand' : 'Collapse'} topic" ${childCount ? '' : 'disabled'}>${childCount ? topic.mindCollapsed ? '▸' : '▾' : '·'}</button>
+    ? rows
+        .map(
+          ({ id, depth, node: topic, childCount }) =>
+            `<div class="mmw-row" style="padding-left:${Math.min(depth, 12) * 13}px" data-mm-row="${esc(id)}">
+        <button type="button" class="mmw-toggle" data-mm-toggle="${esc(id)}" aria-label="${topic.mindCollapsed ? 'Expand' : 'Collapse'} topic" ${childCount ? '' : 'disabled'}>${childCount ? (topic.mindCollapsed ? '▸' : '▾') : '·'}</button>
         <button type="button" class="mmw-focus" data-mm-focus="${esc(id)}" aria-current="${state.selected.has(id)}" title="Select on canvas">◎</button>
         <input data-mm-text="${esc(id)}" aria-label="Topic text" value="${esc(topic.text || '')}" maxlength="240">
-      </div>`).join('')
+      </div>`,
+        )
+        .join('')
     : '<p class="mmw-empty">No mind-map topics yet. Choose “Root” to create one, or select a shape and choose “Convert”.</p>';
 }
 function toggleCollapse(id) {
@@ -166,7 +193,13 @@ function toggleCollapse(id) {
   });
 }
 export function mindmapShortcut(event) {
-  if (!state.board || state.diagramMode !== 'mindmap' || event.metaKey || event.ctrlKey || event.altKey)
+  if (
+    !state.board ||
+    state.diagramMode !== 'mindmap' ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.altKey
+  )
     return false;
   if (event.target?.closest?.('#mindmap-toolbar,#mindmap-panel')) return false;
   const topic = chosenTopic();
@@ -191,8 +224,12 @@ export function setupMindmapWorkspace() {
   const toolbar = document.createElement('nav');
   toolbar.id = 'mindmap-toolbar';
   toolbar.setAttribute('aria-label', 'Canvas workspace modes and creation actions');
-  toolbar.innerHTML = `<div class="mmw-modes">${modes.map(([id, label]) =>
-    `<button type="button" data-mm-mode="${id}" aria-pressed="false">${label}</button>`).join('')}</div>
+  toolbar.innerHTML = `<div class="mmw-modes">${modes
+    .map(
+      ([id, label]) =>
+        `<button type="button" data-mm-mode="${id}" aria-pressed="false">${label}</button>`,
+    )
+    .join('')}</div>
     <div class="mmw-actions" data-mm-actions="mindmap" hidden>
       <button data-mm-action="root" title="Create a root topic">＋ Root</button>
       <button data-mm-action="child" title="Add child · Tab">＋ Branch</button>
@@ -253,7 +290,9 @@ export function setupMindmapWorkspace() {
     if (!id || !state.board) return;
     const topic = state.board.objects.find((item) => item.id === id && isMindNode(item));
     if (topic && topic.text !== event.target.value)
-      commit(() => { topic.text = event.target.value; });
+      commit(() => {
+        topic.text = event.target.value;
+      });
   });
   document.addEventListener('sparkboard:render', refreshWorkspace);
   document.addEventListener('pointerup', () => {

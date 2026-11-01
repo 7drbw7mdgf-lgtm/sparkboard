@@ -80,7 +80,9 @@ export function fit() {
   }
   focusBounds(
     M.enclosing(
-      state.board.objects.filter((n) => n.type !== 'connector' && !hiddenMindmapIds(state.board.objects).has(n.id)),
+      state.board.objects.filter(
+        (n) => n.type !== 'connector' && !hiddenMindmapIds(state.board.objects).has(n.id),
+      ),
       state.board.objects,
     ),
   );

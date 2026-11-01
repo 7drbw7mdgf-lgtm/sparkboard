@@ -169,7 +169,8 @@ export function renderLines() {
     .filter(
       (n) =>
         ['connector', 'line', 'path'].includes(n.type) &&
-        !hidden.has(n.from) && !hidden.has(n.to) &&
+        !hidden.has(n.from) &&
+        !hidden.has(n.to) &&
         !(state.drag?.type === 'rebind-connector' && state.drag.id === n.id),
     )
     .slice()
