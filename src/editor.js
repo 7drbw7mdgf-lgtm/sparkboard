@@ -45,7 +45,7 @@ export function startEdit(id) {
     return;
   }
   // A native form is far more reliable than in-canvas contenteditable with iOS keyboards.
-  if (isCompactEditor() && typeof n.text === 'string' && n.type !== 'link') {
+  if (isCompactEditor() && typeof n.text === 'string' && !['link', 'embed'].includes(n.type)) {
     modal('Edit node text', `<form id="mobile-node-text-form" class="modal-form">
       <label for="mobile-node-text">Text</label>
       <textarea id="mobile-node-text" rows="4" maxlength="2000" spellcheck="true"
