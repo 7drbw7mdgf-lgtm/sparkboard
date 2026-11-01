@@ -43,13 +43,21 @@ export function toggleReshape() {
   const n = ns[0];
   if (!M.shapes.includes(n.type) && n.type !== 'path') return;
   state.reshapeId = state.reshapeId === n.id ? null : n.id;
+  state.reshapeMode = 'points';
   selectVisual();
   toast(
     state.reshapeId
-      ? 'Reshape mode: drag anchor points, click midpoints to add, Option-click to remove'
-      : 'Reshape mode off',
+      ? 'Outline editing: move nodes, drag + handles to add points, or choose Bend to curve edges'
+      : 'Outline editing finished',
   );
 }
+export function setOutlineMode(mode) {
+  if (!['points', 'bend'].includes(mode) || !state.reshapeId) return;
+  state.reshapeMode = mode;
+  selectVisual();
+  toast(mode === 'bend' ? 'Drag blue curve handles to bend each outline edge' : 'Drag white anchor nodes to reshape the outline');
+}
+
 export function command(action) {
   if (action === 'lock') {
     toggleLock();
@@ -63,8 +71,12 @@ export function command(action) {
   commit(() => {
     const ns = editableNodes();
     if (action === 'reset-vertices') {
-      ns.forEach((n) => delete n.vertices);
+      ns.forEach((n) => {
+        delete n.vertices;
+        M.resetCurves(n);
+      });
       state.reshapeId = null;
+      state.reshapeMode = 'points';
     }
     if (action === 'bold') ns.forEach((n) => (n.fontWeight = n.fontWeight === 700 ? 400 : 700));
     if (action === 'group') {
