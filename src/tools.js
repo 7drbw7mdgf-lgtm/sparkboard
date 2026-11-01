@@ -5,7 +5,8 @@ import { linkDialog } from './links.js';
 import { modal } from './dialogs.js';
 import { properties } from './inspector.js';
 import { labels, shapeNames, svgIcon, shapeCategory, shapeCategories } from './icons.js';
-import { $, $$, M } from './core.js';
+import { $, $, M } from './core.js';
+import { isCompactEditor, toolAvailableOnLayout } from './mobile-editor-policy.js';
 const categoryButtons = (scope) =>
   ['All', ...Object.keys(shapeCategories)]
     .map(
@@ -154,7 +155,10 @@ export function closeShapes() {
   $('#shape-toggle').setAttribute('aria-expanded', 'false');
 }
 export function setTool(t) {
+  const compact = isCompactEditor();
+  if (!toolAvailableOnLayout(t, compact)) return;
   finishEdit();
+  if (compact && t !== 'select') state.inspectorOpen = false;
   state.tool = t;
   state.connectorStart = null;
   state.connectorDraft = null;
@@ -166,7 +170,8 @@ export function setTool(t) {
   $('#drawing-options').hidden = t !== 'pen';
   const lineOpts = $('#line-options');
   if (lineOpts) {
-    lineOpts.hidden = t !== 'line' && t !== 'connector';
+    // On a phone, Line draws immediately. Formatting is available after selection.
+    lineOpts.hidden = compact || (t !== 'line' && t !== 'connector');
     const label = $('#line-options-label');
     if (label) label.textContent = t === 'connector' ? 'CONNECTOR TOOL' : 'LINE TOOL';
   }
@@ -180,7 +185,7 @@ export function setTool(t) {
     state.space || t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
   $('#hint').textContent =
     t === 'line'
-      ? 'Drag on the canvas to draw a line · Format options on the right'
+      ? compact ? 'Drag anywhere to draw a line; select it to format later' : 'Drag on the canvas to draw a line · Format options on the right'
       : t === 'connector'
         ? 'Click or drag between two objects to connect them · Format options on the right'
         : t === 'pen'
