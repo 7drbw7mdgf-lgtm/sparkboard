@@ -17,7 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Format changed files
-        run: npx prettier --write scripts/build-sai.cjs scripts/build-website.cjs scripts/verify-website.py integration/sai/HostedPersistence.ts integration/sai/HostedAIPanel.tsx tests/sai-hosted.test.js index.html style.css
+        run: npx prettier --write scripts/build-sai.cjs scripts/build-website.cjs integration/sai/HostedPersistence.ts integration/sai/HostedAIPanel.tsx tests/sai-hosted.test.js index.html style.css
       - name: Commit formatted source
         run: |
           git config user.name "github-actions[bot]"
