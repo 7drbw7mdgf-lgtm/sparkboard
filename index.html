@@ -137,26 +137,14 @@
       <span id="board-type">Brainstorm</span>
     </div>
     <nav id="tools" aria-label="Whiteboard tools"></nav>
-    <aside id="inspector" hidden aria-label="Format">
-      <div class="panel-heading">
+    <aside id="inspector" hidden aria-label="Format" tabindex="-1">
+      <div class="panel-heading format-heading">
         <div>
           <span class="eyebrow" id="inspector-eyebrow">SELECTION</span>
           <h3>Format</h3>
+          <p id="inspector-subtitle" class="format-subtitle">Context-aware controls</p>
         </div>
-        <button id="close-inspector" aria-label="Close format panel">×</button>
-      </div>
-      <div id="properties" hidden>
-        <div class="inspector-quick-bar">
-          <span id="selection-count">1 item</span>
-          <div class="inspector-quick-actions">
-            <button id="edit" title="Edit text (Enter)">✎</button
-            ><button id="reshape" title="Reshape anchor points (A)" hidden>◇</button
-            ><button id="duplicate" title="Duplicate (⌘D)">⧉</button
-            ><button id="lock" title="Lock or unlock">♙</button
-            ><button id="delete" title="Delete selected">⌫</button>
-          </div>
-        </div>
-        <div id="swatches" aria-label="Color presets"></div>
+        <button id="close-inspector" type="button" aria-label="Close format panel">×</button>
       </div>
       <div id="inspector-body"></div>
     </aside>
