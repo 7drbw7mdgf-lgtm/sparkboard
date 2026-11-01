@@ -3452,3 +3452,34 @@ body.is-panning #canvas {
     padding: 11px;
   }
 }
+
+/* Account-owned optional cloud sync: status stays visible without covering the canvas. */
+.cloud-indicator {
+  display: inline-block;
+  max-width: 150px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 1px solid #dce7d9;
+  background: #f7fbf6;
+  font-size: 11px;
+  color: #486447;
+  font-weight: 600;
+}
+.cloud-indicator[hidden] { display: none !important; }
+.account-sync {
+  margin: 15px 0;
+  padding: 13px;
+  border: 1px solid #e1e8d9;
+  border-radius: 11px;
+  background: #f9fcf8;
+}
+.account-sync strong { display: block; font-size: 14px; color: #25452e; }
+.account-sync #cloud-sync-state { font-size: 12px; font-weight: 650; color: #49704e; }
+.account-sync .account-provider { margin-top: 7px; width: 100%; }
+@media (max-width: 650px) {
+  .cloud-indicator { max-width: 114px; padding: 6px; font-size: 10px; }
+}
