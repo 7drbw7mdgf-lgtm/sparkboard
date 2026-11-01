@@ -67,9 +67,14 @@ function section(name, icon, contents, { compact = false } = {}) {
     return (
       '<section class="format-card format-page" role="tabpanel" id="format-panel-' +
       name +
-      '" aria-labelledby="format-tab-' + name +
-      '" data-format-section="' + name + '">' +
-      '<div class="format-card-content">' + contents + '</div></section>'
+      '" aria-labelledby="format-tab-' +
+      name +
+      '" data-format-section="' +
+      name +
+      '">' +
+      '<div class="format-card-content">' +
+      contents +
+      '</div></section>'
     );
   }
   return (
@@ -140,8 +145,7 @@ export function formatPanel(
   { compact = false, page = 'Appearance', outlineMode = 'points' } = {},
 ) {
   if (!ns.length) return '';
-  const panelSection = (name, icon, contents) =>
-    section(name, icon, contents, { compact });
+  const panelSection = (name, icon, contents) => section(name, icon, contents, { compact });
   const n = ns[0],
     multi = ns.length > 1;
   const locked = ns.every((item) => item.locked);
@@ -394,30 +398,58 @@ export function formatPanel(
     const names = pages.map(([name]) => name);
     const current = resolveFormatPage(names, page);
     const currentIndex = names.indexOf(current);
-    const tabs = pages.map(([name]) =>
-      '<button type="button" role="tab" id="format-tab-' + name +
-      '" aria-controls="format-panel-' + name +
-      '" aria-selected="' + String(name === current) +
-      '" tabindex="' + (name === current ? '0' : '-1') +
-      '" class="format-page-tab' + (name === current ? ' active' : '') +
-      '" data-format-page="' + name + '">' + name + '</button>'
-    ).join('');
-    const panels = pages.map(([name, markup]) =>
-      name === current
-        ? markup
-        : markup.replace('class="format-card format-page"', 'class="format-card format-page" hidden')
-    ).join('');
-    return '<div class="format-paged">' +
-      '<nav class="format-page-tabs" role="tablist" aria-label="Format pages">' + tabs + '</nav>' +
-      '<div class="format-page-stack">' + panels + '</div>' +
+    const tabs = pages
+      .map(
+        ([name]) =>
+          '<button type="button" role="tab" id="format-tab-' +
+          name +
+          '" aria-controls="format-panel-' +
+          name +
+          '" aria-selected="' +
+          String(name === current) +
+          '" tabindex="' +
+          (name === current ? '0' : '-1') +
+          '" class="format-page-tab' +
+          (name === current ? ' active' : '') +
+          '" data-format-page="' +
+          name +
+          '">' +
+          name +
+          '</button>',
+      )
+      .join('');
+    const panels = pages
+      .map(([name, markup]) =>
+        name === current
+          ? markup
+          : markup.replace(
+              'class="format-card format-page"',
+              'class="format-card format-page" hidden',
+            ),
+      )
+      .join('');
+    return (
+      '<div class="format-paged">' +
+      '<nav class="format-page-tabs" role="tablist" aria-label="Format pages">' +
+      tabs +
+      '</nav>' +
+      '<div class="format-page-stack">' +
+      panels +
+      '</div>' +
       '<div class="format-page-footer">' +
       '<button type="button" data-format-step="-1" aria-label="Previous format page"' +
-      (currentIndex === 0 ? ' disabled' : '') + '>‹ Back</button>' +
-      '<span data-format-counter aria-live="polite">' + (currentIndex + 1) +
-      ' / ' + names.length + '</span>' +
+      (currentIndex === 0 ? ' disabled' : '') +
+      '>‹ Back</button>' +
+      '<span data-format-counter aria-live="polite">' +
+      (currentIndex + 1) +
+      ' / ' +
+      names.length +
+      '</span>' +
       '<button type="button" data-format-step="1" aria-label="Next format page"' +
-      (currentIndex >= names.length - 1 ? ' disabled' : '') + '>Next ›</button>' +
-      '</div></div>';
+      (currentIndex >= names.length - 1 ? ' disabled' : '') +
+      '>Next ›</button>' +
+      '</div></div>'
+    );
   }
   return '<div class="format-panels">' + appearance + text + layout + arrange + behavior + '</div>';
 }

@@ -4086,7 +4086,9 @@ body.is-panning #canvas {
     min-height: 0;
     overflow: hidden;
   }
-  #inspector .format-heading { flex: 0 0 auto; }
+  #inspector .format-heading {
+    flex: 0 0 auto;
+  }
   #inspector .format-paged {
     display: flex;
     flex-direction: column;
@@ -4109,7 +4111,9 @@ body.is-panning #canvas {
     -webkit-overflow-scrolling: touch;
     padding: 2px 1px 7px;
   }
-  #inspector .format-page-tabs::-webkit-scrollbar { display: none; }
+  #inspector .format-page-tabs::-webkit-scrollbar {
+    display: none;
+  }
   #inspector .format-page-tab {
     flex: 0 0 auto;
     white-space: nowrap;

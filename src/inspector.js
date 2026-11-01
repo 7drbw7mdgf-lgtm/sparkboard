@@ -64,8 +64,9 @@ export function renderInspector() {
     page,
     outlineMode: state.reshapeMode,
   });
-  body.dataset.activePage = body.querySelector('[data-format-page][aria-selected="true"]')
-    ?.dataset.formatPage || 'Appearance';
+  body.dataset.activePage =
+    body.querySelector('[data-format-page][aria-selected="true"]')?.dataset.formatPage ||
+    'Appearance';
   body.dataset.selection = selection;
   body.dataset.compact = String(compact);
 }

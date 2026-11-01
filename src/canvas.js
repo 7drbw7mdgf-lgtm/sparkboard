@@ -365,7 +365,12 @@ export function setupCanvas() {
       return;
     }
     const portEl = e.target.closest('.port');
-    if (portEl && !isCompactEditor() && n && !['path', 'line', 'connector', 'frame'].includes(n.type)) {
+    if (
+      portEl &&
+      !isCompactEditor() &&
+      n &&
+      !['path', 'line', 'connector', 'frame'].includes(n.type)
+    ) {
       const fromPort = portEl.dataset.port,
         startPt = M.portPoint(n, fromPort),
         opts = currentLineOptions('curved');

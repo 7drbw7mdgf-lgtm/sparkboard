@@ -185,7 +185,9 @@ export function setTool(t) {
     state.space || t === 'hand' ? 'grab' : t === 'select' ? 'default' : 'crosshair';
   $('#hint').textContent =
     t === 'line'
-      ? compact ? 'Drag anywhere to draw a line; select it to format later' : 'Drag on the canvas to draw a line · Format options on the right'
+      ? compact
+        ? 'Drag anywhere to draw a line; select it to format later'
+        : 'Drag on the canvas to draw a line · Format options on the right'
       : t === 'connector'
         ? 'Click or drag between two objects to connect them · Format options on the right'
         : t === 'pen'
