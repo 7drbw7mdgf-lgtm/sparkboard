@@ -44,7 +44,7 @@ export function setupControls() {
     button.innerHTML =
       svgIcon(icon) +
       (button.classList.contains('quiet')
-        ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export' }[icon]}</span>`
+        ? `<span>${{ search: 'Find', format: 'Format', scenes: 'Scenes', templates: 'Templates', export: 'Export', more: 'More' }[icon]}</span>`
         : '');
   }
   const mobileMore = $('#mobile-more');
@@ -164,6 +164,17 @@ export function setupControls() {
       toggleReshape();
     } else if (action === 'points' || action === 'bend') {
       setOutlineMode(action);
+    } else if (action === 'remove-point') {
+      const node = editableNodes()[0];
+      const index = state.selectedVertex;
+      if (node && state.reshapeId === node.id && M.shapes.includes(node.type) &&
+        state.reshapeMode === 'points' && Number.isInteger(index) &&
+        M.shapeVertices(node).length > 3 && index < M.shapeVertices(node).length) {
+        commit(() => {
+          M.removeVertex(node, index);
+          state.selectedVertex = null;
+        });
+      }
     } else if (action === 'format') {
       state.inspectorOpen = !state.inspectorOpen;
       properties();
