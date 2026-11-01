@@ -48,10 +48,13 @@ jobs:
           npm run build
       - name: Build hosted Sai planner
         run: npm run sai:build
+      - name: Build Pulse public homepage
+        run: npm run pulse:build
       - name: Build the public website
         env:
           WEBSITE_REVISION: ${{ github.sha }}
           REQUIRE_SAI: '1'
+          REQUIRE_PULSE: '1'
           WEBSITE_LAYOUT: ${{ inputs.layout || 'direct' }}
         run: npm run website:build
       - name: Skip superseded commits
@@ -74,4 +77,5 @@ jobs:
         env:
           EXPECTED_REVISION: ${{ github.sha }}
           REQUIRE_SAI: '1'
+          REQUIRE_PULSE: '1'
         run: python3 scripts/verify-website.py
