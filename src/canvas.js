@@ -356,7 +356,7 @@ export function setupCanvas() {
       return;
     }
     const bindingHandle = e.target.closest('[data-connector-end]');
-    if (bindingHandle && n?.type === 'connector' && !n.locked) {
+    if (state.tool !== 'connector' && bindingHandle && n?.type === 'connector' && !n.locked) {
       const side = bindingHandle.dataset.connectorEnd,
         other = side === 'from' ? 'to' : 'from';
       state.drag = { type: 'rebind-connector', id: n.id, side, excludeId: n[other], startPt: p };
@@ -392,7 +392,7 @@ export function setupCanvas() {
       return;
     }
     const vertexEl = e.target.closest('.vertex-handle');
-    if (vertexEl && n && !n.locked) {
+    if (state.tool !== 'connector' && vertexEl && n && !n.locked) {
       const idx = Number(vertexEl.dataset.vertex);
       state.selectedVertex = idx;
       if (e.altKey) {
@@ -413,7 +413,7 @@ export function setupCanvas() {
       return;
     }
     const shapeCurveEl = e.target.closest('.shape-curve-handle');
-    if (shapeCurveEl && n && M.shapes.includes(n.type) && !n.locked) {
+    if (state.tool !== 'connector' && shapeCurveEl && n && M.shapes.includes(n.type) && !n.locked) {
       state.drag = {
         type: 'curve-edge',
         id: n.id,
@@ -424,7 +424,7 @@ export function setupCanvas() {
       return;
     }
     const edgeEl = e.target.closest('.edge-handle');
-    if (edgeEl && n && !n.locked) {
+    if (state.tool !== 'connector' && edgeEl && n && !n.locked) {
       const edgeIdx = Number(edgeEl.dataset.edge);
       snapshot();
       const local = localShapePoint(n, p);
@@ -441,7 +441,7 @@ export function setupCanvas() {
       return;
     }
     const curveEl = e.target.closest('.curve-handle');
-    if (curveEl && n?.type === 'line' && !n.locked) {
+    if (state.tool !== 'connector' && curveEl && n?.type === 'line' && !n.locked) {
       state.drag = {
         type: 'line-control',
         id: n.id,
@@ -452,7 +452,7 @@ export function setupCanvas() {
       return;
     }
     const lineVertEl = e.target.closest('.line-vertex');
-    if (lineVertEl && n && n.type === 'line' && !n.locked) {
+    if (state.tool !== 'connector' && lineVertEl && n && n.type === 'line' && !n.locked) {
       const idx = Number(lineVertEl.dataset.lineVertex);
       state.drag = {
         type: 'line-vertex',
@@ -464,7 +464,7 @@ export function setupCanvas() {
       return;
     }
     const pathVertEl = e.target.closest('.path-vertex');
-    if (pathVertEl && n && n.type === 'path' && !n.locked) {
+    if (state.tool !== 'connector' && pathVertEl && n && n.type === 'path' && !n.locked) {
       const idx = Number(pathVertEl.dataset.pathVertex);
       if (e.altKey && n.points.length > 2) {
         commit(() => n.points.splice(idx, 1));
@@ -481,8 +481,11 @@ export function setupCanvas() {
     }
     if (state.tool === 'connector') {
       if (!n || ['path', 'line', 'connector', 'frame'].includes(n.type)) {
+        const wasConnecting = Boolean(state.connectorStart);
         state.connectorStart = null;
-        renderLines();
+        state.connectorDraft = null;
+        if (isCompactEditor() && wasConnecting) setTool('select');
+        else renderLines();
         return;
       }
       if (state.connectorStart && state.connectorStart !== n.id) {
