@@ -1,4 +1,5 @@
 import { isNativeControl } from './keyboard.js';
+import { openConnectorControls } from './connector-edit.js';
 import { addFlowStep } from './flowchart.js';
 import { mindmapShortcut } from './mindmap.js';
 import { svgIcon } from './icons.js';
@@ -198,6 +199,8 @@ export function setupControls() {
       setTool('connector');
       state.connectorStart = source.id;
       toast('Tap the object you want to connect to. Tap Select to cancel.');
+    } else if (action === 'connector-style') {
+      openConnectorControls([...state.selected][0]);
     } else if (action === 'format') {
       state.inspectorOpen = !state.inspectorOpen;
       properties();
