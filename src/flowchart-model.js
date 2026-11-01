@@ -71,14 +71,19 @@ export function connectFlowNodes(objects, fromId, toId, makeId) {
       ((o.from === fromId && o.to === toId) || (o.from === toId && o.to === fromId)),
   );
   if (existing) return existing;
+  const dx = target.x + target.w / 2 - (source.x + source.w / 2);
+  const dy = target.y + target.h / 2 - (source.y + source.h / 2);
+  const horizontal = Math.abs(dx) >= Math.abs(dy);
+  const fromPort = horizontal ? (dx >= 0 ? 'e' : 'w') : dy >= 0 ? 's' : 'n';
+  const toPort = horizontal ? (dx >= 0 ? 'w' : 'e') : dy >= 0 ? 'n' : 's';
   const edge = {
     id: makeId(),
     type: 'connector',
     from: fromId,
     to: toId,
     route: 'elbow',
-    fromPort: 'e',
-    toPort: 'w',
+    fromPort,
+    toPort,
     color: '#64748b',
     strokeWidth: 2.5,
     endArrow: 'filled',
