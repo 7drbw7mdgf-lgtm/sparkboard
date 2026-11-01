@@ -318,5 +318,6 @@ export function selectVisual() {
   renderLines();
   properties();
   updateHistory();
-  document.dispatchEvent(new Event('sparkboard:selection'));
+  if (typeof document.dispatchEvent === 'function')
+    document.dispatchEvent(new Event('sparkboard:selection'));
 }
