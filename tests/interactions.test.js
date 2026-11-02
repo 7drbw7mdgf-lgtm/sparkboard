@@ -190,6 +190,8 @@ test('dragging the recipient node away drops its incoming connection', () => {
   const originals = pair.map((item) => ({ ...item }));
   pair[1].x = 90;
   assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['b'])), []);
+  pair[1].x = 120;
+  assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['b'])), []);
   pair[1].x = 220;
   assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['b'])), ['link']);
   assert.equal(

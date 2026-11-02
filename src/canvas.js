@@ -153,6 +153,9 @@ function localShapePoint(n, p) {
   };
 }
 
+/** A click, or a short slip off a shape, must not count as dragging a node away. */
+const CONNECTOR_DRAG_AWAY = 96;
+
 /** Drop incoming links when the recipient itself is dragged clear of where it was connected. */
 export function detachDraggedRecipients(objects, originals, movingIds) {
   const removed = [];
@@ -165,7 +168,7 @@ export function detachDraggedRecipients(objects, originals, movingIds) {
     if (!before || !after) continue;
     const dx = after.x + after.w / 2 - (before.x + before.w / 2);
     const dy = after.y + after.h / 2 - (before.y + before.h / 2);
-    if (Math.hypot(dx, dy) < 24) continue;
+    if (Math.hypot(dx, dy) < CONNECTOR_DRAG_AWAY) continue;
     objects.splice(i, 1);
     removed.push(edge.id);
   }
@@ -287,7 +290,13 @@ export function endPointer(e) {
   if (d.type === 'rebind-connector') {
     const draft = state.connectorDraft;
     state.connectorDraft = null;
-    const changing = Boolean(draft?.binding) || (d.side === 'to' && d.detached);
+    let travel = 0;
+    if (e?.type === 'pointerup' && d.origin) {
+      const release = point(e);
+      travel = Math.hypot(release.x - d.origin.x, release.y - d.origin.y) * (state.view.z || 1);
+    }
+    // A click on the handle just outside a shape only leaves the connector selected.
+    const changing = Boolean(draft?.binding) || (d.side === 'to' && travel >= CONNECTOR_DRAG_AWAY);
     let result = 'kept';
     if (e?.type === 'pointerup' && changing)
       commit(() => {
@@ -1099,7 +1108,7 @@ export function setupCanvas() {
     }
     let dx = p.x - state.drag.start.x,
       dy = p.y - state.drag.start.y;
-    if (!state.drag.changed && Math.hypot(dx, dy) * state.view.z < 3) return;
+    if (!state.drag.changed && Math.hypot(dx, dy) * state.view.z < 8) return;
     if (!state.drag.changed) {
       snapshot();
       state.drag.changed = true;
