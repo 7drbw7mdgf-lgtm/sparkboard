@@ -24,6 +24,8 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
 #feedback-trigger-btn{display:none!important}
 #benchline-sparkboard{position:static!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;z-index:auto!important;display:inline-flex;align-items:center;width:auto!important;height:auto!important;min-height:32px;margin-right:12px;padding:0 2px!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#4262ff!important;font:750 13px/1 'DM Sans',system-ui,sans-serif!important;text-decoration:none;white-space:nowrap}
 #benchline-sparkboard:hover{color:#2f4fe0!important}
+.gantt-timeline{overflow:auto!important;min-width:0;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;overscroll-behavior:contain}
+.gantt-task-list{touch-action:none}
 `;
 
 const phoneCss = `
@@ -43,6 +45,7 @@ body.benchline-phone .flex-shrink-0.select-none.h-full[style*="width"]{width:min
 body.benchline-phone .no-x-scrollbar.overflow-x-auto.border-t{display:none!important}
 body.benchline-phone .fixed.inset-0{padding:8px!important}
 body.benchline-phone .fixed.inset-0>div{max-width:100%!important;width:100%!important;max-height:100%!important;overflow:auto}
+body.benchline-phone .gantt-x-scroll{display:none!important}
 #benchline-phone-chrome{position:fixed;top:48px;left:0;right:0;z-index:35;background:#fff;border-bottom:1px solid #e6e6e2;color:#292c31}
 #benchline-phone-chrome .bpc-row{display:flex;align-items:stretch;height:46px;gap:2px;padding:0 6px 0 2px}
 #benchline-phone-chrome .bpc-pivot{display:flex;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}

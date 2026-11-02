@@ -21,6 +21,12 @@ test('Benchline phone shell is a labelled view bar, not a bottom dock', () => {
   assert.match(build, /id="benchline-sparkboard" href="\/\?workspace=1"/);
   assert.match(build, /aria-label="Back to Sparkboard"/);
   assert.match(build, /removeFeedbackButton/);
+  assert.match(build, /gantt-timeline/);
+  assert.match(build, /pan-x pan-y/);
+  assert.match(build, /handleSidebarTouchMove/);
+  assert.match(build, /gantt-x-scroll/);
+  assert.match(shell, /\.gantt-timeline\{overflow:auto!important/);
+  assert.match(shell, /\.gantt-x-scroll\{display:none!important\}/);
   assert.match(build, /Floating Feedback Button/);
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.start_url, '/sai/');

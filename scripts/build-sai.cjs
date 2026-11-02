@@ -134,6 +134,78 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     'nav className="h-full w-40 flex flex-col',
     'nav className="benchline-sidebar h-full w-40 flex flex-col',
   );
+  replaceRequired(
+    path.join(source, 'components/GanttChart.tsx'),
+    'className="flex-grow overflow-y-auto overflow-x-hidden relative"',
+    "className=\"gantt-timeline flex-grow min-h-0 min-w-0 overflow-auto overscroll-contain relative\"\n                    style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}",
+  );
+  replaceRequired(
+    path.join(source, 'components/GanttChart.tsx'),
+    `            const dx = e.deltaX !== 0 ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+            if (dx !== 0) {
+                e.preventDefault();
+                timelineEl.scrollLeft += dx;
+            }
+        };
+
+        sidebarEl.addEventListener('wheel', handleSidebarWheel, { passive: false });
+        timelineEl.addEventListener('wheel', handleTimelineWheel, { passive: false });
+
+        return () => {
+            sidebarEl.removeEventListener('wheel', handleSidebarWheel);
+            timelineEl.removeEventListener('wheel', handleTimelineWheel);
+        };`,
+    `            const dx = e.deltaX !== 0 ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+            if (dx !== 0) {
+                e.preventDefault();
+                timelineEl.scrollLeft += dx;
+                if (e.deltaX !== 0 && !e.shiftKey) timelineEl.scrollTop += e.deltaY;
+            }
+        };
+
+        let touchX = 0;
+        let touchY = 0;
+        const handleSidebarTouchStart = (e: TouchEvent) => {
+            const t = e.touches[0];
+            if (!t) return;
+            touchX = t.clientX;
+            touchY = t.clientY;
+        };
+        const handleSidebarTouchMove = (e: TouchEvent) => {
+            const t = e.touches[0];
+            if (!t) return;
+            const dx = touchX - t.clientX;
+            const dy = touchY - t.clientY;
+            touchX = t.clientX;
+            touchY = t.clientY;
+            if (dx === 0 && dy === 0) return;
+            e.preventDefault();
+            timelineEl.scrollLeft += dx;
+            timelineEl.scrollTop += dy;
+        };
+
+        sidebarEl.addEventListener('wheel', handleSidebarWheel, { passive: false });
+        sidebarEl.addEventListener('touchstart', handleSidebarTouchStart, { passive: true });
+        sidebarEl.addEventListener('touchmove', handleSidebarTouchMove, { passive: false });
+        timelineEl.addEventListener('wheel', handleTimelineWheel, { passive: false });
+
+        return () => {
+            sidebarEl.removeEventListener('wheel', handleSidebarWheel);
+            sidebarEl.removeEventListener('touchstart', handleSidebarTouchStart);
+            sidebarEl.removeEventListener('touchmove', handleSidebarTouchMove);
+            timelineEl.removeEventListener('wheel', handleTimelineWheel);
+        };`,
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskSidebar.tsx'),
+    'className="flex-grow overflow-y-hidden overflow-x-hidden bg-white dark:bg-gray-900"',
+    'className="gantt-task-list flex-grow overflow-y-hidden overflow-x-hidden bg-white dark:bg-gray-900"',
+  );
+  replaceRequired(
+    path.join(source, 'components/GanttChart.tsx'),
+    'className="flex-shrink-0 flex items-center px-4 border-t border-[#e6e6e2] dark:border-gray-800"',
+    'className="gantt-x-scroll flex-shrink-0 flex items-center px-4 border-t border-[#e6e6e2] dark:border-gray-800"',
+  );
   for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx']) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));
   }
@@ -196,6 +268,8 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     .join('\n');
   if (!bundled.includes('benchline-phone-chrome'))
     throw Error('Benchline phone bar was not bundled.');
+  if (!bundled.includes('gantt-timeline') || !bundled.includes('pan-x pan-y'))
+    throw Error('Gantt chart was not made scrollable.');
   if (bundled.includes('Send developer feedback'))
     throw Error('Feedback button was still bundled.');
   console.log('Benchline (Sai) static app built from ' + SAI_COMMIT + ' for /sai/.');
