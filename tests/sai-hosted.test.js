@@ -18,7 +18,7 @@ test('Sai sources are served as an isolated subpath without duplicating authenti
   assert.match(html, /href="\/sai\/"/);
   assert.match(html, /id="sai-link"|class="sai-workspace-link"/);
   assert.match(html, /class="sai-mobile-link"/);
-  assert.match(html, /Benchline projects are stored locally/);
+  assert.match(html, /Benchline projects remain local/);
   assert.match(html, />Benchline<\/a>/);
   assert.match(html, /Meet Benchline/);
   assert.match(html, /Open Benchline project planner/);

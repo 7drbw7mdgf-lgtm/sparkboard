@@ -210,5 +210,7 @@ test('collapsing a branch closes the gap it leaves and counts hidden topics', ()
   layoutMindmap(objects);
   const gapClosed = byId(objects, 'b').y - byId(objects, 'a').y;
   assert.ok(gapClosed < gapOpen, 'siblings move together once the branch is folded');
-  assert.deepEqual([...hiddenMindmapIds(objects)].sort(), ['a1', 'a1x', 'a2', 'a3']);
+  // Collapsing keeps intermediate parent topics visible while hiding leaf details.
+  assert.deepEqual([...hiddenMindmapIds(objects)].sort(), ['a1x', 'a2', 'a3']);
+  assert.equal(hiddenMindmapIds(objects).has('a1'), false);
 });
