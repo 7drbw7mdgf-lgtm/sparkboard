@@ -82,6 +82,7 @@ function sheetContents(section) {
   let choices;
   if (section === 'more') {
     choices = [
+      ['New task', '✓', 'task', ''],
       ['Sticky', '▤', 'tool', 'sticky'],
       ['Text', 'T', 'tool', 'text'],
       ['Shapes', '◇', 'picker', 'shapes'],
@@ -102,6 +103,7 @@ function sheetContents(section) {
     ];
   } else if (current === 'flowchart') {
     choices = [
+      ['New task', '✓', 'task', ''],
       ['Start', '◉', 'flow', 'start'],
       ['Process', '▭', 'flow', 'process'],
       ['Decision', '◇', 'flow', 'decision'],
@@ -111,6 +113,7 @@ function sheetContents(section) {
     ];
   } else if (current === 'mindmap' || current === 'outline') {
     choices = [
+      ['New task', '✓', 'task', ''],
       ['Root topic', '◉', 'map', 'root'],
       ['Child branch', '↳', 'map', 'child'],
       ['Sibling topic', '⊕', 'map', 'sibling'],
@@ -122,6 +125,7 @@ function sheetContents(section) {
     ];
   } else {
     choices = [
+      ['New task', '✓', 'task', ''],
       ['Sticky note', '▤', 'tool', 'sticky'],
       ['Text', 'T', 'tool', 'text'],
       ['Shapes', '◇', 'picker', 'shapes'],
@@ -194,7 +198,8 @@ function syncDock() {
 }
 function choose(action, value) {
   closeSheet();
-  if (action === 'flow') addFlowStep(value);
+  if (action === 'task') document.dispatchEvent(new Event('sparkboard:new-task'));
+  else if (action === 'flow') addFlowStep(value);
   else if (action === 'connect') startFlowLink();
   else if (action === 'connection') {
     const edge = state.board?.objects.find(
