@@ -22,16 +22,21 @@ export function mobileActionMarkup(
   const single = nodes.length === 1 ? nodes[0] : null;
   const shape = single && M.shapes.includes(single.type) && !single.locked;
   const reshaping = shape && reshapeId === single.id;
-  const button = (text, action, active = false) =>
-    '<button type="button" data-mobile-action="' +
-    action +
-    '"' +
-    (active ? ' class="active" aria-pressed="true"' : '') +
-    ' aria-label="' +
-    esc(text) +
-    '">' +
-    esc(text) +
-    '</button>';
+  const button = (text, action, active = false, extraClass = '') => {
+    const classes = [active ? 'active' : '', extraClass].filter(Boolean).join(' ');
+    return (
+      '<button type="button" data-mobile-action="' +
+      action +
+      '"' +
+      (classes ? ' class="' + classes + '"' : '') +
+      (active ? ' aria-pressed="true"' : '') +
+      ' aria-label="' +
+      esc(text) +
+      '">' +
+      esc(text) +
+      '</button>'
+    );
+  };
   let actions = '';
   if (reshaping) {
     actions += reshapeMode === 'points' ? button('Bend', 'bend') : button('Points', 'points');
@@ -55,6 +60,7 @@ export function mobileActionMarkup(
   if (single?.type === 'connector' && !single.locked) actions += button('Route', 'connector-style');
   actions += button('Format', 'format');
   if (!reshaping && nodes.some((n) => !n.locked)) actions += button('Copy', 'duplicate');
+  if (nodes.some((n) => !n.locked)) actions += button('Delete', 'delete', false, 'danger');
   return (
     '<div class="mobile-actions-inner" role="group" aria-label="' +
     esc(

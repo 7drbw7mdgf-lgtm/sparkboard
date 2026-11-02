@@ -3902,6 +3902,9 @@ body.is-panning #canvas {
     color: #4262ff;
     background: #e8edff;
   }
+  .mobile-actions-inner button.danger {
+    color: #c2414a;
+  }
   .mobile-actions-inner button:focus-visible {
     outline: 2px solid #4262ff;
     outline-offset: -2px;

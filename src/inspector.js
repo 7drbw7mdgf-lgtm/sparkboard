@@ -29,7 +29,7 @@ export function properties() {
   }
   const mobileActions = $('#mobile-selection-actions');
   if (mobileActions) {
-    const show = isCompactEditor() && ns.length > 0 && state.tool === 'select';
+    const show = ns.length > 0 && state.tool === 'select';
     mobileActions.hidden = !show;
     mobileActions.innerHTML = show
       ? mobileActionMarkup(

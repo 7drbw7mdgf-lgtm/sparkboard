@@ -199,6 +199,8 @@ export function setupControls() {
       duplicate();
     } else if (action === 'edit' && state.selected.size === 1) {
       startEdit([...state.selected][0]);
+    } else if (action === 'delete') {
+      deleteSelected();
     }
   };
   $('#close-inspector').onclick = () => {

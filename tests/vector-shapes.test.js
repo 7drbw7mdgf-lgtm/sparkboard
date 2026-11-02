@@ -126,7 +126,10 @@ test('mobile contextual bar is concise and supports both Illustrator-like node m
   assert.match(selected, /data-mobile-action="nodes"/);
   assert.match(selected, /data-mobile-action="format"/);
   assert.match(selected, /data-mobile-action="duplicate"/);
+  assert.match(selected, /data-mobile-action="delete"/);
   assert.doesNotMatch(selected, /data-mobile-action="bend"/);
+  const locked = mobileActionMarkup([{ ...node, locked: true }], null);
+  assert.doesNotMatch(locked, /data-mobile-action="delete"/);
   const bending = mobileActionMarkup([node], node.id, 'bend');
   assert.match(bending, /data-mobile-action="points"/);
   assert.doesNotMatch(bending, /data-mobile-action="remove-point"/);

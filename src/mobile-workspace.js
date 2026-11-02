@@ -89,11 +89,14 @@ body:not(.workspace-empty) #mobile-workspace-dock{display:flex;flex-direction:co
 #mobile-tool-active button{min-height:34px;padding:6px 12px;border-radius:8px;background:#4262ff;color:#fff;font-weight:600;touch-action:manipulation}
 #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
 @media(min-width:651px){
-  #tools{position:fixed!important;left:0!important;top:0!important;bottom:auto!important;transform:none!important;width:0!important;height:0!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;gap:0!important}
-  #tools > button,#tools > .tool-sep,#tools > .shape-picker > #shape-toggle,#tool-dock-toggle{display:none!important}
-  #tools > .shape-picker{position:static!important;width:0!important;height:0!important;overflow:visible!important}
-  #tools #shape-menu{position:fixed!important;left:50%!important;right:auto!important;top:auto!important;bottom:calc(var(--mwd-offset, 80px) + 8px)!important;transform:translateX(-50%)!important;width:min(460px,calc(100vw - 32px))!important;max-width:none!important;max-height:min(62vh,560px)!important;z-index:60!important}
+  #mobile-selection-actions:not([hidden]){display:flex;position:fixed;left:50%;right:auto;bottom:calc(var(--mwd-offset, 80px) + 8px);transform:translateX(-50%);max-width:min(640px,calc(100vw - 160px));z-index:43;border-radius:10px;background:#fff;border:1px solid #e6e8ee;box-shadow:0 8px 24px #18274b1f;padding:3px;overflow-x:auto;scrollbar-width:none}
+  .mobile-actions-inner{display:flex;flex-wrap:nowrap;gap:2px}
+  .mobile-actions-inner button{flex:0 0 auto;padding:8px 12px;min-height:36px;background:transparent;border:0;border-radius:8px;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif;white-space:nowrap;cursor:pointer}
+  .mobile-actions-inner button.active{color:#4262ff;background:#e8edff}
+  .mobile-actions-inner button.danger{color:#c2414a}
+  .mobile-actions-inner button.danger:hover{background:#fde8ea}
   body:not(.workspace-empty) .bottom-hint{bottom:calc(var(--mwd-offset, 80px) + 28px);max-width:min(520px,calc(100vw - 300px))}
+  body:not(.workspace-empty):has(#mobile-selection-actions:not([hidden])) .bottom-hint{bottom:calc(var(--mwd-offset, 80px) + 64px)}
   body:not(.workspace-empty) #toast{bottom:calc(var(--mwd-offset, 80px) + 36px)}
   #mobile-workspace-dock .mwd-circle:hover{transform:scale(1.08)}
   #mobile-workspace-dock .mwd-circle[aria-expanded="true"]:hover{transform:scale(1.14)}

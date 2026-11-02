@@ -61,8 +61,14 @@ test('each mobile view changes the dock, and Add does not repeat Tools', () => {
   assert.match(mobile, /data-mw-fan/);
   assert.doesNotMatch(mobile, /data-mw-action="add"/);
   assert.match(mobile, /@media\(min-width:651px\)/);
-  assert.match(mobile, /#tools > button/);
+  assert.doesNotMatch(mobile, /#tools > button/);
+  assert.doesNotMatch(mobile, /#tools\{width:0/);
   assert.match(mobile, /pointerover/);
+  assert.match(
+    source('src/mobile-actions.js'),
+    /data-mobile-action="delete"|button\('Delete', 'delete'/,
+  );
+  assert.match(source('src/inspector.js'), /ns\.length > 0 && state\.tool === 'select'/);
   assert.equal(
     canvas.tools.some((item) => item.value === 'sticky'),
     false,
