@@ -1,5 +1,6 @@
 import { blobToDataURL } from './storage/media-codec.js';
 import { colors, node, uid } from './core.js';
+import { appendMindNode, layoutMindmap } from './mindmap-model.js';
 export async function sample(kind = 'brainstorm') {
   if (kind === 'studio') {
     const response = await fetch(new URL('../assets/moodboard-study.png', import.meta.url));
@@ -23,32 +24,8 @@ export async function sample(kind = 'brainstorm') {
         ),
       ]),
     ];
-  if (kind === 'mindmap') {
-    let c = node('shape', 470, 300, 230, 120, 'Your big idea', colors[1]),
-      ns = [
-        node('sticky', 180, 130, 190, 155, 'Who is it for?', colors[0]),
-        node('sticky', 800, 130, 190, 155, 'Why does it matter?', colors[3]),
-        node('sticky', 180, 490, 190, 155, 'What could it become?', colors[2]),
-        node('sticky', 800, 490, 190, 155, 'What’s the first step?', colors[4]),
-      ];
-    c.mindmap = true;
-    c.mindParent = null;
-    ns.forEach((topic, i) => {
-      topic.mindmap = true;
-      topic.mindParent = c.id;
-      topic.mindOrder = i;
-    });
-    return [
-      c,
-      ...ns,
-      ...ns.map((n) => ({
-        id: uid(),
-        type: 'connector',
-        from: c.id,
-        to: n.id,
-      })),
-    ];
-  }
+  if (kind === 'kanban') return kanbanSample();
+  if (kind === 'mindmap') return mindMapSample();
   return [
     node('text', 180, 95, 800, 60, 'A space for what’s next.', '#29352a'),
     node('text', 184, 153, 800, 40, 'No perfect ideas needed. Just a place to start.', '#919986', {
@@ -97,6 +74,75 @@ export async function sample(kind = 'brainstorm') {
     ),
   ];
 }
+function kanbanSample() {
+  const columns = [
+    ['To do', ['Write the brief', 'Collect a few examples']],
+    ['In progress', ['Sketch the flow', 'Review it with the team']],
+    ['Done', ['Agree the goal']],
+  ];
+  return [
+    node('text', 150, 64, 860, 54, 'Kanban', '#29352a'),
+    node(
+      'text',
+      154,
+      118,
+      820,
+      34,
+      'Move each card to the right as the work moves forward.',
+      '#919986',
+      {
+        fontSize: 15,
+        fontWeight: 400,
+      },
+    ),
+    ...columns.flatMap(([name, cards], column) => {
+      const x = 150 + column * 340;
+      return [
+        node('frame', x, 180, 310, 540, name.toUpperCase(), 'transparent'),
+        ...cards.map((text, index) =>
+          node('sticky', x + 28, 260 + index * 190, 250, 156, text, colors[(column + index) % 5]),
+        ),
+      ];
+    }),
+  ];
+}
+
+function mindMapSample() {
+  const objects = [];
+  const root = node('shape', 560, 340, 210, 84, 'Central idea', colors[1], {
+    mindmap: true,
+    mindParent: null,
+    mindCollapsed: false,
+    mindOrder: 0,
+    cornerRadius: 20,
+  });
+  objects.push(root);
+  const add = (parentId, text, side) => {
+    const topic = appendMindNode(objects, {
+      id: uid(),
+      connectorId: uid(),
+      parentId,
+      text,
+    });
+    topic.color = colors[objects.filter((item) => item.mindmap).length % 5];
+    if (side === 'left') topic.x = root.x - topic.w - 280;
+    return topic;
+  };
+  const audience = add(root.id, 'Audience', 'left');
+  add(audience.id, 'Who it is for', 'left');
+  add(audience.id, 'Where they start', 'left');
+  const purpose = add(root.id, 'Purpose', 'left');
+  add(purpose.id, 'The problem', 'left');
+  const first = add(root.id, 'First step', 'right');
+  add(first.id, 'This week', 'right');
+  add(root.id, 'Risks', 'right');
+  const resources = add(root.id, 'Resources', 'right');
+  add(resources.id, 'People', 'right');
+  add(resources.id, 'Tools', 'right');
+  layoutMindmap(objects);
+  return objects;
+}
+
 export function studioSample(imageSource) {
   const title = node(
     'text',

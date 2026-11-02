@@ -126,7 +126,7 @@ test('lost capture, cancellation and window/board cleanup always release a pan',
     assert.equal(ui.canvas.hasPointerCapture(1), false);
   }
 });
-test('a connector end snaps to a port, and dragging the recipient end away removes it', () => {
+test('a connector end snaps to a port, and releasing it in empty space keeps the link', () => {
   const objects = [
     { id: 'a', type: 'sticky', x: 0, y: 0, w: 100, h: 80 },
     { id: 'b', type: 'sticky', x: 240, y: 0, w: 100, h: 80 },
@@ -171,13 +171,13 @@ test('a connector end snaps to a port, and dragging the recipient end away remov
       detached: true,
       selected,
     }),
-    'removed',
+    'kept',
   );
   assert.equal(
     objects.some((item) => item.id === 'link'),
-    false,
+    true,
   );
-  assert.equal(selected.has('link'), false);
+  assert.equal(selected.has('link'), true);
 });
 
 test('dragging the recipient node away drops its incoming connection', () => {

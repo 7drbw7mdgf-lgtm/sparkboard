@@ -193,6 +193,7 @@ function mountBoard(board) {
       blank: 'Free canvas',
       retro: 'Retrospective',
       mindmap: 'Mind map',
+      kanban: 'Kanban',
       brainstorm: 'Brainstorm',
     }[board.kind] || 'Whiteboard';
   renderBoardTabs({ reveal: true, openActive: true });
@@ -238,7 +239,8 @@ export function createBoard(kind = 'blank') {
     const titles = {
       brainstorm: 'The next big thing',
       retro: 'Sprint retrospective',
-      mindmap: 'Connecting the dots',
+      mindmap: 'Mind map',
+      kanban: 'Kanban',
       blank: 'Untitled board',
       studio: 'The creative studio',
     };
@@ -246,6 +248,7 @@ export function createBoard(kind = 'blank') {
       id: uid(),
       title: titles[kind] || titles.blank,
       kind,
+      diagramView: kind === 'mindmap' ? 'mindmap' : 'canvas',
       objects: await sample(kind),
       scenes: [],
       grid: true,

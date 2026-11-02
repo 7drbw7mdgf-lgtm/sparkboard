@@ -8,7 +8,11 @@ import { setTool } from './tools.js';
 import { state } from './state.js';
 import { commit, snapshot, updateHistory } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
-import { allowDoubleClickEdit, isCompactEditor } from './mobile-editor-policy.js';
+import {
+  allowDoubleClickEdit,
+  doubleTapOpensText,
+  isCompactEditor,
+} from './mobile-editor-policy.js';
 import { createFlowStep } from './flowchart-model.js';
 import { addMindChild, isMindNode, layoutMindmap } from './mindmap-model.js';
 
@@ -156,6 +160,72 @@ function localShapePoint(n, p) {
 /** A click, or a short slip off a shape, must not count as dragging a node away. */
 const CONNECTOR_DRAG_AWAY = 96;
 
+/** The connector stroke leaves the shape. A click there only clears the selection. */
+function connectorStrokeBesideShape(edge, p, target) {
+  if (
+    target?.closest?.(
+      '[data-connector-end],[data-connector-waypoint],[data-connector-add],.connector-label',
+    )
+  )
+    return false;
+  const pad = 40 / (state.view.z || 1);
+  for (const id of [edge.from, edge.to]) {
+    const shape = state.board.objects.find((item) => item.id === id);
+    if (!shape || ['connector', 'line', 'path'].includes(shape.type)) continue;
+    const box = M.bounds(shape, state.board.objects);
+    const beside =
+      p.x >= box.x - pad &&
+      p.x <= box.x + box.w + pad &&
+      p.y >= box.y - pad &&
+      p.y <= box.y + box.h + pad;
+    if (beside && !M.hitsShape(shape, p)) return true;
+  }
+  return false;
+}
+
+let lastShapeTap = null;
+let textGestureAt = 0;
+
+function shapeAcceptsText(n) {
+  return (
+    n &&
+    !n.locked &&
+    typeof n.text === 'string' &&
+    !['connector', 'line', 'path', 'image', 'file', 'embed', 'link'].includes(n.type)
+  );
+}
+
+/** A second tap on the same shape opens the text box. Empty canvas taps do not. */
+function noteShapeTap(drag, e) {
+  if (!drag || drag.type !== 'move' || drag.changed || !e || e.type !== 'pointerup') {
+    lastShapeTap = null;
+    return;
+  }
+  const n = state.board?.objects.find((item) => item.id === drag.id);
+  if (!shapeAcceptsText(n)) {
+    lastShapeTap = null;
+    return;
+  }
+  const release = point(e);
+  const now = Date.now();
+  const previous = lastShapeTap;
+  lastShapeTap = { id: n.id, at: now, x: release.x, y: release.y };
+  if (
+    doubleTapOpensText({
+      previous,
+      id: n.id,
+      at: now,
+      x: release.x,
+      y: release.y,
+      z: state.view.z || 1,
+    })
+  ) {
+    lastShapeTap = null;
+    textGestureAt = now;
+    startEdit(n.id);
+  }
+}
+
 /** Drop incoming links when the recipient itself is dragged clear of where it was connected. */
 export function detachDraggedRecipients(objects, originals, movingIds) {
   const removed = [];
@@ -176,11 +246,7 @@ export function detachDraggedRecipients(objects, originals, movingIds) {
 }
 
 /** Snap a connector end onto a port, or unhook the recipient end when it is dragged clear. */
-export function applyConnectorEndRelease(
-  objects,
-  connectorId,
-  { side, binding, detached, selected } = {},
-) {
+export function applyConnectorEndRelease(objects, connectorId, { side, binding } = {}) {
   const connector = objects.find((item) => item.id === connectorId && item.type === 'connector');
   if (!connector || (side !== 'from' && side !== 'to')) return 'missing';
   if (binding?.nodeId && objects.some((item) => item.id === binding.nodeId)) {
@@ -190,12 +256,10 @@ export function applyConnectorEndRelease(
     if (binding.port) connector[side + 'Port'] = binding.port;
     return 'snapped';
   }
-  if (side === 'to' && detached) {
-    const index = objects.findIndex((item) => item.id === connector.id);
-    if (index >= 0) objects.splice(index, 1);
-    selected?.delete(connector.id);
-    return 'removed';
-  }
+  // Releasing the handle in empty space must not delete the connector.
+  // A click just outside a shape, or a pull that does not land on another
+  // shape, leaves the link alone. Delete, or dragging the recipient node
+  // clear of where it was connected, is what removes it.
   return 'kept';
 }
 
@@ -295,8 +359,8 @@ export function endPointer(e) {
       const release = point(e);
       travel = Math.hypot(release.x - d.origin.x, release.y - d.origin.y) * (state.view.z || 1);
     }
-    // A click on the handle just outside a shape only leaves the connector selected.
-    const changing = Boolean(draft?.binding) || (d.side === 'to' && travel >= CONNECTOR_DRAG_AWAY);
+    // A click, or a pull that does not land on a shape, never retargets or deletes.
+    const changing = Boolean(draft?.binding) && travel >= 24;
     let result = 'kept';
     if (e?.type === 'pointerup' && changing)
       commit(() => {
@@ -420,9 +484,19 @@ export function endPointer(e) {
     return;
   }
   if (d.type === 'move' && d.changed) {
-    const removed = detachDraggedRecipients(state.board.objects, d.original, d.movingIds);
-    for (const id of removed) state.selected.delete(id);
-    if (removed.length) toast(removed.length === 1 ? 'Connection removed' : 'Connections removed');
+    let travel = 0;
+    if (e?.type === 'pointerup' && d.origin) {
+      const release = point(e);
+      travel = Math.hypot(release.x - d.origin.x, release.y - d.origin.y) * (state.view.z || 1);
+    }
+    // The shape itself has to travel with the pointer. A click outside, or a
+    // jump from snapping, does not count as dragging a node away.
+    if (travel >= CONNECTOR_DRAG_AWAY) {
+      const removed = detachDraggedRecipients(state.board.objects, d.original, d.movingIds);
+      for (const id of removed) state.selected.delete(id);
+      if (removed.length)
+        toast(removed.length === 1 ? 'Connection removed' : 'Connections removed');
+    }
   }
   if (d.changed) {
     render();
@@ -765,7 +839,7 @@ export function setupCanvas() {
       !e.target.closest(
         '.port,.resize,.rotate-handle,.vertex-handle,.edge-handle,.shape-curve-handle',
       ) &&
-      !M.hitsShape(n, p)
+      (n.type === 'connector' ? connectorStrokeBesideShape(n, p, e.target) : !M.hitsShape(n, p))
     )
       n = null;
     if (
@@ -833,6 +907,7 @@ export function setupCanvas() {
       type: resizeEl ? 'resize' : 'move',
       dir: resizeEl?.dataset.dir || 'se',
       start: p,
+      origin: p,
       id: n.id,
       wasSelected,
       shiftKey: e.shiftKey,
@@ -1161,9 +1236,19 @@ export function setupCanvas() {
     renderFast();
   });
 
-  $('#canvas').addEventListener('pointerup', endPointer);
-  $('#canvas').addEventListener('pointercancel', endPointer);
-  $('#canvas').addEventListener('lostpointercapture', endPointer);
+  $('#canvas').addEventListener('pointerup', (e) => {
+    const drag = state.drag;
+    endPointer(e);
+    noteShapeTap(drag, e);
+  });
+  $('#canvas').addEventListener('pointercancel', (e) => {
+    lastShapeTap = null;
+    endPointer(e);
+  });
+  $('#canvas').addEventListener('lostpointercapture', (e) => {
+    if (state.drag) lastShapeTap = null;
+    endPointer(e);
+  });
   $('#canvas').addEventListener('dblclick', (e) => {
     if (
       !allowDoubleClickEdit({
@@ -1177,6 +1262,6 @@ export function setupCanvas() {
     if (state.space || state.tool !== 'select' || e.target.closest('[data-open]')) return;
     let id = e.target.closest('[data-id]')?.dataset.id;
     if (id) startEdit(id);
-    else if (state.tool === 'select') addAt('sticky', point(e));
+    else if (state.tool === 'select' && Date.now() - textGestureAt > 500) addAt('sticky', point(e));
   });
 }

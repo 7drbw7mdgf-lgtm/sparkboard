@@ -105,8 +105,9 @@ export function setupControls() {
       `<div class="template-grid">${[
         ['studio', 'Creative studio', 'Images, resources and ideas. Everything in one space.'],
         ['brainstorm', 'Brainstorm', 'Turn a few sparks into your next big thing.'],
+        ['kanban', 'Kanban', 'To do, in progress, and done. Move the work across.'],
+        ['mindmap', 'Mind map', 'A central idea, with branches you can keep extending.'],
         ['retro', 'Sprint retrospective', 'Reflect on the good. Make the next sprint better.'],
-        ['mindmap', 'Mind map', 'Find the connections between your ideas.'],
         ['blank', 'A clean slate', 'Your space, your rules. Start from scratch.'],
       ]
         .map(

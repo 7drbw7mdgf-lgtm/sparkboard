@@ -16,6 +16,13 @@ export function allowDoubleClickEdit({ pointerType, firesTouchEvents, lastTouchA
   return !lastTouchAt || now - lastTouchAt > 900;
 }
 
+/** Two quick taps on the same shape open its text box. A single tap does not. */
+export function doubleTapOpensText({ previous, id, at, x, y, z = 1 }) {
+  if (!previous || previous.id !== id || !id) return false;
+  if (at < previous.at || at - previous.at >= 450) return false;
+  return Math.hypot(x - previous.x, y - previous.y) * (z || 1) < 24;
+}
+
 /** One finger selects/moves; two fingers navigate, or twist to turn a shape. */
 export function initialToolForLayout(compact) {
   return 'select';

@@ -5,6 +5,7 @@ import {
   isCompactEditor,
   inspectorOpenAfterSelection,
   allowDoubleClickEdit,
+  doubleTapOpensText,
   initialToolForLayout,
   toolAvailableOnLayout,
 } from '../src/mobile-editor-policy.js';
@@ -72,6 +73,17 @@ test('touch-generated double clicks never invoke text editing or insert sticky n
   assert.equal(allowDoubleClickEdit({ lastTouchAt: 1000, now: 1250 }), false);
   assert.equal(allowDoubleClickEdit({ lastTouchAt: 1000, now: 2000 }), true);
   assert.equal(allowDoubleClickEdit({ pointerType: 'mouse', now: 2000 }), true);
+});
+
+test('a second tap on the same shape opens text, and a single tap does not', () => {
+  const first = { id: 'shape', at: 1000, x: 40, y: 50 };
+  assert.equal(doubleTapOpensText({ previous: null, id: 'shape', at: 1200, x: 40, y: 50 }), false);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 1200, x: 48, y: 54 }), true);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 1000, x: 40, y: 50 }), true);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 999, x: 40, y: 50 }), false);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'other', at: 1200, x: 40, y: 50 }), false);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 1600, x: 40, y: 50 }), false);
+  assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 1200, x: 80, y: 50 }), false);
 });
 
 test('compact Format presents one accessible page, tabs and Back/Next', () => {

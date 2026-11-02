@@ -10,6 +10,7 @@ const tools = [
   { label: 'Templates', action: 'header', value: 'templates' },
   { label: 'Export', action: 'header', value: 'export' },
   { label: 'Scenes', action: 'header', value: 'scenes' },
+  { label: 'Benchline', action: 'link', value: '/sai/' },
 ];
 
 const menus = {

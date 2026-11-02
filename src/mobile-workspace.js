@@ -11,13 +11,14 @@ import { mobileWorkspaceMenus } from './mobile-menus.js';
 import { svgIcon } from './icons.js';
 
 const mobileStyle = `
-#mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet,#mobile-tool-active{display:none}
+#mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet,#mobile-tool-active,#mobile-benchline{display:none}
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){
   body:not(.workspace-empty) #mobile-workspace-dock{display:flex;flex-direction:column}
   body:not(.workspace-empty) #mobile-workspace-mode{display:none}
   .workspace-header{height:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none}
   #tools{display:none!important}
   #mobile-more,#mobile-more-menu{display:none!important}
+  body:not(.workspace-empty) #mobile-benchline{display:inline-flex;position:fixed;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:22;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;background:#e8f4e9;border:1px solid #c7dec9;color:#2d7144;font:750 12px/1 'DM Sans',sans-serif;text-decoration:none;pointer-events:auto;box-shadow:0 4px 14px #18274b14}
   #mindmap-toolbar{display:none!important}
   #mobile-workspace-mode{position:fixed;top:calc(124px + env(safe-area-inset-top));left:12px;z-index:19;align-items:center;gap:8px;border:1px solid #e6e8ee;background:#fff;box-shadow:0 6px 20px #18274b14;border-radius:10px;min-height:40px;padding:0 11px;font:600 12px/1 'DM Sans',sans-serif;color:#5c6570}
   #mobile-workspace-mode select{border:0;outline:0;background:transparent;color:#1f2430;font:600 14px/1 'DM Sans',sans-serif;min-height:40px;padding:0 16px 0 0;font-size:16px}
@@ -38,7 +39,7 @@ const mobileStyle = `
   #mobile-tool-sheet h3{font:650 15px/1.2 'DM Sans',sans-serif;margin:0}
   #mobile-tool-sheet p{font-size:12px;color:#6b7280;margin:4px 0 8px;line-height:1.4;padding:0 4px}
   #mobile-tool-sheet .mw-list{display:flex;flex-direction:column}
-  #mobile-tool-sheet .mw-row{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#1f2430;font:550 15px/1.2 'DM Sans',sans-serif;text-align:left;touch-action:manipulation}
+  #mobile-tool-sheet .mw-row,#mobile-tool-sheet a.mw-row{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#1f2430;font:550 15px/1.2 'DM Sans',sans-serif;text-align:left;text-decoration:none;touch-action:manipulation}
   #mobile-tool-sheet .mw-row:active{background:#f3f4f6}
   #mobile-tool-sheet .mw-sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 4px}
   #mobile-tool-sheet .mw-close{min-height:32px;padding:0 10px;border-radius:8px;background:#f3f4f6;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif}
@@ -81,7 +82,7 @@ body:not(.workspace-empty) #mobile-workspace-dock{display:flex;flex-direction:co
 #mobile-tool-sheet h3{font:650 15px/1.2 'DM Sans',sans-serif;margin:0}
 #mobile-tool-sheet p{font-size:12px;color:#6b7280;margin:4px 0 8px;line-height:1.4;padding:0 4px}
 #mobile-tool-sheet .mw-list{display:flex;flex-direction:column}
-#mobile-tool-sheet .mw-row{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#1f2430;font:550 15px/1.2 'DM Sans',sans-serif;text-align:left;touch-action:manipulation}
+#mobile-tool-sheet .mw-row,#mobile-tool-sheet a.mw-row{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#1f2430;font:550 15px/1.2 'DM Sans',sans-serif;text-align:left;text-decoration:none;touch-action:manipulation}
 #mobile-tool-sheet .mw-row:active,#mobile-tool-sheet .mw-row:hover{background:#f3f4f6}
 #mobile-tool-sheet .mw-sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 4px}
 #mobile-tool-sheet .mw-close{min-height:32px;padding:0 10px;border-radius:8px;background:#f3f4f6;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif}
@@ -123,6 +124,8 @@ function closeSheet() {
   closeFan();
 }
 function rowButton(item) {
+  if (item.action === 'link')
+    return `<a class="mw-row" href="${item.value}" aria-label="${item.label}">${item.label}</a>`;
   return `<button type="button" class="mw-row" data-mw-item="${item.action}" data-mw-value="${item.value}">${item.label}</button>`;
 }
 function sheetContents(section) {
@@ -306,6 +309,7 @@ function choose(action, value) {
     else if (value === 'layout') toast('Create or convert a topic first');
     else toast('Could not add a topic');
   } else if (action === 'mode') setDiagramView(value);
+  else if (action === 'link' && value) location.assign(value);
   syncDock();
 }
 
@@ -337,7 +341,12 @@ export function setupMobileWorkspace() {
   sheet.id = 'mobile-tool-sheet';
   sheet.hidden = true;
   sheet.setAttribute('aria-label', 'Mobile tools and objects');
-  document.body.append(header, dock, sheet, status);
+  const benchline = document.createElement('a');
+  benchline.id = 'mobile-benchline';
+  benchline.href = '/sai/';
+  benchline.textContent = 'Benchline';
+  benchline.setAttribute('aria-label', 'Open Benchline project planner');
+  document.body.append(header, dock, sheet, status, benchline);
   status.addEventListener('click', (event) => {
     if (event.target.closest('[data-mw-finish]')) {
       setTool('select');

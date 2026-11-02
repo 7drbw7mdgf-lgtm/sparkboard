@@ -26,6 +26,14 @@ test('compact tools expose explicit exit from drawing/linking and keep drawer fo
   const tools = mobileWorkspaceMenus('canvas').tools.map((item) => item.value);
   assert.ok(tools.includes('undo'));
   assert.ok(tools.includes('redo'));
+  assert.ok(
+    mobileWorkspaceMenus('canvas').tools.some(
+      (item) => item.action === 'link' && item.value === '/sai/' && item.label === 'Benchline',
+    ),
+  );
+  assert.match(mobile, /benchline\.id = 'mobile-benchline'/);
+  assert.match(mobile, /#mobile-benchline\{display:inline-flex/);
+  assert.match(mobile, /href = '\/sai\/'/);
 });
 
 test('each mobile view changes the dock, and Add does not repeat Tools', () => {
