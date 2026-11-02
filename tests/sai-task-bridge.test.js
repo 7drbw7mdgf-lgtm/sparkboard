@@ -65,6 +65,7 @@ test('hosted Sai imports Sparkboard task creations with stable IDs, optional due
   assert.equal(merged.tasks[0].endDate.getDate(), 5);
   assert.ok(merged.projectEndDate.getTime() >= merged.tasks[0].endDate.getTime());
   assert.match(merged.tasks[0].notes, /board-123/);
+  assert.equal(merged.tasks[0].tags[0], 'Sparkboard');
   assert.equal(bridge.mergeSparkboardTasks(merged), merged);
   bridge.saveHostedProject(merged);
   assert.equal(JSON.parse(storage.getItem(bridge.TASK_BRIDGE_KEY)).length, 0);

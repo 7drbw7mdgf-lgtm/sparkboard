@@ -11,6 +11,9 @@ test('Sai source revision is pinned and build has no credential injection', () =
   assert.match(build, /API_KEY: ''/);
   assert.match(build, /--base', '\/sai\//);
   assert.match(build, /HostedPersistence/);
+  assert.match(build, /TASK_BRIDGE_CHANNEL/);
+  assert.match(build, /indexRef/);
+  assert.match(build, /From Sparkboard/);
 });
 
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {

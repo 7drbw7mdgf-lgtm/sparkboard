@@ -43,7 +43,7 @@ Use **Convert** in Mind map mode to turn an existing selected shape and its outg
 
 ## Task handoff to Sai / Benchline
 
-Use **✓ Task** in the desktop board mode bar, or **Add → New task** on mobile, to create a task card on the current board (under the selected mind-map topic where applicable). Enter a title, optional due date, priority and notes. The task is saved with the board and queued for the hosted Benchline planner at **/sai/**. Open the planner on **sparkboard.co.uk in the same browser profile** to import the task into its task list. New creations can also arrive while the planner is open in another tab. Stable task IDs prevent duplicate imports. The bridge is **one-way on creation**, not a shared task-editing system. Benchline project data and Sparkboard boards are saved separately; Sparkboard account board sync **does not** sync Benchline projects or the handoff queue across devices.
+Use **✓ Task** in the desktop board mode bar, or **Add → New task** on mobile, to create a task card on the current board (under the selected mind-map topic where applicable). Enter a title, optional due date, priority and notes. The task is saved with the board and added to Benchline at **/sai/** in this browser: it shows on the home list and in the task list, including when Benchline is already open. Stable task IDs prevent duplicate imports. The bridge is **one-way on creation**, not a shared task-editing system. Benchline project data and Sparkboard boards are saved separately; Sparkboard account board sync **does not** sync Benchline projects or the handoff queue across devices.
 
 ## Features
 

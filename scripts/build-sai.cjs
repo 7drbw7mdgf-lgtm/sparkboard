@@ -48,19 +48,67 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     app,
     "import { useHistory } from './hooks/useHistory';",
-    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY } from './HostedPersistence';",
+    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';",
   );
   // Benchline opens straight into the workspace with a demo project; a project saved on this
   // device takes its place.
   replaceRequired(
     app,
     'useHistory<ProjectData | null>(initialProjectData);',
-    "useHistory<ProjectData | null>(loadHostedProject() ?? initialProjectData);\n    useEffect(() => {\n      const receiveTasks = () => setProjectData(previous => mergeSparkboardTasks(previous));\n      receiveTasks();\n      const onTaskStorage = (event: StorageEvent) => { if (event.key === TASK_BRIDGE_KEY) receiveTasks(); };\n      window.addEventListener('storage', onTaskStorage);\n      return () => window.removeEventListener('storage', onTaskStorage);\n    }, []);\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);",
+    "useHistory<ProjectData | null>(loadHostedProject() ?? initialProjectData);\n    useEffect(() => {\n      const receiveTasks = () => setProjectData(previous => mergeSparkboardTasks(previous));\n      receiveTasks();\n      const onTaskStorage = (event: StorageEvent) => { if (event.key === TASK_BRIDGE_KEY) receiveTasks(); };\n      const onFocus = () => receiveTasks();\n      let channel: BroadcastChannel | null = null;\n      try {\n        channel = new BroadcastChannel(TASK_BRIDGE_CHANNEL);\n        channel.onmessage = () => receiveTasks();\n      } catch { /* storage and focus still import tasks */ }\n      window.addEventListener('storage', onTaskStorage);\n      window.addEventListener('focus', onFocus);\n      document.addEventListener('visibilitychange', onFocus);\n      return () => {\n        window.removeEventListener('storage', onTaskStorage);\n        window.removeEventListener('focus', onFocus);\n        document.removeEventListener('visibilitychange', onFocus);\n        channel?.close();\n      };\n    }, []);\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);",
   );
   replaceRequired(
     app,
     'onSave={() => {}}',
     'onSave={() => { if (projectData) downloadHostedProject(projectData); }}',
+  );
+  replaceRequired(
+    path.join(source, 'hooks/useHistory.ts'),
+    "import { useState, useCallback, useMemo } from 'react';",
+    "import { useState, useCallback, useMemo, useRef } from 'react';",
+  );
+  replaceRequired(
+    path.join(source, 'hooks/useHistory.ts'),
+    `const [currentIndex, setCurrentIndex] = useState(0);
+
+    const setState = useCallback((newStateOrFn: T | ((prevState: T) => T)) => {
+        setHistory(currentHistory => {
+            const currentState = currentHistory[currentIndex];`,
+    `const [currentIndex, setCurrentIndex] = useState(0);
+    const indexRef = useRef(currentIndex);
+    indexRef.current = currentIndex;
+
+    const setState = useCallback((newStateOrFn: T | ((prevState: T) => T)) => {
+        setHistory(currentHistory => {
+            const currentState = currentHistory[indexRef.current];`,
+  );
+  replaceRequired(
+    path.join(source, 'hooks/useHistory.ts'),
+    'const newHistory = currentHistory.slice(0, currentIndex + 1);',
+    'const newHistory = currentHistory.slice(0, indexRef.current + 1);',
+  );
+  replaceRequired(
+    path.join(source, 'hooks/useHistory.ts'),
+    '    }, [currentIndex]);',
+    '    }, []);',
+  );
+  replaceRequired(
+    path.join(source, 'components/widgets/MyTasksWidget.tsx'),
+    `const currentUser = people.find(p => p.name === 'Alice'); // For demo
+        if (!currentUser) return [];
+        return tasks.filter(t => t.assignedTo.includes(currentUser.id) && t.completion < 100)
+                    .sort((a,b) => a.endDate.getTime() - b.endDate.getTime())
+                    .slice(0, 7);`,
+    `const currentUser = people.find(p => p.name === 'Alice'); // For demo
+        const fromSparkboard = (task: { id: string }) => task.id.startsWith('sparkboard:');
+        return tasks.filter(t => t.completion < 100 && (fromSparkboard(t) || (!!currentUser && t.assignedTo.includes(currentUser.id))))
+                    .sort((a, b) => Number(fromSparkboard(b)) - Number(fromSparkboard(a)) || a.endDate.getTime() - b.endDate.getTime())
+                    .slice(0, 12);`,
+  );
+  replaceRequired(
+    path.join(source, 'components/widgets/MyTasksWidget.tsx'),
+    "<p className=\"text-xs text-gray-500 dark:text-gray-400\">Due: {task.endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>",
+    "<p className=\"text-xs text-gray-500 dark:text-gray-400\">{task.id.startsWith('sparkboard:') ? 'From Sparkboard · ' : ''}Due: {task.endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>",
   );
   for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx']) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));

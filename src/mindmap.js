@@ -432,7 +432,7 @@ export function setupMindmapWorkspace() {
         `<button type="button" data-mm-mode="${id}" aria-pressed="false">${label}</button>`,
     )
     .join('')}</div>
-    <button type="button" data-mm-action="task" class="mmw-task-action" title="Create a task and send it to Sai/Benchline">✓ Task</button>
+    <button type="button" data-mm-action="task" class="mmw-task-action" title="Create a task and add it to Benchline">✓ Task</button>
     <div class="mmw-actions" data-mm-actions="mindmap" hidden>
       <button data-mm-action="root" title="Create a root topic">＋ Root</button>
       <button data-mm-action="layout" title="Arrange topics automatically">Arrange</button>

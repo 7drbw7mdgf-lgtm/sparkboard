@@ -4,6 +4,17 @@
  * sparkboard.co.uk in the same browser profile. Tasks stay queued until persisted by Sai.
  */
 export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
+export const TASK_BRIDGE_CHANNEL = 'sparkboard.sai.tasks';
+
+function notifyOpenPlanner() {
+  try {
+    const channel = new BroadcastChannel(TASK_BRIDGE_CHANNEL);
+    channel.postMessage({ type: 'tasks' });
+    channel.close();
+  } catch {
+    // Other tabs still observe the localStorage write.
+  }
+}
 
 export function readTaskQueue(storage) {
   try {
@@ -37,6 +48,7 @@ export function publishTask(task, storage) {
         createdAt: String(task.createdAt || ''),
       });
       target.setItem(TASK_BRIDGE_KEY, JSON.stringify(queued));
+      notifyOpenPlanner();
     }
     return true;
   } catch {

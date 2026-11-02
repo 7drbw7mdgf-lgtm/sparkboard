@@ -36,8 +36,8 @@ function decorateTasks() {
       tag.className = 'spark-task-tag' + (item.sparkTask.pending ? ' is-pending' : '');
       tag.textContent = item.sparkTask.pending ? '✓ Task · saved here' : '✓ Task';
       tag.title = item.sparkTask.pending
-        ? 'Stored on this board; Sai handoff failed in this browser'
-        : 'Task queued for Sai/Benchline in this browser';
+        ? 'Stored on this board; Benchline handoff failed in this browser'
+        : 'Showing in Benchline on this browser';
       element.append(tag);
     });
 }
@@ -54,7 +54,7 @@ function createTask() {
         <label>Priority<select name="priority"><option>Medium</option><option>High</option><option>Urgent</option><option>Low</option></select></label>
       </div>
       <label>Details (optional)<textarea name="notes" maxlength="4000" placeholder="What needs doing?"></textarea></label>
-      <p>A task card will appear here. New tasks are handed to Sai/Benchline on the same website and browser; this is not cross-device project sync.</p>
+      <p>The card stays on this board, and Benchline adds it to the task list in this browser.</p>
       <button type="submit">Create task</button>
     </form>`,
     'TASK',
@@ -146,8 +146,8 @@ function createTask() {
     $('#dialog')?.close();
     toast(
       success
-        ? 'Task added · queued for Sai/Benchline in this browser'
-        : 'Task saved on board · Sai handoff unavailable; check browser storage',
+        ? 'Task added to Benchline'
+        : 'Task saved on the board. Benchline could not be updated in this browser',
     );
   });
 }

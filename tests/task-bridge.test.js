@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { publishTask, readTaskQueue, TASK_BRIDGE_KEY } from '../src/task-bridge.js';
+import {
+  publishTask,
+  readTaskQueue,
+  TASK_BRIDGE_CHANNEL,
+  TASK_BRIDGE_KEY,
+} from '../src/task-bridge.js';
 
 const storage = () => {
   const values = new Map();
@@ -27,6 +32,26 @@ test('tasks transfer once and survive repeat publishes', () => {
     createdAt: '',
   });
   assert.match(store.getItem(TASK_BRIDGE_KEY), /task-1/);
+});
+
+test('publishing a task notifies an open Benchline tab', () => {
+  const messages = [];
+  const previous = globalThis.BroadcastChannel;
+  globalThis.BroadcastChannel = class {
+    constructor(name) {
+      this.name = name;
+    }
+    postMessage(data) {
+      messages.push({ name: this.name, data });
+    }
+    close() {}
+  };
+  try {
+    assert.equal(publishTask({ id: 'task-2', name: 'Label gels' }, storage()), true);
+    assert.deepEqual(messages, [{ name: TASK_BRIDGE_CHANNEL, data: { type: 'tasks' } }]);
+  } finally {
+    globalThis.BroadcastChannel = previous;
+  }
 });
 
 test('invalid tasks do not enter queue and failed storage is reported', () => {

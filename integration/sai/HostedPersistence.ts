@@ -53,6 +53,7 @@ export function loadHostedProject(): ProjectData | null {
 // Task creations move between Sparkboard and the hosted planner on the same origin/profile.
 // This queue is NOT shared across devices or other domains.
 export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
+export const TASK_BRIDGE_CHANNEL = 'sparkboard.sai.tasks';
 
 type BridgeTask = {
   id: string;
@@ -109,6 +110,7 @@ export function mergeSparkboardTasks(project: ProjectData | null): ProjectData |
         ? (incoming.priority as NonNullable<ProjectData['tasks'][number]['priority']>)
         : undefined,
       notes: String(incoming.notes || '').slice(0, 4000) + context,
+      tags: ['Sparkboard'],
       source: 'local',
       externalId: incoming.id,
     });
