@@ -1,7 +1,8 @@
 import type { ProjectData } from './types';
 
-// Sai is local-first on this hosting setup; unlike Sparkboard boards, these
+// Benchline (formerly Sai) is local-first on this hosting setup; unlike Sparkboard boards, these
 // projects are NOT covered by the optional Supabase account sync.
+// Key keeps its original name so projects saved before the rename still load.
 const KEY = 'sai.hosted.project.v1';
 
 function asDate(value: unknown): Date {
@@ -53,7 +54,7 @@ export function saveHostedProject(data: ProjectData): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(data));
   } catch {
-    console.warn('Sai local save failed; export a project backup.');
+    console.warn('Benchline local save failed; export a project backup.');
   }
 }
 
@@ -63,7 +64,7 @@ export function downloadHostedProject(data: ProjectData): void {
   );
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'sai-project-backup.json';
+  link.download = 'benchline-project-backup.json';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
