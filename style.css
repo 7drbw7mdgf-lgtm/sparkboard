@@ -2344,6 +2344,7 @@ header .divider {
   background: #fff;
   border: 2px solid #4262ff;
   opacity: 0;
+  pointer-events: none;
   transition:
     opacity 0.14s ease,
     transform 0.14s ease;
@@ -2358,6 +2359,7 @@ header .divider {
 .object:hover .port,
 .object.selected .port {
   opacity: 0.9;
+  pointer-events: auto;
 }
 .object.reshaping .port,
 .object.editing .port,

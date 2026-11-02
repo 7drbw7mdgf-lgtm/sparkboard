@@ -372,6 +372,16 @@ export function endPointer(e) {
     setTool('select');
     return;
   }
+  if (d.type === 'marquee') {
+    const current = d.current || d.start;
+    const moved = Math.hypot(current.x - d.start.x, current.y - d.start.y) * (state.view.z || 1);
+    if (moved < 8) {
+      state.selected = new Set(d.original);
+      state.reshapeId = null;
+    }
+    selectVisual();
+    return;
+  }
   if (d.type === 'draw-shape') {
     setTool('select');
     render();
@@ -742,6 +752,15 @@ export function setupCanvas() {
     const resizeEl = e.target.closest('.resize');
     if (
       n &&
+      state.tool === 'select' &&
+      !e.target.closest(
+        '.port,.resize,.rotate-handle,.vertex-handle,.edge-handle,.shape-curve-handle',
+      ) &&
+      !M.hitsShape(n, p)
+    )
+      n = null;
+    if (
+      n &&
       n.type === 'frame' &&
       !state.selected.has(n.id) &&
       !e.shiftKey &&
@@ -979,7 +998,7 @@ export function setupCanvas() {
         y = Math.min(p.y, state.drag.start.y),
         w = Math.abs(p.x - state.drag.start.x),
         h = Math.abs(p.y - state.drag.start.y);
-      if (w * state.view.z < 3 && h * state.view.z < 3) return;
+      if (w * state.view.z < 8 && h * state.view.z < 8) return;
       const ids = state.board.objects
         .filter((n) => {
           const b = M.bounds(n, state.board.objects);

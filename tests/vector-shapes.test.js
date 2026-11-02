@@ -139,3 +139,14 @@ test('mobile contextual bar is concise and supports both Illustrator-like node m
   const minimal = mobileActionMarkup([shape('triangle')], 'shape-one', 'points', 0);
   assert.doesNotMatch(minimal, /data-mobile-action="remove-point"/);
 });
+
+test('a click outside a shape outline misses it', () => {
+  const box = { x: 0, y: 0, w: 100, h: 100 };
+  assert.equal(M.hitsShape({ ...box, type: 'triangle' }, { x: 50, y: 80 }), true);
+  assert.equal(M.hitsShape({ ...box, type: 'triangle' }, { x: 4, y: 4 }), false);
+  assert.equal(M.hitsShape({ ...box, type: 'diamond' }, { x: 50, y: 50 }), true);
+  assert.equal(M.hitsShape({ ...box, type: 'diamond' }, { x: 2, y: 2 }), false);
+  assert.equal(M.hitsShape({ ...box, type: 'circle' }, { x: 50, y: 50 }), true);
+  assert.equal(M.hitsShape({ ...box, type: 'circle' }, { x: 2, y: 2 }), false);
+  assert.equal(M.hitsShape({ ...box, type: 'sticky' }, { x: 2, y: 2 }), true);
+});

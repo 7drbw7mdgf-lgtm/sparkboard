@@ -369,6 +369,11 @@ const cylinderBinding = [
   }),
 ];
 
+function hitsShape(n, p) {
+  if (!n || !shapes.includes(n.type) || n.type === 'frame') return true;
+  return shapeContains(n, p, shapeVertices(n));
+}
+
 function bindingVertices(n) {
   if (n.vertices || polygons[n.type]) return shapeVertices(n);
   if (n.type === 'pill') return pillBinding;
@@ -1325,6 +1330,7 @@ export {
   defaultVertices,
   defaultShapeSize,
   shapeVertices,
+  hitsShape,
   verticesToPoints,
   shapePath,
   moveCurve,
