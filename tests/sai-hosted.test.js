@@ -18,7 +18,13 @@ test('Sai sources are served as an isolated subpath without duplicating authenti
   assert.match(html, /href="\/sai\/"/);
   assert.match(html, /id="sai-link"|class="sai-workspace-link"/);
   assert.match(html, /class="sai-mobile-link"/);
-  assert.match(html, /Sai projects are stored locally/);
+  assert.match(html, /Benchline projects are stored locally/);
+  assert.match(html, />Benchline<\/a>/);
+  assert.match(html, /Meet Benchline/);
+  assert.match(html, /Open Benchline project planner/);
+  assert.doesNotMatch(html, />Sai planner/);
+  // Keep the hosted route intact until a separate Benchline destination is supplied.
+  assert.match(html, /href="\/sai\/"/);
   const ci = fs.readFileSync('.github/workflows/ci.yml', 'utf8');
   const deploy = fs.readFileSync('.github/workflows/deploy-website.yml', 'utf8');
   assert.match(ci, /npm run sai:build/);
