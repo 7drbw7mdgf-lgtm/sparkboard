@@ -1,39 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { removeFeedbackButton } from '../scripts/build-sai.cjs';
 
-test('Benchline phone shell follows the Sparkboard dock', () => {
+test('Benchline phone shell is a labelled view bar, not a bottom dock', () => {
   const shell = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
   const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
   const manifest = JSON.parse(fs.readFileSync('integration/sai/manifest.webmanifest', 'utf8'));
   assert.match(shell, /\(max-width: 650px\), \(max-height: 500px\) and \(pointer: coarse\)/);
-  for (const label of [
-    'Home',
-    'Tasks',
-    'New task',
-    'Views',
-    'Kanban',
-    'Gantt',
-    'Calendar',
-    'More',
-    'Settings',
-    'Help',
-  ]) {
-    assert.match(shell, new RegExp(`aria-label="${label}"`));
+  assert.match(shell, /id="benchline-phone-chrome"/);
+  assert.match(shell, /aria-label="Planner views"/);
+  for (const label of ['Home', 'Tasks', 'Calendar', 'Kanban', 'Gantt', 'New', 'Settings', 'Help']) {
+    assert.match(shell, new RegExp(label));
   }
-  assert.match(shell, /id="benchline-mobile-dock"/);
-  assert.match(shell, /benchline-sidebar\{display:none/);
-  assert.match(shell, /#benchline-sparkboard/);
+  assert.doesNotMatch(shell, /benchline-mobile-dock/);
+  assert.match(shell, /#4262ff/);
+  assert.match(shell, /\/\?workspace=1/);
+  assert.match(shell, /#feedback-trigger-btn\{display:none/);
   assert.match(build, /import HostedMobileShell from '\.\/HostedMobileShell'/);
-  assert.match(build, /benchline-sidebar h-full w-40/);
-  assert.match(build, /id="benchline-sparkboard" href="\/"/);
+  assert.match(build, /id="benchline-sparkboard" href="\/\?workspace=1"/);
   assert.match(build, /aria-label="Back to Sparkboard"/);
-  assert.match(build, /apple-mobile-web-app-capable/);
-  assert.match(build, /manifest\.webmanifest/);
-  assert.match(build, /benchline-mobile-dock/);
-  assert.equal(manifest.name, 'Benchline');
-  assert.equal(manifest.short_name, 'Benchline');
-  assert.equal(manifest.start_url, '/sai/');
-  assert.equal(manifest.scope, '/sai/');
+  assert.match(build, /removeFeedbackButton/);
+  assert.match(build, /Floating Feedback Button/);
   assert.equal(manifest.display, 'standalone');
+  assert.equal(manifest.start_url, '/sai/');
+});
+
+test('the hosted build removes the floating feedback button', () => {
+  const dir = fs.mkdtempSync('/tmp/benchline-feedback-');
+  const file = dir + '/App.tsx';
+  try {
+    fs.writeFileSync(
+      file,
+      'before\n{/* Floating Feedback Button */}\n<button id="feedback-trigger-btn">Feedback</button>\nafter\n',
+    );
+    removeFeedbackButton(file);
+    const next = fs.readFileSync(file, 'utf8');
+    assert.match(next, /before/);
+    assert.match(next, /after/);
+    assert.doesNotMatch(next, /feedback-trigger-btn/);
+    assert.throws(() => removeFeedbackButton(file), /missing feedback button/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

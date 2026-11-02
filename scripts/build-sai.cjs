@@ -16,6 +16,20 @@ const SAI_REPOSITORY = 'https://github.com/7drbw7mdgf-lgtm/Sai.git';
 // Sai main after the Gantt fix and the rename to Benchline (Sai PR #1).
 const SAI_COMMIT = '13a8c48e7addea1bd376e8a4b13481eac52853c4';
 
+function removeFeedbackButton(filename) {
+  const source = fs.readFileSync(filename, 'utf8');
+  const start = source.indexOf('{/* Floating Feedback Button */}');
+  const end = source.indexOf('</button>', start);
+  if (start < 0 || end < 0) {
+    throw Error('Pinned Sai source changed: missing feedback button');
+  }
+  const next = source.slice(0, start) + source.slice(end + '</button>'.length);
+  if (next.includes('id="feedback-trigger-btn"')) {
+    throw Error('Feedback button was not removed');
+  }
+  fs.writeFileSync(filename, next);
+}
+
 function replaceRequired(filename, original, replacement) {
   const source = fs.readFileSync(filename, 'utf8');
   if (!source.includes(original)) {
@@ -149,8 +163,9 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     index,
     '</body>',
-    '<a id="benchline-sparkboard" href="/" aria-label="Back to Sparkboard" style="position:fixed;bottom:15px;right:15px;z-index:60;border-radius:999px;background:#243f30;color:white;padding:10px 14px;text-decoration:none;font:700 12px system-ui;box-shadow:0 4px 18px #1113">← Sparkboard</a>\n</body>',
+    '<a id="benchline-sparkboard" href="/?workspace=1" aria-label="Back to Sparkboard" style="color:#4262ff;font:700 13px system-ui;text-decoration:none">← Sparkboard</a>\n</body>',
   );
+  removeFeedbackButton(app);
   const env = { ...process.env, GEMINI_API_KEY: '', API_KEY: '' };
   execFileSync('npm', ['install', '--no-audit', '--no-fund'], {
     cwd: source,
@@ -179,10 +194,12 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   const bundled = scripts
     .map((name) => fs.readFileSync(path.join(destination, 'assets', name), 'utf8'))
     .join('\n');
-  if (!bundled.includes('benchline-mobile-dock'))
-    throw Error('Benchline mobile dock was not bundled.');
+  if (!bundled.includes('benchline-phone-chrome'))
+    throw Error('Benchline phone bar was not bundled.');
+  if (bundled.includes('Send developer feedback'))
+    throw Error('Feedback button was still bundled.');
   console.log('Benchline (Sai) static app built from ' + SAI_COMMIT + ' for /sai/.');
 }
 
 if (require.main === module) buildSai();
-module.exports = { buildSai, SAI_COMMIT, replaceRequired };
+module.exports = { buildSai, SAI_COMMIT, replaceRequired, removeFeedbackButton };

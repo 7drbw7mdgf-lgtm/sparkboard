@@ -15,7 +15,7 @@ test('Sai source revision is pinned and build has no credential injection', () =
   assert.match(build, /indexRef/);
   assert.match(build, /From Sparkboard/);
   assert.match(build, /aria-label="Back to Sparkboard"/);
-  assert.match(build, /href="\/"/);
+  assert.match(build, /href="\/\?workspace=1"/);
 });
 
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {

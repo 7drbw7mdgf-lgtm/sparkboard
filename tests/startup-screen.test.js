@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { shouldShowStartup } from '../src/startup-screen.js';
+import { shouldShowStartup, workspaceReturnRequested } from '../src/startup-screen.js';
 
 test('new anonymous visitors see the startup sign-in screen', () => {
   assert.equal(shouldShowStartup(false, false), true);
@@ -16,4 +16,11 @@ test('guest choice is remembered for the current browser tab', () => {
 
 test('signed-in visitors bypass the startup screen regardless of guest choice', () => {
   assert.equal(shouldShowStartup(true, true), false);
+});
+
+test('a return from Benchline asks for the board rather than the marketing page', () => {
+  assert.equal(workspaceReturnRequested('?workspace=1'), true);
+  assert.equal(workspaceReturnRequested('workspace=1'), true);
+  assert.equal(workspaceReturnRequested('?workspace=0'), false);
+  assert.equal(workspaceReturnRequested(''), false);
 });

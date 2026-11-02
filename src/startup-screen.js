@@ -23,6 +23,12 @@ export function shouldShowStartup(signedIn, guestChoice) {
   return !signedIn && !guestChoice;
 }
 
+/** Benchline returns here to reopen the board, not the marketing page. */
+export function workspaceReturnRequested(search = '') {
+  const query = String(search).startsWith('?') ? String(search).slice(1) : String(search);
+  return new URLSearchParams(query).get('workspace') === '1';
+}
+
 export function setupStartupScreen() {
   const screen = $('#start-screen');
   const form = $('#start-email-form');
@@ -155,7 +161,12 @@ export function setupStartupScreen() {
       guest.disabled = false;
       screen.setAttribute('aria-busy', 'false');
       message(error);
-      if (!shouldShowStartup(Boolean(user), rememberedGuest())) dismiss();
+      if (workspaceReturnRequested(location.search)) {
+        dismiss({ remember: true });
+        const url = new URL(location.href);
+        url.searchParams.delete('workspace');
+        history.replaceState(null, '', url.pathname + url.search + url.hash);
+      } else if (!shouldShowStartup(Boolean(user), rememberedGuest())) dismiss();
       else open();
     },
   };
