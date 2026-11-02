@@ -1,14 +1,20 @@
 'use strict';
 /**
- * Fetches the owner's pinned public Sai repository and builds it as a separate
- * application at /sai/. Never inject provider API keys into the browser bundle.
+ * Fetches the owner's pinned public Sai repository (the app is now called Benchline) and
+ * builds it as a separate application at /sai/. Never inject provider API keys into the
+ * browser bundle.
+ *
+ * To publish a newer Benchline, update SAI_COMMIT to that commit on Sai's main branch. If the
+ * build then fails with "missing integration anchor", the patched lines below have changed
+ * upstream and need updating to match.
  */
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const SAI_REPOSITORY = 'https://github.com/7drbw7mdgf-lgtm/Sai.git';
-const SAI_COMMIT = '227c2ee20c013a339c9f8ac40495c6c6394cf58d';
+// Sai main after the Gantt fix and the rename to Benchline (Sai PR #1).
+const SAI_COMMIT = '13a8c48e7addea1bd376e8a4b13481eac52853c4';
 
 function replaceRequired(filename, original, replacement) {
   const source = fs.readFileSync(filename, 'utf8');
@@ -44,15 +50,12 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     "import { useHistory } from './hooks/useHistory';",
     "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject } from './HostedPersistence';",
   );
+  // Benchline opens straight into the workspace with a demo project; a project saved on this
+  // device takes its place.
   replaceRequired(
     app,
-    'const [appState, setAppState] = useState<AppState>(AppState.SPLASH);',
-    'const [appState, setAppState] = useState<AppState>(() => loadHostedProject() ? AppState.MAIN : AppState.SPLASH);',
-  );
-  replaceRequired(
-    app,
-    'useHistory<ProjectData | null>(null);',
-    'useHistory<ProjectData | null>(loadHostedProject());\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);',
+    'useHistory<ProjectData | null>(initialProjectData);',
+    'useHistory<ProjectData | null>(loadHostedProject() ?? initialProjectData);\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);',
   );
   replaceRequired(
     app,
@@ -66,12 +69,12 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     index,
     '<link rel="icon" type="image/svg+xml" href="/vite.svg" />',
-    '<meta name="application-name" content="Sai project planner" />',
+    '<meta name="application-name" content="Benchline project planner" />',
   );
   replaceRequired(
     index,
-    '<title>Project Guru</title>',
-    '<title>Sai — Project planner · Sparkboard</title>',
+    '<title>Benchline</title>',
+    '<title>Benchline — Project planner · Sparkboard</title>',
   );
   replaceRequired(
     index,
@@ -97,7 +100,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   if (!html.includes('/sai/assets/')) throw Error('Sai bundle is missing its /sai/ asset base.');
   if (!fs.readdirSync(path.join(destination, 'assets')).some((name) => name.endsWith('.js')))
     throw Error('Sai has no built JavaScript.');
-  console.log('Sai static app built from ' + SAI_COMMIT + ' for /sai/.');
+  console.log('Benchline (Sai) static app built from ' + SAI_COMMIT + ' for /sai/.');
 }
 
 if (require.main === module) buildSai();

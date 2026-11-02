@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Hosted Sai has no server-side Gemini proxy. Never send personal project data
+// Hosted Benchline has no server-side Gemini proxy. Never send personal project data
 // to an AI API with a static/bundled browser key.
 const HostedAIPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -8,15 +8,15 @@ const HostedAIPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isO
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Sai AI assistant"
+      aria-label="Benchline AI assistant"
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
     >
       <div className="w-full max-w-lg rounded-xl bg-white p-7 shadow-2xl dark:bg-gray-900 dark:text-white">
         <h2 className="mb-3 text-xl font-bold">AI assistant is not enabled</h2>
         <p className="mb-5 text-sm leading-relaxed">
-          Sai's project planner, tasks, Gantt chart, calendar and notes work without AI. The hosted
-          AI assistant requires a secure server-side Gemini integration. No API key is embedded in
-          this website.
+          Benchline's project planner, tasks, Gantt chart, calendar and notes work without AI. The
+          hosted AI assistant requires a secure server-side Gemini integration. No API key is
+          embedded in this website.
         </p>
         <button
           type="button"
