@@ -60,6 +60,9 @@ test('each mobile view changes the dock, and Add does not repeat Tools', () => {
   assert.doesNotMatch(mobile, /class="mwd-modes"/);
   assert.match(mobile, /data-mw-fan/);
   assert.doesNotMatch(mobile, /data-mw-action="add"/);
+  assert.match(mobile, /@media\(min-width:651px\)/);
+  assert.match(mobile, /#tools > button/);
+  assert.match(mobile, /pointerover/);
   assert.equal(
     canvas.tools.some((item) => item.value === 'sticky'),
     false,

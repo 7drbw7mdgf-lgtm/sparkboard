@@ -1,6 +1,6 @@
 import { $ } from './core.js';
 import { state } from './state.js';
-import { setTool } from './tools.js';
+import { closeShapes, setTool } from './tools.js';
 import { addFlowStep } from './flowchart.js';
 import { toast } from './notifications.js';
 import { isCompactEditor } from './mobile-editor-policy.js';
@@ -62,6 +62,45 @@ const mobileStyle = `
   #mobile-workspace-mode{top:calc(82px + env(safe-area-inset-top));left:10px}
   #mobile-tool-sheet:not([hidden]){max-height:54dvh}
   #canvas{inset:0!important;height:100dvh!important}
+}
+body:not(.workspace-empty) #mobile-workspace-dock{display:flex;flex-direction:column}
+#mobile-workspace-dock{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));z-index:45;height:auto;padding:0;gap:8px;border:0;background:transparent;box-shadow:none;pointer-events:none;align-items:center}
+#mobile-workspace-dock .mwd-circles,#mobile-workspace-dock .mwd-fan{pointer-events:auto}
+#mobile-workspace-dock .mwd-circles{display:flex;align-items:flex-end;justify-content:center;gap:10px}
+#mobile-workspace-dock .mwd-circle{width:40px;height:40px;padding:0;border:1px solid #e4e7ee;border-radius:50%;background:#fff;color:#1f2430;box-shadow:0 6px 16px #18274b22;display:grid;place-items:center;touch-action:manipulation;transition:transform .14s ease,background .14s ease,color .14s ease}
+#mobile-workspace-dock .mwd-circle.mwd-main{width:56px;height:56px}
+#mobile-workspace-dock .mwd-circle:active,#mobile-workspace-dock .mwd-circle[aria-expanded="true"]{transform:scale(1.14)}
+#mobile-workspace-dock .mwd-circle[aria-expanded="true"],#mobile-workspace-dock .mwd-circle[aria-pressed="true"]{background:#4262ff;color:#fff;border-color:#4262ff}
+#mobile-workspace-dock .mwd-circle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+#mobile-workspace-dock .mwd-circle.mwd-main svg{width:24px;height:24px}
+#mobile-workspace-dock .mwd-circle svg polygon{fill:currentColor;stroke:none}
+#mobile-workspace-dock .mwd-fan{display:flex;flex-wrap:nowrap;justify-content:safe center;gap:6px;max-width:calc(100vw - 16px);overflow-x:auto;scrollbar-width:none;padding:0 4px}
+#mobile-workspace-dock .mwd-fan[hidden]{display:none}
+#mobile-workspace-dock .mwd-fan .mwd-circle{flex:0 0 40px}
+#mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:50%;right:auto;transform:translateX(-50%);width:min(420px,calc(100vw - 24px));bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #e6e8ee;border-radius:14px;padding:12px 8px 8px;box-shadow:0 8px 28px #18274b24;color:#1f2430}
+#mobile-tool-sheet h3{font:650 15px/1.2 'DM Sans',sans-serif;margin:0}
+#mobile-tool-sheet p{font-size:12px;color:#6b7280;margin:4px 0 8px;line-height:1.4;padding:0 4px}
+#mobile-tool-sheet .mw-list{display:flex;flex-direction:column}
+#mobile-tool-sheet .mw-row{display:flex;align-items:center;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#1f2430;font:550 15px/1.2 'DM Sans',sans-serif;text-align:left;touch-action:manipulation}
+#mobile-tool-sheet .mw-row:active,#mobile-tool-sheet .mw-row:hover{background:#f3f4f6}
+#mobile-tool-sheet .mw-sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 4px}
+#mobile-tool-sheet .mw-close{min-height:32px;padding:0 10px;border-radius:8px;background:#f3f4f6;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif}
+#mobile-tool-active:not([hidden]){display:flex;position:fixed;left:50%;right:auto;transform:translateX(-50%);bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:6px 6px 6px 12px;border:1px solid #e6e8ee;border-radius:10px;background:#fff;box-shadow:0 6px 20px #18274b1a;font:600 13px 'DM Sans',sans-serif;color:#1f2430}
+#mobile-tool-active button{min-height:34px;padding:6px 12px;border-radius:8px;background:#4262ff;color:#fff;font-weight:600;touch-action:manipulation}
+#mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
+@media(min-width:651px){
+  #tools{position:fixed!important;left:0!important;top:0!important;bottom:auto!important;transform:none!important;width:0!important;height:0!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;gap:0!important}
+  #tools > button,#tools > .tool-sep,#tools > .shape-picker > #shape-toggle,#tool-dock-toggle{display:none!important}
+  #tools > .shape-picker{position:static!important;width:0!important;height:0!important;overflow:visible!important}
+  #tools #shape-menu{position:fixed!important;left:50%!important;right:auto!important;top:auto!important;bottom:calc(var(--mwd-offset, 80px) + 8px)!important;transform:translateX(-50%)!important;width:min(460px,calc(100vw - 32px))!important;max-width:none!important;max-height:min(62vh,560px)!important;z-index:60!important}
+  body:not(.workspace-empty) .bottom-hint{bottom:calc(var(--mwd-offset, 80px) + 28px);max-width:min(520px,calc(100vw - 300px))}
+  body:not(.workspace-empty) #toast{bottom:calc(var(--mwd-offset, 80px) + 36px)}
+  #mobile-workspace-dock .mwd-circle:hover{transform:scale(1.08)}
+  #mobile-workspace-dock .mwd-circle[aria-expanded="true"]:hover{transform:scale(1.14)}
+}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){
+  #mobile-tool-sheet:not([hidden]){left:8px;right:8px;width:auto;transform:none}
+  #mobile-tool-active:not([hidden]){left:auto;right:12px;transform:none;max-width:calc(100vw - 24px)}
 }
 `;
 
@@ -184,6 +223,7 @@ function toggleFan(section) {
   if (!fan.hidden && fan.dataset.section === section) closeFan();
   else {
     $('#mobile-tool-sheet').hidden = true;
+    closeShapes();
     renderFan(section);
   }
 }
@@ -275,7 +315,7 @@ export function setupMobileWorkspace() {
   header.innerHTML = `<span>VIEW</span><select aria-label="Board view"><option value="canvas">Canvas</option><option value="mindmap">Mind map</option><option value="flowchart">Flowchart</option><option value="outline">Outline</option></select>`;
   const dock = document.createElement('nav');
   dock.id = 'mobile-workspace-dock';
-  dock.setAttribute('aria-label', 'Mobile editing tools');
+  dock.setAttribute('aria-label', 'Editing tools');
   dock.innerHTML = `<div class="mwd-fan" data-mw-fan hidden></div>
     <div class="mwd-circles">
       <button type="button" class="mwd-circle mwd-main" data-mw-item="tool" data-mw-value="sticky" aria-label="Sticky note">${svgIcon('sticky')}</button>
@@ -306,12 +346,42 @@ export function setupMobileWorkspace() {
     setDiagramView(event.target.value);
     syncDock();
   });
+  const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let fanTimer = 0;
+  const cancelFanClose = () => clearTimeout(fanTimer);
+  const scheduleFanClose = () => {
+    cancelFanClose();
+    fanTimer = setTimeout(() => {
+      if (!$('#mobile-tool-sheet').hidden) return;
+      closeFan();
+      syncDock();
+    }, 180);
+  };
+  dock.addEventListener('pointerenter', cancelFanClose);
+  dock.addEventListener('pointerleave', () => {
+    if (finePointer()) scheduleFanClose();
+  });
+  dock.addEventListener('pointerover', (event) => {
+    if (!finePointer()) return;
+    const trigger = event.target.closest('[data-mw-action="view"], [data-mw-action="more"]');
+    if (!trigger || !dock.contains(trigger)) return;
+    cancelFanClose();
+    const fan = dock.querySelector('[data-mw-fan]');
+    if (fan.hidden || fan.dataset.section !== trigger.dataset.mwAction) {
+      $('#mobile-tool-sheet').hidden = true;
+      closeShapes();
+      renderFan(trigger.dataset.mwAction);
+      syncDock();
+    }
+  });
   dock.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button) return;
-    if (button.dataset.mwAction === 'view' || button.dataset.mwAction === 'more')
-      toggleFan(button.dataset.mwAction);
-    else if (button.dataset.mwAction === 'board') {
+    if (button.dataset.mwAction === 'view' || button.dataset.mwAction === 'more') {
+      const fan = dock.querySelector('[data-mw-fan]');
+      const openHere = !fan.hidden && fan.dataset.section === button.dataset.mwAction;
+      if (!(finePointer() && event.detail > 0 && openHere)) toggleFan(button.dataset.mwAction);
+    } else if (button.dataset.mwAction === 'board') {
       closeFan();
       showSheet('more');
     } else if (button.dataset.mwItem) choose(button.dataset.mwItem, button.dataset.mwValue);
@@ -353,8 +423,13 @@ export function setupMobileWorkspace() {
     addAt(event.detail.type, { x: center.x - 95, y: center.y - 85 });
     syncDock();
   });
+  let compactLayout = isCompactEditor();
   window.addEventListener('resize', () => {
-    if (!isCompactEditor()) closeSheet();
+    const next = isCompactEditor();
+    if (next !== compactLayout) {
+      closeSheet();
+      compactLayout = next;
+    }
     placeChrome();
   });
   syncDock();
