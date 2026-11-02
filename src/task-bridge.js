@@ -5,9 +5,10 @@
  */
 export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
 
-export function readTaskQueue(storage = globalThis.localStorage) {
+export function readTaskQueue(storage) {
   try {
-    const items = JSON.parse(storage.getItem(TASK_BRIDGE_KEY) || '[]');
+    const target = storage ?? globalThis.localStorage;
+    const items = JSON.parse(target.getItem(TASK_BRIDGE_KEY) || '[]');
     return Array.isArray(items) ? items.filter((item) =>
       item && typeof item.id === 'string' && typeof item.name === 'string'
     ) : [];
@@ -16,11 +17,12 @@ export function readTaskQueue(storage = globalThis.localStorage) {
   }
 }
 
-export function publishTask(task, storage = globalThis.localStorage) {
+export function publishTask(task, storage) {
   if (!task || typeof task.id !== 'string' || !task.id || !String(task.name || '').trim())
     throw Error('A task requires an ID and title.');
   try {
-    const queued = readTaskQueue(storage);
+    const target = storage ?? globalThis.localStorage;
+    const queued = readTaskQueue(target);
     if (!queued.some((item) => item.id === task.id)) {
       queued.push({
         id: task.id,
@@ -33,7 +35,7 @@ export function publishTask(task, storage = globalThis.localStorage) {
         nodeId: String(task.nodeId || ''),
         createdAt: String(task.createdAt || ''),
       });
-      storage.setItem(TASK_BRIDGE_KEY, JSON.stringify(queued));
+      target.setItem(TASK_BRIDGE_KEY, JSON.stringify(queued));
     }
     return true;
   } catch {
