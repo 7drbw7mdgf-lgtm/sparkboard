@@ -86,11 +86,11 @@ export function mergeSparkboardTasks(project: ProjectData | null): ProjectData |
     const id = 'sparkboard:' + incoming.id;
     if (known.has(id)) continue;
     known.add(id);
-    const parsed = /^\\d{4}-\\d{2}-\\d{2}$/.test(incoming.dueDate || '')
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(incoming.dueDate || '')
       ? new Date(incoming.dueDate + 'T12:00:00') : now;
     const endDate = Number.isFinite(parsed.getTime()) ? parsed : now;
     const startDate = endDate < now ? endDate : now;
-    const context = incoming.boardId ? '\\nSparkboard source board: ' + incoming.boardId : '';
+    const context = incoming.boardId ? '\nSparkboard source board: ' + incoming.boardId : '';
     created.push({
       id,
       name: incoming.name.trim().slice(0, 240),
