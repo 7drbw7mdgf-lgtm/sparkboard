@@ -3844,39 +3844,38 @@ body.is-panning #canvas {
     right: auto;
     bottom: calc(139px + env(safe-area-inset-bottom));
     transform: translateX(-50%);
-    max-width: calc(100vw - 20px);
+    max-width: calc(100vw - 16px);
     z-index: 19;
-    border-radius: 15px;
+    border-radius: 10px;
     background: #fff;
-    border: 1px solid #e2e8dc;
-    box-shadow: 0 6px 23px #23351e25;
-    padding: 5px;
+    border: 1px solid #e6e8ee;
+    box-shadow: 0 8px 24px #18274b1f;
+    padding: 3px;
   }
   .mobile-actions-inner {
     display: flex;
     flex-wrap: nowrap;
-    gap: 5px;
+    gap: 2px;
   }
   .mobile-actions-inner button {
     flex: 0 0 auto;
-    padding: 8px 11px;
-    min-height: 39px;
-    min-width: 58px;
+    padding: 8px 12px;
+    min-height: 36px;
+    min-width: 0;
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    color: #3a5340;
-    font-size: 12px;
-    font-weight: 750;
+    border: 0;
+    border-radius: 8px;
+    color: #1f2430;
+    font-size: 13px;
+    font-weight: 600;
     white-space: nowrap;
   }
   .mobile-actions-inner button.active {
-    color: #155d34;
-    background: #e2f5e6;
-    border-color: #a4d6b1;
+    color: #4262ff;
+    background: #e8edff;
   }
   .mobile-actions-inner button:focus-visible {
-    outline: 2px solid #217d43;
+    outline: 2px solid #4262ff;
     outline-offset: -2px;
   }
   .cloud-indicator:not([hidden]) {
@@ -4121,21 +4120,21 @@ body.is-panning #canvas {
   #inspector .format-page-tab {
     flex: 0 0 auto;
     white-space: nowrap;
-    min-height: 40px;
-    border-radius: 10px;
-    padding: 9px 11px;
-    font-size: 11px;
+    min-height: 32px;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
     line-height: 1.2;
-    font-weight: 750;
-    color: #5b6c57;
-    border: 1px solid #e2e8df;
-    background: #f8faf7;
+    font-weight: 600;
+    color: #5c6570;
+    border: 0;
+    background: transparent;
   }
   #inspector .format-page-tab.active,
   #inspector .format-page-tab[aria-selected='true'] {
-    color: #165d36;
-    background: #e3f3e7;
-    border-color: #93c5a2;
+    color: #4262ff;
+    background: #e8edff;
+    border-color: transparent;
   }
   #inspector .format-page-stack {
     min-height: 0;
@@ -4150,8 +4149,9 @@ body.is-panning #canvas {
     display: block;
     min-height: 0;
     margin: 0;
-    padding: 11px;
-    background: #fbfcfa;
+    padding: 8px 4px 4px;
+    background: #fff;
+    border: 0;
   }
   #inspector .format-page-stack > .format-page[hidden] {
     display: none !important;
@@ -4166,14 +4166,14 @@ body.is-panning #canvas {
     padding-top: 6px;
   }
   #inspector .format-page-footer > button {
-    min-height: 36px;
-    padding: 7px 12px;
-    font-weight: 700;
-    font-size: 12px;
-    border: 1px solid #e2e8df;
-    border-radius: 9px;
-    color: #285339;
-    background: #f7fbf7;
+    min-height: 32px;
+    padding: 6px 10px;
+    font-weight: 600;
+    font-size: 13px;
+    border: 0;
+    border-radius: 8px;
+    color: #1f2430;
+    background: #f3f4f6;
   }
   #inspector .format-page-footer > span {
     color: #798778;

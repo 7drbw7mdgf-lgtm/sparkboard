@@ -34,7 +34,7 @@ export function mobileActionMarkup(
     '</button>';
   let actions = '';
   if (reshaping) {
-    actions += reshapeMode === 'points' ? button('⌁ Bend', 'bend') : button('◈ Points', 'points');
+    actions += reshapeMode === 'points' ? button('Bend', 'bend') : button('Points', 'points');
     if (
       reshapeMode === 'points' &&
       Number.isInteger(selectedVertex) &&
@@ -42,20 +42,19 @@ export function mobileActionMarkup(
       selectedVertex < M.shapeVertices(single).length &&
       M.shapeVertices(single).length > 3
     ) {
-      actions += button('− Point', 'remove-point');
+      actions += button('Remove point', 'remove-point');
     }
-    actions += button('✓ Done', 'done');
+    actions += button('Done', 'done');
   } else if (shape) {
-    actions += button('✎ Text', 'edit');
-    if (single.mindmap) actions += button('🎨 Branch', 'mind-style');
-    actions += button('◈ Nodes', 'nodes');
+    actions += button('Text', 'edit');
+    if (single.mindmap) actions += button('Branch', 'mind-style');
+    actions += button('Nodes', 'nodes');
   } else if (single && ['text', 'sticky'].includes(single.type) && !single.locked) {
-    actions += button('✎ Text', 'edit');
+    actions += button('Text', 'edit');
   }
-  if (single?.type === 'connector' && !single.locked)
-    actions += button('↝ Route', 'connector-style');
-  actions += button('⚙ Format', 'format');
-  if (!reshaping && nodes.some((n) => !n.locked)) actions += button('⧉ Copy', 'duplicate');
+  if (single?.type === 'connector' && !single.locked) actions += button('Route', 'connector-style');
+  actions += button('Format', 'format');
+  if (!reshaping && nodes.some((n) => !n.locked)) actions += button('Copy', 'duplicate');
   return (
     '<div class="mobile-actions-inner" role="group" aria-label="' +
     esc(

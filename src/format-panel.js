@@ -251,7 +251,7 @@ export function formatPanel(
         )
         .join('') +
       '</div>';
-    if (!multi) text += action('✎ Edit text', 'edit', disabled);
+    if (!multi) text += action('Edit text', 'edit', disabled);
   } else if (allLine && !multi) {
     text += field(
       'Label',
@@ -336,7 +336,7 @@ export function formatPanel(
   }
   if (canReshape) {
     layout += action(
-      reshapeId === n.id ? '✓ Finish outline editing' : '◇ Edit outline nodes',
+      reshapeId === n.id ? 'Finish outline' : 'Edit outline',
       'reshape',
       disabled,
       reshapeId === n.id ? 'active' : '',
@@ -357,8 +357,8 @@ export function formatPanel(
 
   let arrange =
     '<div class="format-grid two">' +
-    action('↑ Bring forward', 'front', disabled) +
-    action('↓ Send backward', 'back', disabled) +
+    action('Bring forward', 'front', disabled) +
+    action('Send backward', 'back', disabled) +
     '</div>';
   if (multi && allGeometry) {
     arrange +=
@@ -378,12 +378,12 @@ export function formatPanel(
 
   let behavior =
     '<div class="format-grid two">' +
-    action(locked ? '▣ Unlock' : '▢ Lock', 'lock') +
-    action('⧉ Duplicate', 'duplicate', disabled) +
-    (!multi && n.type === 'link' ? action('↗ Edit link', 'edit-link', disabled) : '') +
+    action(locked ? 'Unlock' : 'Lock', 'lock') +
+    action('Duplicate', 'duplicate', disabled) +
+    (!multi && n.type === 'link' ? action('Edit link', 'edit-link', disabled) : '') +
     (multi ? action('Group', 'group', disabled) : '') +
     (ns.some((item) => item.group) ? action('Ungroup', 'ungroup', disabled) : '') +
-    action('⌫ Delete', 'delete', disabled, 'danger') +
+    action('Delete', 'delete', disabled, 'danger') +
     '</div>';
   behavior = panelSection('Actions', '⚡', behavior);
 
@@ -439,7 +439,7 @@ export function formatPanel(
       '<div class="format-page-footer">' +
       '<button type="button" data-format-step="-1" aria-label="Previous format page"' +
       (currentIndex === 0 ? ' disabled' : '') +
-      '>‹ Back</button>' +
+      '>Back</button>' +
       '<span data-format-counter aria-live="polite">' +
       (currentIndex + 1) +
       ' / ' +
@@ -447,7 +447,7 @@ export function formatPanel(
       '</span>' +
       '<button type="button" data-format-step="1" aria-label="Next format page"' +
       (currentIndex >= names.length - 1 ? ' disabled' : '') +
-      '>Next ›</button>' +
+      '>Next</button>' +
       '</div></div>'
     );
   }

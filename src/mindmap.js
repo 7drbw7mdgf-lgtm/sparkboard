@@ -143,6 +143,9 @@ function placeSibling(siblingId) {
       : 'Sibling added next to it · Enter adds another',
   );
 }
+export function setDiagramView(mode) {
+  changeMode(mode);
+}
 function changeMode(mode) {
   if (!state.board || !modes.some(([id]) => id === mode)) return;
   state.board.diagramView = mode;

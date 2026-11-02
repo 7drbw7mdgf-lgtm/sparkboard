@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { initialToolForLayout } from '../src/mobile-editor-policy.js';
 import { mobileActionMarkup } from '../src/mobile-actions.js';
+import { mobileWorkspaceMenus } from '../src/mobile-menus.js';
 
 const source = (path) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 
@@ -22,8 +23,38 @@ test('compact tools expose explicit exit from drawing/linking and keep drawer fo
   assert.match(mobile, /data-mw-finish/);
   assert.match(mobile, /setTool\('select'\)/);
   assert.match(mobile, /sheet\.dataset\.renderedMode !== mode\(\)/);
-  assert.match(mobile, /\['Undo', '↶', 'header', 'undo'\]/);
-  assert.match(mobile, /\['Redo', '↷', 'header', 'redo'\]/);
+  const tools = mobileWorkspaceMenus('canvas').tools.map((item) => item.value);
+  assert.ok(tools.includes('undo'));
+  assert.ok(tools.includes('redo'));
+});
+
+test('each mobile view changes the dock, and Add does not repeat Tools', () => {
+  const keys = (items) => new Set(items.map((item) => item.action + ':' + item.value));
+  const canvas = mobileWorkspaceMenus('canvas');
+  const map = mobileWorkspaceMenus('mindmap');
+  const flow = mobileWorkspaceMenus('flowchart');
+  const outline = mobileWorkspaceMenus('outline');
+  for (const menu of [canvas, map, flow, outline]) {
+    const shared = [...keys(menu.add)].filter((key) => keys(menu.tools).has(key));
+    assert.deepEqual(shared, []);
+  }
+  assert.notDeepEqual(
+    canvas.context.map((item) => item.value),
+    map.context.map((item) => item.value),
+  );
+  assert.notDeepEqual(
+    map.context.map((item) => item.value),
+    flow.context.map((item) => item.value),
+  );
+  assert.deepEqual(outline.context, []);
+  assert.match(outline.hint, /Outline/);
+  assert.ok(flow.context.some((item) => item.value === 'process'));
+  assert.ok(map.context.some((item) => item.value === 'root'));
+  assert.ok(canvas.add.some((item) => item.value === 'sticky'));
+  assert.equal(
+    canvas.tools.some((item) => item.value === 'sticky'),
+    false,
+  );
 });
 
 test('mobile shape choice creates an object without a follow-up canvas tap', () => {
