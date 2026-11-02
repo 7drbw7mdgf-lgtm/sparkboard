@@ -21,15 +21,35 @@ const categoryButtons = (scope) =>
     )
     .join('');
 
+const shapeButton = (kind, mobile) => {
+  const name = shapeNames[kind];
+  const identity = mobile ? `type="button" data-mobile-shape="${kind}"` : `data-tool="${kind}"`;
+  return `<button ${identity} aria-label="${name}" data-shape-name="${name.toLowerCase()}" data-category="${shapeCategory(kind)}">${svgIcon(kind)}<span>${name}</span></button>`;
+};
+
+const shapeLibrary = (mobile) =>
+  Object.entries(shapeCategories)
+    .map(
+      ([category, kinds]) =>
+        `<section class="shape-group" data-shape-group="${category}"><h4 class="shape-group-title">${category}</h4><div class="shape-group-grid">${kinds.map((kind) => shapeButton(kind, mobile)).join('')}</div></section>`,
+    )
+    .join('');
+
+const hideEmptyShapeGroups = (root) => {
+  root.querySelectorAll('.shape-group').forEach((group) => {
+    group.hidden = ![...group.querySelectorAll('button')].some((button) => !button.hidden);
+  });
+};
+
 function showMobileShapePicker() {
   modal(
     'Choose a shape',
     `<div class="mobile-shapes">
       <label class="shape-search-label" for="mobile-shape-search">Find a shape</label>
-      <input id="mobile-shape-search" type="search" placeholder="Search 34 shapes…" aria-label="Search shapes" />
+      <input id="mobile-shape-search" type="search" placeholder="Search shapes" aria-label="Search shapes" />
       <div id="mobile-shape-categories" class="shape-categories" role="group" aria-label="Shape categories">${categoryButtons('mobile')}</div>
-      <div id="mobile-shape-grid" class="mobile-shape-grid" role="group" aria-label="Shape library">
-        ${M.shapes.map((kind) => `<button type="button" data-mobile-shape="${kind}" data-category="${shapeCategory(kind)}" data-shape-name="${shapeNames[kind].toLowerCase()}" aria-label="${shapeNames[kind]}">${svgIcon(kind)}<span>${shapeNames[kind]}</span></button>`).join('')}
+      <div id="mobile-shape-grid" class="mobile-shape-grid" aria-label="Shape library">
+        ${shapeLibrary(true)}
       </div>
       <p id="mobile-shape-empty" class="shape-empty" hidden>No shapes match.</p>
     </div>`,
@@ -48,6 +68,7 @@ function showMobileShapePicker() {
           (selected !== 'All' && button.dataset.category !== selected);
         if (!button.hidden) count++;
       });
+    hideEmptyShapeGroups($('#mobile-shape-grid'));
     $('#mobile-shape-empty').hidden = count > 0;
   };
   picker.onclick = (event) => {
@@ -92,7 +113,7 @@ export function setupTools() {
       (k, i) =>
         (k === 'sticky' || k === 'media' ? '<div class="tool-sep"></div>' : '') +
         (k === 'shapes'
-          ? `<div class="shape-picker"><button id="shape-toggle" data-label="Shapes" aria-label="Shapes" aria-expanded="false" aria-controls="shape-menu">${svgIcon('shape')}<span class="expand-caret" aria-hidden="true">›</span></button><div id="shape-menu" role="group" aria-label="Choose a shape" hidden><div class="shape-menu-head"><span class="shape-menu-title">SHAPE LIBRARY</span><span>${M.shapes.length} shapes</span></div><input id="shape-search" type="search" placeholder="Find a shape…" aria-label="Search shapes"><div id="shape-categories" class="shape-categories" role="group" aria-label="Shape categories">${categoryButtons('desktop')}</div><div id="shape-grid">${M.shapes.map((k) => `<button data-tool="${k}" aria-label="${shapeNames[k]}" data-shape-name="${shapeNames[k].toLowerCase()}" data-category="${shapeCategory(k)}">${svgIcon(k)}<span>${shapeNames[k]}</span></button>`).join('')}</div><p id="shape-empty" hidden>No matching shapes.</p><p class="shape-tip">Choose a shape, then click the canvas.</p></div></div>`
+          ? `<div class="shape-picker"><button id="shape-toggle" data-label="Shapes" aria-label="Shapes" aria-expanded="false" aria-controls="shape-menu">${svgIcon('shape')}<span class="expand-caret" aria-hidden="true">›</span></button><div id="shape-menu" role="group" aria-label="Choose a shape" hidden><div class="shape-menu-head"><span class="shape-menu-title">SHAPE LIBRARY</span></div><input id="shape-search" type="search" placeholder="Search shapes" aria-label="Search shapes"><div id="shape-categories" class="shape-categories" role="group" aria-label="Shape categories">${categoryButtons('desktop')}</div><div id="shape-grid">${shapeLibrary(false)}</div><p id="shape-empty" hidden>No matching shapes.</p><p class="shape-tip">Choose a shape, then click the canvas.</p></div></div>`
           : `<button data-tool="${k}" data-label="${labels[k]}" aria-label="${labels[k]}">${svgIcon(k)}</button>`),
     )
     .join('');
@@ -160,12 +181,13 @@ export function setupTools() {
     const term = $('#shape-search').value.toLowerCase().trim();
     const active = $('#shape-categories [aria-pressed="true"]')?.dataset.shapeCategory || 'All';
     let visible = 0;
-    $('#shape-grid button').forEach((button) => {
+    $$('#shape-grid button').forEach((button) => {
       button.hidden =
         !button.dataset.shapeName.includes(term) ||
         (active !== 'All' && button.dataset.category !== active);
       if (!button.hidden) visible++;
     });
+    hideEmptyShapeGroups($('#shape-grid'));
     $('#shape-empty').hidden = visible > 0;
   };
   $('#shape-search').oninput = filterDesktopShapes;

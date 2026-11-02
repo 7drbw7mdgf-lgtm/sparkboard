@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import * as M from '../board-model.js';
 import { shapeSvg } from '../src/rendering.js';
 import { shapeNames, shapeCategory, shapeCategories, svgIcon } from '../src/icons.js';
 import { mobileActionMarkup } from '../src/mobile-actions.js';
+
+const groups = ['Basic', 'Arrows', 'Flowchart', 'Callouts', 'Symbols'];
 
 const shape = (type = 'shape') => ({
   id: 'shape-one',
@@ -17,18 +20,33 @@ const shape = (type = 'shape') => ({
 });
 
 test('expanded shape library has distinct names, polygon outlines and usable icons', () => {
-  assert.equal(M.shapes.length, 34);
+  assert.ok(M.shapes.length > 34);
   assert.equal(new Set(M.shapes).size, M.shapes.length);
+  assert.deepEqual(Object.keys(shapeCategories), groups);
   assert.equal(Object.values(shapeCategories).flat().length, M.shapes.length);
   assert.equal(new Set(Object.values(shapeCategories).flat()).size, M.shapes.length);
+  for (const type of ['semicircle', 'notched-arrow', 'delay', 'banner', 'crescent']) {
+    assert.ok(M.shapes.includes(type), type);
+  }
   for (const type of M.shapes) {
     assert.ok(shapeNames[type], 'Missing label: ' + type);
-    assert.ok(['Basic', 'Arrows', 'Flowchart', 'Symbols'].includes(shapeCategory(type)));
+    assert.ok(groups.includes(shapeCategory(type)));
     assert.match(svgIcon(type), /<svg/);
     assert.doesNotMatch(svgIcon(type), /undefined/);
     assert.match(shapeSvg(shape(type)), /<(?:svg)/);
     assert.ok(M.shapeVertices(shape(type)).length >= 3);
   }
+});
+
+test('shape pickers name groups and do not mention a shape count', () => {
+  const tools = readFileSync(new URL('../src/tools.js', import.meta.url), 'utf8');
+  const landing = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(tools, /shape-group-title/);
+  assert.doesNotMatch(tools, /\$\{M\.shapes\.length\}/);
+  assert.doesNotMatch(tools, /Search \d+/);
+  assert.doesNotMatch(tools, /\d+ shapes/);
+  assert.doesNotMatch(landing, /\d+ editable shapes/);
+  assert.doesNotMatch(landing, /\d+ vector shapes/);
 });
 
 test('curve controls bend edges and update the actual vector outline', () => {

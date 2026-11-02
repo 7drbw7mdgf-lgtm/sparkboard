@@ -18,6 +18,12 @@ test('shape gallery scrolls inside available vertical space without clipping cat
 });
 
 test('every named category remains available in the shape picker', () => {
-  assert.deepEqual(Object.keys(shapeCategories), ['Basic', 'Arrows', 'Flowchart', 'Symbols']);
+  assert.deepEqual(Object.keys(shapeCategories), [
+    'Basic',
+    'Arrows',
+    'Flowchart',
+    'Callouts',
+    'Symbols',
+  ]);
   assert.ok(Object.values(shapeCategories).every((items) => items.length > 0));
 });

@@ -44,6 +44,25 @@ const shapes = [
   'burst',
   'right-triangle',
   'corner-cut',
+  'semicircle',
+  'kite',
+  'heptagon',
+  'chevron-left',
+  'notched-arrow',
+  'manual-input',
+  'delay',
+  'display',
+  'stored-data',
+  'off-page',
+  'merge',
+  'flag',
+  'banner',
+  'crescent',
+  'pin',
+  'check',
+  'folder',
+  'user',
+  'tag',
 ];
 const types = [
   'sticky',
@@ -92,6 +111,25 @@ const polygons = {
     '50,1 60,20 81,9 78,32 99,40 82,53 94,75 70,76 63,99 48,83 28,97 27,73 4,73 18,54 1,39 25,35 20,12 42,22',
   'right-triangle': '3,2 97,98 3,98',
   'corner-cut': '3,2 70,2 98,30 98,98 3,98',
+  semicircle: '2,50 8,28 22,12 50,2 78,12 92,28 98,50',
+  kite: '50,2 92,42 50,98 8,42',
+  heptagon: '50,2 88,20 97,61 71,93 29,93 3,61 12,20',
+  'chevron-left': '98,4 35,4 1,50 35,96 98,96 64,50',
+  'notched-arrow': '22,22 68,22 68,4 98,50 68,96 68,78 22,78 40,50',
+  'manual-input': '2,28 98,4 98,96 2,96',
+  delay: '2,8 55,8 78,18 96,50 78,82 55,92 2,92',
+  display: '4,50 22,8 78,8 96,28 96,72 78,92 22,92',
+  'stored-data': '18,8 82,8 96,28 96,72 82,92 18,92 4,72 4,28',
+  'off-page': '2,8 62,8 98,50 62,92 2,92',
+  merge: '2,8 98,8 50,96',
+  flag: '8,4 8,98 18,98 18,78 88,62 18,46 18,4',
+  banner: '2,22 18,22 18,8 82,8 82,22 98,22 82,50 98,78 82,78 82,92 18,92 18,78 2,78 18,50',
+  crescent: '70,8 40,8 18,28 8,50 18,72 40,92 70,92 58,78 46,50 58,22',
+  pin: '50,2 78,18 90,42 82,66 50,98 18,66 10,42 22,18',
+  check: '8,46 28,46 40,60 74,20 90,32 40,84',
+  folder: '4,22 36,22 44,12 96,12 96,88 4,88',
+  user: '50,8 68,8 74,28 62,40 86,52 86,92 14,92 14,52 38,40 26,28',
+  tag: '4,8 62,8 96,50 62,92 4,92',
 };
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const clampCoord = (v) => Math.max(-25, Math.min(125, Math.round(v * 100) / 100));
@@ -165,6 +203,13 @@ function defaultShapeSize(type) {
       'house',
       'diamond',
       'right-triangle',
+      'semicircle',
+      'kite',
+      'heptagon',
+      'crescent',
+      'pin',
+      'check',
+      'merge',
     ].includes(type)
   )
     return { w: 174, h: 174 };
@@ -178,10 +223,21 @@ function defaultShapeSize(type) {
       'parallelogram',
       'trapezoid',
       'ribbon',
+      'chevron-left',
+      'notched-arrow',
+      'manual-input',
+      'delay',
+      'display',
+      'stored-data',
+      'off-page',
+      'banner',
+      'tag',
+      'folder',
     ].includes(type)
   )
     return { w: 210, h: 134 };
-  if (['up-arrow', 'down-arrow', 'bookmark'].includes(type)) return { w: 138, h: 198 };
+  if (['up-arrow', 'down-arrow', 'bookmark', 'flag', 'user'].includes(type))
+    return { w: 138, h: 198 };
   return { w: 190, h: 170 };
 }
 
