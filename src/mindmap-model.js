@@ -132,6 +132,8 @@ export function layoutMindmap(objects = [], options = {}) {
   const vgap = options.verticalGap ?? 34;
   const rootGap = options.rootGap ?? 90;
   const sides = mindSides(objects, index);
+  const hidden = hiddenMindmapIds(objects);
+  const visibleChildren = (item) => (children.get(item.id) || []).filter((child) => !hidden.has(child.id));
   const heightCache = new Map();
   const visiting = new Set();
   const stackHeight = (list) =>
@@ -140,7 +142,7 @@ export function layoutMindmap(objects = [], options = {}) {
     if (heightCache.has(item.id)) return heightCache.get(item.id);
     if (visiting.has(item.id)) return Math.max(64, Number(item.h) || 70);
     visiting.add(item.id);
-    const descendants = item.mindCollapsed ? [] : children.get(item.id) || [];
+    const descendants = visibleChildren(item);
     const result = Math.max(Number(item.h) || 70, stackHeight(descendants));
     visiting.delete(item.id);
     heightCache.set(item.id, result);
@@ -164,16 +166,13 @@ export function layoutMindmap(objects = [], options = {}) {
       item.x = Math.round(side === 'left' ? anchorX - item.w : anchorX);
       item.y = Math.round(top + (span - item.h) / 2);
     }
-    if (item.mindCollapsed) return;
-    const descendants = (children.get(item.id) || []).filter((child) => !placed.has(child.id));
+    const descendants = visibleChildren(item).filter((child) => !placed.has(child.id));
     const nextAnchor = side === 'left' ? item.x - hgap : item.x + item.w + hgap;
     placeStack(descendants, nextAnchor, item.y + item.h / 2, side);
   }
   function placeRoot(root, lastBottom) {
     placed.add(root.id);
-    const kids = root.mindCollapsed
-      ? []
-      : (children.get(root.id) || []).filter((child) => !placed.has(child.id));
+    const kids = visibleChildren(root).filter((child) => !placed.has(child.id));
     const left = kids.filter((child) => sides.get(child.id) === 'left');
     const right = kids.filter((child) => sides.get(child.id) !== 'left');
     const span = Math.max(Number(root.h) || 70, stackHeight(left), stackHeight(right));
@@ -187,7 +186,8 @@ export function layoutMindmap(objects = [], options = {}) {
   let lastBottom = -Infinity;
   for (const root of roots) lastBottom = placeRoot(root, lastBottom);
   // Imported cycles and damaged references are recovered as additional roots.
-  for (const item of nodes) if (!placed.has(item.id)) lastBottom = placeRoot(item, lastBottom);
+  for (const item of nodes)
+    if (!placed.has(item.id) && !hidden.has(item.id)) lastBottom = placeRoot(item, lastBottom);
   return placed.size;
 }
 
