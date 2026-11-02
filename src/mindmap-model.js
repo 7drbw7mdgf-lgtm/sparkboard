@@ -25,9 +25,12 @@ export function indexMindmap(objects = []) {
 }
 
 export function hiddenMindmapIds(objects = []) {
-  const { nodes, byId } = indexMindmap(objects);
+  const { nodes, byId, children } = indexMindmap(objects);
   const hidden = new Set();
   for (const item of nodes) {
+    // Keep every topic that parents another topic visible, even inside folded branches.
+    // Folding focuses the leaf details without hiding the structure of the map.
+    if (children.get(item.id)?.length) continue;
     const visited = new Set([item.id]);
     let current = item;
     while (current.mindParent && byId.has(current.mindParent)) {
@@ -55,7 +58,7 @@ export function outlineMindmap(objects = []) {
       id: item.id,
       depth,
       node: item,
-      concealed,
+      concealed: concealed && !(children.get(item.id) || []).length,
       childCount: children.get(item.id).length,
     });
     for (const child of children.get(item.id))
