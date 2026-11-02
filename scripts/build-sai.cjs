@@ -48,14 +48,14 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     app,
     "import { useHistory } from './hooks/useHistory';",
-    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject } from './HostedPersistence';",
+    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY } from './HostedPersistence';",
   );
   // Benchline opens straight into the workspace with a demo project; a project saved on this
   // device takes its place.
   replaceRequired(
     app,
     'useHistory<ProjectData | null>(initialProjectData);',
-    'useHistory<ProjectData | null>(loadHostedProject() ?? initialProjectData);\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);',
+    'useHistory<ProjectData | null>(loadHostedProject() ?? initialProjectData);\\n    useEffect(() => {\\n      const receiveTasks = () => setProjectData(previous => mergeSparkboardTasks(previous));\\n      receiveTasks();\\n      const onTaskStorage = (event: StorageEvent) => { if (event.key === TASK_BRIDGE_KEY) receiveTasks(); };\\n      window.addEventListener(\'storage\', onTaskStorage);\\n      return () => window.removeEventListener(\'storage\', onTaskStorage);\\n    }, []);\\n    useEffect(() => { if (projectData) saveHostedProject(projectData); }, [projectData]);',
   );
   replaceRequired(
     app,
