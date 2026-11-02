@@ -108,7 +108,7 @@ export function exportSVG() {
   const content = paintOrder(state.board.objects)
     .map((n) => visuals.get(n.id) || '')
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${b.w + pad * 2}" height="${b.h + pad * 2}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}"><title>${esc(state.board.title)}</title>${markerDefs('export-')}<rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f9faf7"/>${content}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${b.w + pad * 2}" height="${b.h + pad * 2}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}"><title>${esc(state.board.title)}</title>${markerDefs('export-')}<rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f5f6f8"/>${content}</svg>`;
 }
 export function downloadBlob(content, type, extension) {
   const blob =

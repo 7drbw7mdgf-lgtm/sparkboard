@@ -28,7 +28,7 @@ const mobileStyle = `
   #mobile-workspace-dock .mwd-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:13px;color:#63736b;font:700 10px/1.1 Manrope,sans-serif;padding:4px 1px;touch-action:manipulation}
   #mobile-workspace-dock .mwd-actions button .mwd-icon{font:700 21px/1 sans-serif}
   #mobile-workspace-dock .mwd-actions button[aria-pressed="true"]{background:#e5f1e9;color:#24694e}
-  #mobile-workspace-dock .mwd-actions button[data-mw-action="add"]{background:#286a51;color:#fff}
+  #mobile-workspace-dock .mwd-actions button[data-mw-action="add"]{background:#4262ff;color:#fff}
   #mobile-workspace-dock .mwd-actions button[data-mw-action="add"][aria-expanded="true"]{background:#184d3a}
   #mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:9px;right:9px;bottom:calc(128px + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #dce5df;border-radius:19px;padding:16px;box-shadow:0 6px 34px #13281f36;color:#253b31}
   #mobile-tool-sheet h3{font:750 16px/1.25 Manrope,sans-serif;margin:0 0 5px}
@@ -48,7 +48,7 @@ const mobileStyle = `
   /* Float the controls over a truly full-screen canvas. */
   #canvas{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important}
   #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(132px + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:7px 8px 7px 13px;border:1px solid #c9dcd0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #1a332a30;font:700 12px Manrope,sans-serif;color:#355a46;max-width:calc(100vw - 24px)}
-  #mobile-tool-active button{min-height:36px;padding:6px 12px;border-radius:9px;background:#286a51;color:#fff;font-weight:700;touch-action:manipulation}
+  #mobile-tool-active button{min-height:36px;padding:6px 12px;border-radius:9px;background:#4262ff;color:#fff;font-weight:700;touch-action:manipulation}
   #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(128px + env(safe-area-inset-bottom));z-index:35}
   #toast{bottom:calc(214px + env(safe-area-inset-bottom))}
   /* Pen width and colour remain usable, without opening a full-screen sheet. */
@@ -58,7 +58,7 @@ const mobileStyle = `
   #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(128px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
   #inspector .format-heading{padding:7px 10px 12px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
-  #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #286a51;outline-offset:2px}
+  #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
   body.workspace-empty #mobile-tool-sheet{display:none!important}
 }
 @media(max-height:500px) and (pointer:coarse){

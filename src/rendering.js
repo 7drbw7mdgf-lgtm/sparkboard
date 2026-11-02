@@ -181,7 +181,7 @@ export function renderLines() {
         const d = M.smoothPath(n.points);
         const width = n.strokeWidth || 4;
         const halo = selected
-          ? `<path class="selection-halo" d="${d}" fill="none" stroke="#ed7959" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.32"/>`
+          ? `<path class="selection-halo" d="${d}" fill="none" stroke="#4262ff" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.32"/>`
           : '';
         const anchors =
           state.reshapeId === n.id && selected && !n.locked
@@ -204,12 +204,12 @@ export function renderLines() {
         dash = lineDashAttr(n.lineStyle || 'solid', width),
         markers = markerAttrs(n);
       const halo = selected
-        ? `<path class="selection-halo" d="${route.d}" fill="none" stroke="#ed7959" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.28"/>`
+        ? `<path class="selection-halo" d="${route.d}" fill="none" stroke="#4262ff" stroke-width="${width + 6}" stroke-linecap="round" stroke-linejoin="round" opacity="0.28"/>`
         : '';
       const label = n.text
         ? (() => {
             const w = Math.max(44, Math.min(240, n.text.length * 7.4 + 20));
-            return `<g class="connector-label" data-id="${n.id}" transform="translate(${route.labelX},${route.labelY})"><rect x="${-w / 2}" y="-12" width="${w}" height="24" rx="12" fill="#ffffffee" stroke="${selected ? '#ed7959' : '#d5dbd0'}" stroke-width="1.2"/><text text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="600" fill="#3c4234">${esc(n.text)}</text></g>`;
+            return `<g class="connector-label" data-id="${n.id}" transform="translate(${route.labelX},${route.labelY})"><rect x="${-w / 2}" y="-12" width="${w}" height="24" rx="12" fill="#ffffffee" stroke="${selected ? '#4262ff' : '#d5dbd0'}" stroke-width="1.2"/><text text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="600" fill="#3c4234">${esc(n.text)}</text></g>`;
           })()
         : '';
       const curveControls =
@@ -261,7 +261,7 @@ export function renderLines() {
     })
     .join('');
   const draft = state.connectorDraft
-    ? `<path class="connector-draft" d="${state.connectorDraft.d}" fill="none" stroke="${state.connectorDraft.color || '#ed7959'}" stroke-width="${state.connectorDraft.strokeWidth || 2}"${state.connectorDraft.lineStyle ? lineDashAttr(state.connectorDraft.lineStyle, state.connectorDraft.strokeWidth || 2) : ' stroke-dasharray="5 4"'} stroke-linecap="round"${markerAttrs(state.connectorDraft)}/>`
+    ? `<path class="connector-draft" d="${state.connectorDraft.d}" fill="none" stroke="${state.connectorDraft.color || '#4262ff'}" stroke-width="${state.connectorDraft.strokeWidth || 2}"${state.connectorDraft.lineStyle ? lineDashAttr(state.connectorDraft.lineStyle, state.connectorDraft.strokeWidth || 2) : ' stroke-dasharray="5 4"'} stroke-linecap="round"${markerAttrs(state.connectorDraft)}/>`
     : '';
   const guides = (state.guides || [])
     .map((g) =>

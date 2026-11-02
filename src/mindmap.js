@@ -35,7 +35,7 @@ const style = `
 #mindmap-toolbar .mmw-modes{background:#f1f3ef;border-radius:9px;padding:3px;flex:0 0 auto}
 #mindmap-toolbar .mmw-actions{overflow-x:auto;scrollbar-width:none}
 #mindmap-toolbar button{white-space:nowrap;padding:6px 10px;min-height:34px;border-radius:8px;font-weight:600}
-#mindmap-toolbar button[aria-pressed="true"]{background:#fff;color:#326956;box-shadow:0 1px 5px #283c301a}
+#mindmap-toolbar button[aria-pressed="true"]{background:#fff;color:#4262ff;box-shadow:0 1px 5px #283c301a}
 #mindmap-toolbar .mmw-actions button{background:#f5f7f3}
 #mindmap-toolbar .mmw-actions button:disabled{opacity:.4;cursor:not-allowed}
 #mindmap-toolbar .mmw-actions[hidden]{display:none}
@@ -56,7 +56,7 @@ const style = `
 #mindmap-outline .mmw-empty{padding:15px;font-size:13px;color:#7c887f}
 body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{display:none}
 #objects .mm-fold,#objects .mm-daughter,#objects .mm-sibling{position:absolute;z-index:6;display:flex;width:max-content;white-space:nowrap;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;border:1.5px solid #7a8e81;background:#fff;color:#3d5446;font:700 12px/1 Manrope,sans-serif;cursor:pointer;translate:-50% -50%;box-shadow:0 2px 6px #2c3a3022;opacity:0;transition:opacity .12s,transform .12s;touch-action:manipulation}
-#objects .mm-daughter,#objects .mm-sibling{width:18px;height:18px;min-width:18px;padding:0;border-radius:50%;border-color:#326956;color:#326956;font-size:14px;line-height:1}
+#objects .mm-daughter,#objects .mm-sibling{width:18px;height:18px;min-width:18px;padding:0;border-radius:50%;border-color:#4262ff;color:#4262ff;font-size:14px;line-height:1}
 #objects .object:hover>.mm-fold,#objects .object.selected>.mm-fold,#objects .mm-fold.is-collapsed,#objects .mm-fold:focus-visible,#objects .object:hover>.mm-daughter,#objects .object.selected>.mm-daughter,#objects .mm-daughter:focus-visible,#objects .object:hover>.mm-sibling,#objects .object.selected>.mm-sibling,#objects .mm-sibling:focus-visible{opacity:1}
 #objects .mm-fold:hover,#objects .mm-daughter:hover,#objects .mm-sibling:hover{transform:scale(1.12);border-color:#326956}
 #objects .mm-master{position:absolute;right:7px;top:-25px;z-index:7;min-height:26px;padding:3px 8px;border:1px solid #a7b5a8;border-radius:14px;background:#fff;color:#325b49;font:700 11px Manrope,sans-serif;box-shadow:0 2px 7px #24403018;touch-action:manipulation}

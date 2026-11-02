@@ -28,7 +28,7 @@ button:hover {
 button:focus-visible,
 input:focus-visible,
 [contenteditable]:focus-visible {
-  outline: 2px solid #ec7048;
+  outline: 2px solid #4262ff;
   outline-offset: 3px;
 }
 header {
@@ -52,7 +52,7 @@ header {
   font-family: Manrope, sans-serif;
 }
 .logo {
-  color: #ef754e;
+  color: #ffd02f;
   font-size: 42px;
   line-height: 1;
 }
@@ -102,7 +102,7 @@ header {
   margin-left: 4px;
 }
 .primary {
-  background: #ef754e;
+  background: #4262ff;
   color: white;
   border-radius: 7px;
   font-weight: 600;
@@ -110,14 +110,14 @@ header {
   padding: 11px 17px;
 }
 .primary:hover {
-  background: #d85f3b;
+  background: #2f4fe0;
 }
 #canvas {
   position: absolute;
   inset: 82px 0 0;
   overflow: hidden;
-  background-color: #f9faf7;
-  background-image: radial-gradient(#d8dcd5 0.85px, transparent 0.85px);
+  background-color: #f5f6f8;
+  background-image: radial-gradient(#cfd3dc 0.9px, transparent 0.9px);
   background-size: 22px 22px;
   touch-action: none;
 }
@@ -208,21 +208,21 @@ header {
   pointer-events: auto;
 }
 .object.selected {
-  outline: 2px solid #ed7959;
+  outline: 2px solid #4262ff;
   outline-offset: 4px;
 }
 .object.editing {
   cursor: text;
   user-select: text;
   display: block;
-  outline: 2px solid #ed7959;
+  outline: 2px solid #4262ff;
 }
 .object .resize {
   position: absolute;
   bottom: -7px;
   right: -7px;
   background: white;
-  border: 2px solid #ed7959;
+  border: 2px solid #4262ff;
   width: 11px;
   height: 11px;
   cursor: nwse-resize;
@@ -265,10 +265,10 @@ header {
   display: flex;
   flex-direction: column;
   background: #fff;
-  border: 1px solid #e6e6e0;
-  border-radius: 13px;
-  padding: 7px;
-  box-shadow: 0 4px 16px #242d1910;
+  border: 1px solid #eceef2;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 8px 28px rgba(24, 39, 75, 0.14);
   gap: 5px;
 }
 #tools button {
@@ -280,8 +280,8 @@ header {
   position: relative;
 }
 #tools button.active {
-  color: #dd6945;
-  background: #fff0e9;
+  color: #4262ff;
+  background: #e8edff;
 }
 #tools svg {
   width: 22px;
@@ -390,7 +390,7 @@ header {
   margin: 13px 0 10px;
 }
 .welcome h2 span {
-  color: #ed7959;
+  color: #4262ff;
 }
 .welcome p {
   color: #929789;
@@ -735,8 +735,8 @@ button:disabled:hover {
   color: #8f9688;
 }
 #shape-toggle[aria-expanded='true'] {
-  background: #fff0e9;
-  color: #dd6945;
+  background: #e8edff;
+  color: #4262ff;
 }
 #shape-menu {
   position: absolute;
@@ -1169,7 +1169,7 @@ button:disabled:hover {
   display: block;
   width: 100%;
   margin-top: 11px;
-  accent-color: #ed7959;
+  accent-color: #4262ff;
 }
 .form-row input[type='color'] {
   display: block;
@@ -1210,7 +1210,7 @@ button:disabled:hover {
 }
 .wide-field input {
   width: 130px;
-  accent-color: #ed7959;
+  accent-color: #4262ff;
 }
 .action-button {
   border: 1px solid #e4e9db;
@@ -1314,8 +1314,8 @@ button:disabled:hover {
 }
 #selection-box {
   position: absolute;
-  border: 1px solid #ed7959;
-  background: #ed795915;
+  border: 1px solid #4262ff;
+  background: #4262ff15;
   pointer-events: none;
   z-index: 29;
 }
@@ -2297,7 +2297,7 @@ header .divider {
   height: 12px;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid #ed7959;
+  border: 2px solid #4262ff;
   cursor: grab;
   z-index: 4;
   box-shadow: 0 1px 4px #0000001f;
@@ -2310,7 +2310,7 @@ header .divider {
   transform: translateX(-50%);
   width: 1.5px;
   height: 14px;
-  background: #ed7959;
+  background: #4262ff;
   pointer-events: none;
 }
 .object .port {
@@ -2319,7 +2319,7 @@ header .divider {
   height: 12px;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid #7d8f69;
+  border: 2px solid #4262ff;
   opacity: 0;
   transition:
     opacity 0.14s ease,
@@ -2343,12 +2343,12 @@ header .divider {
 }
 .object .port:hover {
   opacity: 1;
-  background: #ed7959;
-  border-color: #ed7959;
+  background: #4262ff;
+  border-color: #4262ff;
   transform: scale(1.28);
 }
 .object.connect-target {
-  outline: 2px solid #7d946b;
+  outline: 2px solid #4262ff;
   outline-offset: 4px;
 }
 #connections .connector-endpoint.connector-binding {
@@ -2370,7 +2370,7 @@ header .divider {
   pointer-events: none;
 }
 .magnetic-anchor-point {
-  fill: #ed7959;
+  fill: #4262ff;
   stroke: white;
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
@@ -2446,7 +2446,7 @@ header .divider {
 }
 #connections .connector-endpoint {
   fill: #fff;
-  stroke: #ed7959;
+  stroke: #4262ff;
   stroke-width: 2px;
 }
 #connections .connector-label {
@@ -2454,7 +2454,7 @@ header .divider {
   cursor: pointer;
 }
 #connections .smart-guide {
-  stroke: #ed7959;
+  stroke: #4262ff;
   stroke-width: 1.2px;
   stroke-dasharray: 4 3;
   pointer-events: none;
@@ -2484,8 +2484,8 @@ body.is-panning #canvas {
 }
 #properties #reshape.active,
 .action-button.active {
-  background: #fff0e9;
-  color: #dd6945;
+  background: #e8edff;
+  color: #4262ff;
   border-color: #edac96;
 }
 #connections .curve-guide {
