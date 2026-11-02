@@ -16,6 +16,7 @@ import { setupMindmapWorkspace } from './src/mindmap.js';
 import { setupFlowchart } from './src/flowchart.js';
 import { setupMobileWorkspace } from './src/mobile-workspace.js';
 import { setupConnectorEdit } from './src/connector-edit.js';
+import { setupTaskWorkspace } from './src/tasks.js';
 
 const startup = setupStartupScreen();
 
@@ -34,6 +35,7 @@ setupMindmapWorkspace();
 setupFlowchart();
 setupMobileWorkspace();
 setupConnectorEdit();
+setupTaskWorkspace();
 
 init()
   .then(() => setupAuth(startup))
