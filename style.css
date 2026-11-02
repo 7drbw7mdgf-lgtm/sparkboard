@@ -4228,7 +4228,6 @@ body.is-panning #canvas {
 .start-screen .landing-page {
   width: 100%;
   min-height: 100%;
-  overflow-x: clip;
   background: #fcfcf8;
 }
 .start-screen .landing-nav {
@@ -4236,10 +4235,15 @@ body.is-panning #canvas {
   align-items: center;
   justify-content: space-between;
   gap: 22px;
+  position: sticky;
+  top: 0;
+  z-index: 6;
   padding: 18px clamp(20px, 5.2vw, 84px);
   max-width: 1590px;
   margin: 0 auto;
   min-height: 88px;
+  background: #fcfcf8f2;
+  backdrop-filter: blur(14px);
 }
 .start-screen .landing-logo {
   display: inline-flex;
@@ -4279,6 +4283,30 @@ body.is-panning #canvas {
 }
 .start-screen .landing-nav-links a:hover {
   color: #d76e4e;
+}
+.start-screen .landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.start-screen .landing-nav-benchline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #c7dec9;
+  background: #e8f4e9;
+  color: #246b3c;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.start-screen .landing-nav-benchline:hover {
+  background: #d9ecdc;
+  color: #1d5a32;
 }
 .start-screen .landing-nav-cta {
   display: inline-flex;
@@ -4350,6 +4378,10 @@ body.is-panning #canvas {
   color: #748275;
   max-width: 570px;
   margin: 28px 0 34px;
+}
+.start-screen .landing-lede a {
+  color: #246b3c;
+  font-weight: 750;
 }
 .start-screen .landing-hero-cta {
   display: flex;
@@ -4506,11 +4538,19 @@ body.is-panning #canvas {
   font-size: 12px;
   font-weight: 750;
 }
+.start-screen .landing-value-strip a {
+  color: #246b3c;
+  background: #fff;
+  border: 1px solid #c7dec9;
+  border-radius: 999px;
+  padding: 7px 12px;
+  text-decoration: none;
+}
 .start-screen .landing-section {
   max-width: 1400px;
   margin: 0 auto;
   padding: 100px clamp(20px, 5.2vw, 84px);
-  scroll-margin-top: 28px;
+  scroll-margin-top: 96px;
 }
 .start-screen .landing-section-heading {
   max-width: 760px;
@@ -4538,12 +4578,37 @@ body.is-panning #canvas {
   line-height: 1.7;
   margin: 16px 0 0;
 }
+.start-screen .landing-section-heading .landing-feature-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  color: #3f7a52;
+  font-size: 13px;
+  font-weight: 750;
+}
+.start-screen .landing-feature-rail {
+  min-width: 0;
+}
 .start-screen .landing-feature-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 4px;
+  padding: 4px 2px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: #b7cbb6 transparent;
+}
+.start-screen .landing-feature-grid:focus-visible {
+  outline: 3px solid #efb69e;
+  outline-offset: 4px;
 }
 .start-screen .landing-feature {
+  flex: 0 0 min(360px, 82vw);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   min-width: 0;
   border-radius: 23px;
   overflow: hidden;
@@ -4966,8 +5031,16 @@ body.is-panning #canvas {
     font-size: 13px;
   }
   .start-screen .landing-feature-grid {
-    grid-template-columns: 1fr;
-    gap: 13px;
+    gap: 12px;
+    scrollbar-width: none;
+  }
+  .start-screen .landing-feature {
+    flex-basis: 84vw;
+  }
+  .start-screen .landing-nav-benchline {
+    min-height: 36px;
+    padding: 0 11px;
+    font-size: 12px;
   }
   .start-screen .landing-feature-graphic {
     min-height: 175px;
@@ -5078,7 +5151,8 @@ body.is-panning #canvas {
   gap: clamp(22px, 5vw, 75px);
   max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(55px, 7vw, 105px) clamp(20px, 5.2vw, 84px);
+  padding: clamp(28px, 4vw, 64px) clamp(20px, 5.2vw, 84px) clamp(55px, 7vw, 90px);
+  scroll-margin-top: 96px;
 }
 .start-screen .landing-sai-promo-copy h2 {
   color: #294230;

@@ -38,7 +38,12 @@ test('marketing home has original visual demonstration, features, practical use 
   assert.match(index, /not live multiuser collaboration/);
   assert.match(index, /<h1 id="landing-headline" tabindex="-1">/);
   assert.match(index, /<a class="landing-nav-cta" href="#start-auth"/);
+  assert.match(index, /class="landing-nav-benchline" href="\/sai\/"/);
+  assert.match(index, /id="start-benchline"/);
+  assert.match(index, /class="landing-feature-grid"/);
+  assert.match(index, /Scroll across/);
   assert.match(css, /.landing-hero-art/);
+  assert.match(css, /scroll-snap-type: x mandatory/);
   assert.match(css, /@media \(max-width: 560px\)/);
 });
 
