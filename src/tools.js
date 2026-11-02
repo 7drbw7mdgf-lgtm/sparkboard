@@ -110,10 +110,14 @@ export function setupTools() {
     dockButton.dataset.label = label;
     dockButton.title = label;
     dockButton.setAttribute('aria-pressed', String(bottom));
-    try { window.localStorage.setItem('sparkboard:toolbar-dock', toolbar.dataset.dock); } catch {}
+    try {
+      window.localStorage.setItem('sparkboard:toolbar-dock', toolbar.dataset.dock);
+    } catch {}
   };
   let previousDock = 'left';
-  try { previousDock = window.localStorage.getItem('sparkboard:toolbar-dock') || 'left'; } catch {}
+  try {
+    previousDock = window.localStorage.getItem('sparkboard:toolbar-dock') || 'left';
+  } catch {}
   setDock(previousDock);
   $('#tools').onclick = (e) => {
     const b = e.target.closest('button');

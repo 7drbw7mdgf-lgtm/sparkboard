@@ -133,7 +133,8 @@ export function layoutMindmap(objects = [], options = {}) {
   const rootGap = options.rootGap ?? 90;
   const sides = mindSides(objects, index);
   const hidden = hiddenMindmapIds(objects);
-  const visibleChildren = (item) => (children.get(item.id) || []).filter((child) => !hidden.has(child.id));
+  const visibleChildren = (item) =>
+    (children.get(item.id) || []).filter((child) => !hidden.has(child.id));
   const heightCache = new Map();
   const visiting = new Set();
   const stackHeight = (list) =>

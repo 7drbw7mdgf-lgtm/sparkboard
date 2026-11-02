@@ -111,8 +111,14 @@ function dropLinkedNode(d, p) {
       }
     } else {
       created = node(
-        'shape', Math.round(p.x - 100), Math.round(p.y - 50), 200, 100,
-        'New node', '#e7edff', { cornerRadius: 14 },
+        'shape',
+        Math.round(p.x - 100),
+        Math.round(p.y - 50),
+        200,
+        100,
+        'New node',
+        '#e7edff',
+        { cornerRadius: 14 },
       );
       state.board.objects.push(created);
       upsertConnector({
@@ -285,8 +291,8 @@ export function endPointer(e) {
       // A short tap still enters the usual two-click connector flow. Only an
       // intentional drag into blank space creates an additional shape.
       const release = point(e);
-      const moved = d.downPt && Math.hypot(release.x - d.downPt.x, release.y - d.downPt.y)
-        * state.view.z >= 48;
+      const moved =
+        d.downPt && Math.hypot(release.x - d.downPt.x, release.y - d.downPt.y) * state.view.z >= 48;
       if (moved && dropLinkedNode(d, release)) return;
       if (d.fromTool) {
         state.connectorStart = d.from;

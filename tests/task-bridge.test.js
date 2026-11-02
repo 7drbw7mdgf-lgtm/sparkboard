@@ -17,8 +17,14 @@ test('tasks transfer once and survive repeat publishes', () => {
   assert.equal(publishTask(task, store), true);
   assert.equal(readTaskQueue(store).length, 1);
   assert.deepEqual(readTaskQueue(store)[0], {
-    id: 'task-1', name: 'Run qPCR', notes: '', priority: 'High',
-    dueDate: '', boardId: 'board-1', nodeId: '', createdAt: '',
+    id: 'task-1',
+    name: 'Run qPCR',
+    notes: '',
+    priority: 'High',
+    dueDate: '',
+    boardId: 'board-1',
+    nodeId: '',
+    createdAt: '',
   });
   assert.match(store.getItem(TASK_BRIDGE_KEY), /task-1/);
 });
@@ -26,5 +32,16 @@ test('tasks transfer once and survive repeat publishes', () => {
 test('invalid tasks do not enter queue and failed storage is reported', () => {
   const store = storage();
   assert.throws(() => publishTask({ id: '', name: 'Missing ID' }, store));
-  assert.equal(publishTask({ id: 'x', name: 'Valid' }, { getItem: () => null, setItem: () => { throw Error('quota'); } }), false);
+  assert.equal(
+    publishTask(
+      { id: 'x', name: 'Valid' },
+      {
+        getItem: () => null,
+        setItem: () => {
+          throw Error('quota');
+        },
+      },
+    ),
+    false,
+  );
 });

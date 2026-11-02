@@ -189,7 +189,6 @@ test('rerouted wires keep a wide clearance and fillet elbow and curved corners',
   }
 });
 
-
 test('binding metadata survives portable backups and rejects malformed anchors', () => {
   const objects = [
     note('a'),

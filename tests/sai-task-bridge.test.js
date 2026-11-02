@@ -13,23 +13,50 @@ function hostedModule() {
     setItem: (key, value) => values.set(key, value),
   };
   const module = { exports: {} };
-  vm.runInNewContext(code, { module, exports: module.exports, localStorage: storage, console, Date,
-    JSON, Array, Set, Math, Blob, URL, document: {} });
+  vm.runInNewContext(code, {
+    module,
+    exports: module.exports,
+    localStorage: storage,
+    console,
+    Date,
+    JSON,
+    Array,
+    Set,
+    Math,
+    Blob,
+    URL,
+    document: {},
+  });
   return { bridge: module.exports, storage };
 }
 
 const project = () => ({
-  tasks: [], groups: [], people: [], notes: [], assignments: [], meetings: [], jobs: [],
+  tasks: [],
+  groups: [],
+  people: [],
+  notes: [],
+  assignments: [],
+  meetings: [],
+  jobs: [],
   projectStartDate: new Date('2026-11-01T12:00:00'),
   projectEndDate: new Date('2026-11-30T12:00:00'),
 });
 
 test('hosted Sai imports Sparkboard task creations with stable IDs, optional due dates and no duplication', () => {
   const { bridge, storage } = hostedModule();
-  storage.setItem(bridge.TASK_BRIDGE_KEY, JSON.stringify([
-    { id: 'new-task', name: 'Prepare sequencing', priority: 'High',
-      dueDate: '2026-12-05', boardId: 'board-123', notes: 'Check kit stock' },
-  ]));
+  storage.setItem(
+    bridge.TASK_BRIDGE_KEY,
+    JSON.stringify([
+      {
+        id: 'new-task',
+        name: 'Prepare sequencing',
+        priority: 'High',
+        dueDate: '2026-12-05',
+        boardId: 'board-123',
+        notes: 'Check kit stock',
+      },
+    ]),
+  );
   const merged = bridge.mergeSparkboardTasks(project());
   assert.equal(merged.tasks.length, 1);
   assert.equal(merged.tasks[0].id, 'sparkboard:new-task');

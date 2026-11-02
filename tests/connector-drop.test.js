@@ -3,10 +3,18 @@ import assert from 'node:assert/strict';
 import { createFlowStep } from '../src/flowchart-model.js';
 
 test('dropping a flowchart connector creates a linked node at the release point', () => {
-  const objects = [{
-    id: 'start', type: 'pill', x: 10, y: 30, w: 160, h: 70,
-    text: 'Start', flowRole: 'start',
-  }];
+  const objects = [
+    {
+      id: 'start',
+      type: 'pill',
+      x: 10,
+      y: 30,
+      w: 160,
+      h: 70,
+      text: 'Start',
+      flowRole: 'start',
+    },
+  ];
   let count = 0;
   const created = createFlowStep(objects, {
     fromId: 'start',

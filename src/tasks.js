@@ -26,23 +26,27 @@ const taskCSS = `
 function decorateTasks() {
   if (!state.board) return;
   const byId = new Map(state.board.objects.map((item) => [item.id, item]));
-  $('#objects')?.querySelectorAll('.object').forEach((element) => {
-    const item = byId.get(element.dataset.id);
-    element.querySelector('.spark-task-tag')?.remove();
-    if (!item?.sparkTask) return;
-    const tag = document.createElement('span');
-    tag.className = 'spark-task-tag' + (item.sparkTask.pending ? ' is-pending' : '');
-    tag.textContent = item.sparkTask.pending ? '✓ Task · saved here' : '✓ Task';
-    tag.title = item.sparkTask.pending
-      ? 'Stored on this board; Sai handoff failed in this browser'
-      : 'Task queued for Sai/Benchline in this browser';
-    element.append(tag);
-  });
+  $('#objects')
+    ?.querySelectorAll('.object')
+    .forEach((element) => {
+      const item = byId.get(element.dataset.id);
+      element.querySelector('.spark-task-tag')?.remove();
+      if (!item?.sparkTask) return;
+      const tag = document.createElement('span');
+      tag.className = 'spark-task-tag' + (item.sparkTask.pending ? ' is-pending' : '');
+      tag.textContent = item.sparkTask.pending ? '✓ Task · saved here' : '✓ Task';
+      tag.title = item.sparkTask.pending
+        ? 'Stored on this board; Sai handoff failed in this browser'
+        : 'Task queued for Sai/Benchline in this browser';
+      element.append(tag);
+    });
 }
 
 function createTask() {
   if (!state.board) return;
-  modal('Add a task to your board', `
+  modal(
+    'Add a task to your board',
+    `
     <form id="spark-task-form">
       <label>Task name<input name="name" required maxlength="240" placeholder="e.g. Analyse RNA-seq results" autocomplete="off"></label>
       <div class="spark-task-pair">
@@ -52,7 +56,9 @@ function createTask() {
       <label>Details (optional)<textarea name="notes" maxlength="4000" placeholder="What needs doing?"></textarea></label>
       <p>A task card will appear here. New tasks are handed to Sai/Benchline on the same website and browser; this is not cross-device project sync.</p>
       <button type="submit">Create task</button>
-    </form>`, 'TASK');
+    </form>`,
+    'TASK',
+  );
   const form = $('#spark-task-form');
   form?.querySelector('[name="name"]')?.focus();
   form?.addEventListener('submit', (event) => {
@@ -60,10 +66,14 @@ function createTask() {
     const data = new FormData(form);
     const name = String(data.get('name') || '').trim();
     if (!name || !state.board) return;
-    const parent = state.selected.size === 1
-      ? state.board.objects.find((item) => state.selected.has(item.id) &&
-        !['connector', 'line', 'path', 'image', 'file', 'embed', 'frame'].includes(item.type))
-      : null;
+    const parent =
+      state.selected.size === 1
+        ? state.board.objects.find(
+            (item) =>
+              state.selected.has(item.id) &&
+              !['connector', 'line', 'path', 'image', 'file', 'embed', 'frame'].includes(item.type),
+          )
+        : null;
     const selected = parent && isMindNode(parent) ? parent : null;
     const p = centerPoint();
     const taskId = uid();
@@ -83,27 +93,42 @@ function createTask() {
       if (selected) {
         selected.mindCollapsed = false;
         item = addMindChild(state.board.objects, {
-          id: nodeId, connectorId: uid(), parentId: selected.id, text: name,
+          id: nodeId,
+          connectorId: uid(),
+          parentId: selected.id,
+          text: name,
         });
         themeNewMindTopic(state.board.objects, item.id);
         layoutMindmap(state.board.objects);
       } else if (['mindmap', 'outline'].includes(state.diagramMode)) {
         item = appendMindNode(state.board.objects, {
-          id: nodeId, connectorId: uid(), x: p.x - 100, y: p.y - 37, text: name,
+          id: nodeId,
+          connectorId: uid(),
+          x: p.x - 100,
+          y: p.y - 37,
+          text: name,
         });
       } else {
         item = node(
           'shape',
           parent ? parent.x + parent.w + 105 : p.x - 110,
           parent ? parent.y : p.y - 45,
-          220, 90, name, '#d6ecde',
+          220,
+          90,
+          name,
+          '#d6ecde',
         );
         item.id = nodeId;
         state.board.objects.push(item);
         if (parent) {
           state.board.objects.push({
-            id: uid(), type: 'connector', from: parent.id, to: item.id,
-            route: 'elbow', endArrow: 'arrow', color: '#65937c',
+            id: uid(),
+            type: 'connector',
+            from: parent.id,
+            to: item.id,
+            route: 'elbow',
+            endArrow: 'arrow',
+            color: '#65937c',
           });
         }
       }
@@ -119,9 +144,11 @@ function createTask() {
       save();
     }
     $('#dialog')?.close();
-    toast(success
-      ? 'Task added · queued for Sai/Benchline in this browser'
-      : 'Task saved on board · Sai handoff unavailable; check browser storage');
+    toast(
+      success
+        ? 'Task added · queued for Sai/Benchline in this browser'
+        : 'Task saved on board · Sai handoff unavailable; check browser storage',
+    );
   });
 }
 
