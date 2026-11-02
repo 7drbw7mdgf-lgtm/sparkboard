@@ -2300,26 +2300,39 @@ header .divider {
 }
 .object .rotate-handle {
   position: absolute;
-  top: -28px;
+  top: -78px;
   left: 50%;
   transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
   background: #fff;
   border: 2px solid #4262ff;
   cursor: grab;
   z-index: 4;
   box-shadow: 0 1px 4px #0000001f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.object .rotate-handle svg {
+  width: 14px;
+  height: 14px;
+  stroke: #4262ff;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 .object .rotate-handle::after {
   content: '';
   position: absolute;
-  top: 10px;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   width: 1.5px;
-  height: 14px;
+  height: 16px;
   background: #4262ff;
   pointer-events: none;
 }
@@ -2876,7 +2889,10 @@ body.is-panning #canvas {
     right: -9px;
   }
   .object .rotate-handle {
-    top: -32px;
+    top: -92px;
+  }
+  .object .rotate-handle::after {
+    height: 26px;
   }
   #connections .path-vertex,
   #connections .curve-handle {

@@ -16,7 +16,7 @@ export function allowDoubleClickEdit({ pointerType, firesTouchEvents, lastTouchA
   return !lastTouchAt || now - lastTouchAt > 900;
 }
 
-/** One finger selects/moves; two fingers navigate via the gesture layer. */
+/** One finger selects/moves; two fingers navigate, or twist to turn a shape. */
 export function initialToolForLayout(compact) {
   return 'select';
 }

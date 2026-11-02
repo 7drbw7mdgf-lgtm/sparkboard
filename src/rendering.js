@@ -145,10 +145,13 @@ export function renderFast() {
   renderLines();
 }
 
+/** Pixels the connection node sits outside the outline, clear of the turn handle. */
+export const PORT_OUTSET = 18;
+
 function positionPort(element, n, port) {
   const point = M.portPoint({ ...n, rotation: 0 }, port);
-  element.style.left = `${point.x - n.x + point.nx * 10}px`;
-  element.style.top = `${point.y - n.y + point.ny * 10}px`;
+  element.style.left = `${point.x - n.x + point.nx * PORT_OUTSET}px`;
+  element.style.top = `${point.y - n.y + point.ny * PORT_OUTSET}px`;
   // Keep the center aligned when the mobile layout enlarges the port.
   element.style.translate = '-50% -50%';
   element.style.right = 'auto';
@@ -341,7 +344,9 @@ export function selectVisual() {
         const rot = document.createElement('span');
         rot.className = 'rotate-handle';
         rot.dataset.rotate = 'true';
-        rot.title = 'Drag to rotate (Shift to snap 15°)';
+        rot.title = 'Drag to rotate, or twist with two fingers';
+        rot.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3M21 3v6h-6"/></svg>';
         el.append(rot);
       }
     }

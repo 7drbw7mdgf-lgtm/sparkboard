@@ -1,9 +1,69 @@
 import { endPointer } from './canvas.js';
+import { snapshot } from './history.js';
+import { save } from './boards.js';
+import { render, renderFast, selectVisual } from './rendering.js';
 import { state } from './state.js';
 import { applyView } from './viewport.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+const NOT_TURNABLE = new Set(['connector', 'line', 'path']);
+
+export function touchAngle(a, b) {
+  return Math.atan2(b.y - a.y, b.x - a.x);
+}
+
+/** Signed degrees from the starting finger angle, wrapped to [-180, 180]. */
+export function twistDegrees(startTouches, currentTouches) {
+  let delta = ((touchAngle(...currentTouches) - touchAngle(...startTouches)) * 180) / Math.PI;
+  while (delta > 180) delta -= 360;
+  while (delta < -180) delta += 360;
+  return delta;
+}
+
+export function rotationAfterTwist(startRotation, deltaDegrees) {
+  let deg = Math.round(((Number(startRotation) || 0) + deltaDegrees) * 10) / 10;
+  while (deg > 180) deg -= 360;
+  while (deg < -180) deg += 360;
+  return deg;
+}
+
+export function canTurn(object) {
+  return Boolean(object) && !object.locked && !NOT_TURNABLE.has(object.type);
+}
+
+export function objectFromTarget(target, objects) {
+  const id = target?.closest?.('[data-id]')?.dataset.id;
+  return objects?.find((item) => item.id === id) || null;
+}
+
+/** Prefer the selected object under either finger, otherwise the later finger. */
+export function twistTarget(targets, objects, selectedIds) {
+  const found = targets.map((target) => objectFromTarget(target, objects)).filter(canTurn);
+  if (!found.length) return null;
+  return found.find((item) => selectedIds?.has(item.id)) || found[found.length - 1];
+}
+
+/**
+ * A twist on a turnable object rotates it. A pinch or a two-finger slide still
+ * pans and zooms. The first clear motion wins so a zoom does not spin a shape.
+ */
+export function classifyTwoFingerGesture({
+  mode,
+  targetId,
+  deltaDegrees,
+  startDistance,
+  currentDistance,
+  panDistance,
+}) {
+  if (mode) return mode;
+  const angle = Math.abs(deltaDegrees);
+  const scaleDelta = Math.abs(currentDistance / Math.max(1, startDistance) - 1);
+  if (targetId && angle >= 8 && scaleDelta <= 0.12) return 'twist';
+  if (scaleDelta >= 0.08 || panDistance >= 18) return 'navigate';
+  if (!targetId && (scaleDelta >= 0.05 || panDistance >= 6)) return 'navigate';
+  return null;
+}
 
 /** Keep the same board point beneath the fingers as they pinch or move together. */
 export function calculatePinchView(startView, startTouches, currentTouches, rect) {
@@ -20,24 +80,41 @@ export function calculatePinchView(startView, startTouches, currentTouches, rect
   };
 }
 
-/** Single-finger gestures remain owned by the canvas editor. Two fingers pan/zoom. */
+/** Single-finger gestures remain owned by the canvas editor. Two fingers navigate, or twist a shape. */
 export function setupMobileGestures() {
   const canvas = document.querySelector('#canvas');
   const pointers = new Map();
   let gesture = null;
+
+  const currentTouches = () => [...pointers.values()].slice(0, 2).map(({ x, y }) => ({ x, y }));
 
   canvas.addEventListener(
     'pointerdown',
     (event) => {
       if (event.pointerType !== 'touch' || event.target.closest('.pdf-viewer, [data-open]')) return;
 
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      if (pointers.size === 2) {
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, target: event.target });
+      if (pointers.size === 2 && !state.editing) {
         // End any pending one-finger drag before taking ownership of both touches.
         endPointer();
+        const active = [...pointers.values()];
+        const under = twistTarget(
+          active.map((pointer) => pointer.target),
+          state.board?.objects,
+          state.selected,
+        );
+        const selectedOnly =
+          !under && state.selected?.size === 1
+            ? state.board?.objects.find((item) => state.selected.has(item.id) && canTurn(item))
+            : null;
+        const target = under || selectedOnly;
         gesture = {
           view: { ...state.view },
-          touches: [...pointers.values()],
+          touches: currentTouches(),
+          targetId: target?.id || null,
+          startRotation: target?.rotation || 0,
+          mode: null,
+          rotated: false,
         };
       }
       if (gesture) {
@@ -52,16 +129,49 @@ export function setupMobileGestures() {
     'pointermove',
     (event) => {
       if (!pointers.has(event.pointerId)) return;
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const pointer = pointers.get(event.pointerId);
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
       if (!gesture || pointers.size < 2) return;
-      const next = calculatePinchView(
-        gesture.view,
-        gesture.touches,
-        [...pointers.values()].slice(0, 2),
-        canvas.getBoundingClientRect(),
-      );
-      Object.assign(state.view, next);
-      applyView();
+      const touches = currentTouches();
+      const delta = twistDegrees(gesture.touches, touches);
+      const mode = classifyTwoFingerGesture({
+        mode: gesture.mode,
+        targetId: gesture.targetId,
+        deltaDegrees: delta,
+        startDistance: distance(...gesture.touches),
+        currentDistance: distance(...touches),
+        panDistance: distance(midpoint(...gesture.touches), midpoint(...touches)),
+      });
+      gesture.mode = mode;
+      if (mode === 'twist') {
+        const node = state.board?.objects.find((item) => item.id === gesture.targetId);
+        if (node && canTurn(node)) {
+          if (!gesture.rotated) {
+            snapshot();
+            gesture.rotated = true;
+            if (!state.selected.has(node.id) || state.selected.size !== 1) {
+              state.selected = new Set([node.id]);
+              selectVisual();
+            }
+          }
+          Object.assign(state.view, gesture.view);
+          node.rotation = rotationAfterTwist(gesture.startRotation, delta);
+          renderFast();
+          applyView();
+        }
+      } else if (mode === 'navigate' || !gesture.targetId) {
+        Object.assign(
+          state.view,
+          calculatePinchView(
+            gesture.view,
+            gesture.touches,
+            touches,
+            canvas.getBoundingClientRect(),
+          ),
+        );
+        applyView();
+      }
       event.preventDefault();
       event.stopImmediatePropagation();
     },
@@ -72,7 +182,13 @@ export function setupMobileGestures() {
     if (!pointers.has(event.pointerId)) return;
     pointers.delete(event.pointerId);
     if (gesture) {
-      if (pointers.size < 2) gesture = null;
+      if (pointers.size < 2) {
+        if (gesture.rotated) {
+          render();
+          save();
+        }
+        gesture = null;
+      }
       // A released pinch must not accidentally finish a canvas edit.
       event.stopImmediatePropagation();
     }
