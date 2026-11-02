@@ -48,7 +48,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     app,
     "import { useHistory } from './hooks/useHistory';",
-    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';",
+    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';\nimport HostedMobileShell from './HostedMobileShell';",
   );
   // Benchline opens straight into the workspace with a demo project; a project saved on this
   // device takes its place.
@@ -110,9 +110,26 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     "<p className=\"text-xs text-gray-500 dark:text-gray-400\">Due: {task.endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>",
     "<p className=\"text-xs text-gray-500 dark:text-gray-400\">{task.id.startsWith('sparkboard:') ? 'From Sparkboard · ' : ''}Due: {task.endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>",
   );
-  for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx']) {
+  replaceRequired(
+    app,
+    '<SideNavbar currentView={currentView} onViewChange={setCurrentView} onSettings={() => setIsSettingsModalOpen(true)} onAddTask={() => setIsAddTaskPanelOpen(true)} onOpenShortcutHelp={() => setIsShortcutHelpOpen(true)} />',
+    '<SideNavbar currentView={currentView} onViewChange={setCurrentView} onSettings={() => setIsSettingsModalOpen(true)} onAddTask={() => setIsAddTaskPanelOpen(true)} onOpenShortcutHelp={() => setIsShortcutHelpOpen(true)} />\n            <HostedMobileShell currentView={currentView} onViewChange={setCurrentView} onAddTask={() => setIsAddTaskPanelOpen(true)} onSettings={() => setIsSettingsModalOpen(true)} onHelp={() => setIsShortcutHelpOpen(true)} />',
+  );
+  replaceRequired(
+    path.join(source, 'components/SideNavbar.tsx'),
+    'nav className="h-full w-40 flex flex-col',
+    'nav className="benchline-sidebar h-full w-40 flex flex-col',
+  );
+  for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx']) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));
   }
+  const pub = path.join(source, 'public');
+  fs.mkdirSync(pub, { recursive: true });
+  fs.copyFileSync(
+    path.join(root, 'integration/sai/manifest.webmanifest'),
+    path.join(pub, 'manifest.webmanifest'),
+  );
+  fs.copyFileSync(path.join(root, 'integration/sai/icon.svg'), path.join(pub, 'icon.svg'));
   const index = path.join(source, 'index.html');
   replaceRequired(
     index,
@@ -126,8 +143,13 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   );
   replaceRequired(
     index,
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />\n  <meta name="theme-color" content="#243f30" />\n  <meta name="mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-title" content="Benchline" />\n  <link rel="manifest" href="/sai/manifest.webmanifest" />\n  <link rel="apple-touch-icon" href="/sai/icon.svg" />',
+  );
+  replaceRequired(
+    index,
     '</body>',
-    '<a href="/" aria-label="Back to Sparkboard" style="position:fixed;bottom:15px;right:15px;z-index:9999;border-radius:999px;background:#274332;color:white;padding:10px 14px;text-decoration:none;font:700 12px system-ui;box-shadow:0 4px 18px #1113">← Sparkboard</a>\n</body>',
+    '<a id="benchline-sparkboard" href="/" aria-label="Back to Sparkboard" style="position:fixed;bottom:15px;right:15px;z-index:60;border-radius:999px;background:#243f30;color:white;padding:10px 14px;text-decoration:none;font:700 12px system-ui;box-shadow:0 4px 18px #1113">← Sparkboard</a>\n</body>',
   );
   const env = { ...process.env, GEMINI_API_KEY: '', API_KEY: '' };
   execFileSync('npm', ['install', '--no-audit', '--no-fund'], {
@@ -146,8 +168,19 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   );
   const html = fs.readFileSync(path.join(destination, 'index.html'), 'utf8');
   if (!html.includes('/sai/assets/')) throw Error('Sai bundle is missing its /sai/ asset base.');
-  if (!fs.readdirSync(path.join(destination, 'assets')).some((name) => name.endsWith('.js')))
-    throw Error('Sai has no built JavaScript.');
+  if (!html.includes('id="benchline-sparkboard"') || !html.includes('manifest.webmanifest'))
+    throw Error('Benchline mobile shell was not published.');
+  if (!fs.existsSync(path.join(destination, 'manifest.webmanifest')))
+    throw Error('Benchline manifest was not published.');
+  const scripts = fs
+    .readdirSync(path.join(destination, 'assets'))
+    .filter((name) => name.endsWith('.js'));
+  if (!scripts.length) throw Error('Sai has no built JavaScript.');
+  const bundled = scripts
+    .map((name) => fs.readFileSync(path.join(destination, 'assets', name), 'utf8'))
+    .join('\n');
+  if (!bundled.includes('benchline-mobile-dock'))
+    throw Error('Benchline mobile dock was not bundled.');
   console.log('Benchline (Sai) static app built from ' + SAI_COMMIT + ' for /sai/.');
 }
 

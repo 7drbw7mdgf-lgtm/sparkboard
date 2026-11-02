@@ -1,0 +1,18 @@
+{
+  "name": "Benchline",
+  "short_name": "Benchline",
+  "description": "Project planner for Sparkboard",
+  "start_url": "/sai/",
+  "scope": "/sai/",
+  "display": "standalone",
+  "background_color": "#f9faf7",
+  "theme_color": "#243f30",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
