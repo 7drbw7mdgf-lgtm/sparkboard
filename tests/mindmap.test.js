@@ -58,12 +58,13 @@ test('layout preserves unrelated whiteboard art and arranges siblings apart', ()
   assert.equal(objects[0].y, 100, 'root anchor should be preserved');
 });
 
-test('collapsed branches hide descendants without deleting their board data', () => {
+test('collapsed branches hide leaves but preserve every parent topic in view', () => {
   const objects = [root({ mindCollapsed: true })];
   appendMindNode(objects, { id: 'child', connectorId: 'ec', parentId: 'root' });
   appendMindNode(objects, { id: 'grandchild', connectorId: 'eg', parentId: 'child' });
-  assert.deepEqual([...hiddenMindmapIds(objects)].sort(), ['child', 'grandchild']);
+  assert.deepEqual([...hiddenMindmapIds(objects)].sort(), ['grandchild']);
   assert.equal(objects.length, 5);
+  assert.equal(outlineMindmap(objects).find((row) => row.id === 'child').concealed, false);
   assert.equal(outlineMindmap(objects).find((row) => row.id === 'grandchild').concealed, true);
   objects[0].mindCollapsed = false;
   assert.equal(hiddenMindmapIds(objects).size, 0);
