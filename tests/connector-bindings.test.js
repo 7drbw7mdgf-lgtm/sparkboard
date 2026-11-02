@@ -58,7 +58,7 @@ test('normalized edge anchors follow movement, resize and rotation without becom
   assert.deepEqual(connector.fromAnchor, { x: 1, y: 0.25 });
 });
 
-test('snapping accepts the whole edge, excludes free lines and prioritizes the frontmost overlapping target', () => {
+test('snapping lands on a cardinal port, excludes free lines and prioritizes the frontmost overlapping target', () => {
   const a = note('a'),
     line = {
       id: 'line',
@@ -70,17 +70,19 @@ test('snapping accepts the whole edge, excludes free lines and prioritizes the f
     };
   const hit = M.nearestBinding([a, line], { x: 105, y: 19 }, null, 26);
   assert.equal(hit.node.id, 'a');
-  assert.equal(hit.port, undefined);
-  near(hit.anchor.x, 1);
-  assert.ok(hit.anchor.y > 0.1 && hit.anchor.y < 0.4);
+  assert.equal(hit.port, 'e');
+  assert.equal(hit.anchor, undefined);
+  near(hit.x, M.portPoint(a, 'e').x);
+  near(hit.y, M.portPoint(a, 'e').y);
   assert.equal(M.nearestBinding([line], { x: 50, y: 50 }, null, 26), null);
   assert.equal(M.nearestBinding([a, note('front')], { x: 50, y: 40 }, null, 26).node.id, 'front');
   assert.equal(M.nearestBinding([a], { x: 105, y: 19 }, 'a', 26), null);
   assert.equal(M.nearestBinding([a], { x: 105, y: 40 }, null, 26).port, 'e');
-  assert.equal(
-    M.nearestBinding([a], { x: 50, y: 40 }, null, 26, undefined, { x: 400, y: 40 }).anchor,
-    undefined,
-  );
+  const centered = M.nearestBinding([a], { x: 50, y: 40 }, null, 26, undefined, { x: 400, y: 40 });
+  assert.equal(centered.port, 'e');
+  assert.equal(centered.anchor, undefined);
+  assert.deepEqual(M.facingPorts(a, note('b', 300, 0)), { fromPort: 'e', toPort: 'w' });
+  assert.deepEqual(M.facingPorts(a, note('b', 0, 300)), { fromPort: 's', toPort: 'n' });
 });
 
 test('automatic bindings slide to the facing side when notes cross over one another', () => {

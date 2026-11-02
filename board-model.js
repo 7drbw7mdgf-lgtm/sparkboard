@@ -268,6 +268,17 @@ function portPoint(n, port = 'e') {
   return { ...bindingPoint(n, anchor), port };
 }
 
+/** Cardinal ports facing each other. A new link uses these instead of an arbitrary outline point. */
+function facingPorts(a, b) {
+  const dx = b.x + b.w / 2 - (a.x + a.w / 2);
+  const dy = b.y + b.h / 2 - (a.y + a.h / 2);
+  const horizontal = Math.abs(dx) >= Math.abs(dy);
+  return {
+    fromPort: horizontal ? (dx >= 0 ? 'e' : 'w') : dy >= 0 ? 's' : 'n',
+    toPort: horizontal ? (dx >= 0 ? 'w' : 'e') : dy >= 0 ? 'n' : 's',
+  };
+}
+
 function roundedBindingVertices(x, y, w, h, r) {
   return [
     [x + w - r, y + r, -90],
@@ -320,6 +331,31 @@ function bindingPoint(n, anchor) {
   return edgePoint(n, anchorToward(n, anchor), bindingVertices(n));
 }
 
+/** Pick a cardinal port. A pointer in the middle uses the side facing the drag, not a free edge point. */
+function snapPort(n, p, fromPoint, inside) {
+  let port = 'e',
+    point = portPoint(n, port),
+    best = Infinity;
+  for (const candidate of ports) {
+    const fixed = portPoint(n, candidate);
+    const distance = Math.hypot(p.x - fixed.x, p.y - fixed.y);
+    if (distance < best) {
+      best = distance;
+      port = candidate;
+      point = fixed;
+    }
+  }
+  const cx = n.x + n.w / 2,
+    cy = n.y + n.h / 2;
+  if (inside && Math.hypot(p.x - cx, p.y - cy) < best) {
+    const dx = fromPoint.x - cx,
+      dy = fromPoint.y - cy;
+    port = Math.abs(dx) >= Math.abs(dy) ? (dx >= 0 ? 'e' : 'w') : dy >= 0 ? 's' : 'n';
+    point = portPoint(n, port);
+  }
+  return { port, x: point.x, y: point.y };
+}
+
 /** Screen-scaled proximity and an existing-target bias avoid snapping flicker between nearby notes. */
 function nearestBinding(objects, p, excludeId, radius = 24, previousId, fromPoint = p) {
   let best = null,
@@ -329,29 +365,19 @@ function nearestBinding(objects, p, excludeId, radius = 24, previousId, fromPoin
     const vertices = bindingVertices(n),
       inside = shapeContains(n, p, vertices);
     const toward = Math.hypot(p.x - n.x - n.w / 2, p.y - n.y - n.h / 2) < 1 ? fromPoint : p;
-    let point = edgePoint(n, toward, vertices),
-      port;
-    let distance = Math.hypot(p.x - point.x, p.y - point.y);
+    const edge = edgePoint(n, toward, vertices);
+    const distance = Math.hypot(p.x - edge.x, p.y - edge.y);
     if (!inside && distance > radius * (n.id === previousId ? 1.3 : 1)) continue;
-    let portDistance = radius * 0.45;
-    for (const candidate of ports) {
-      const fixed = portPoint(n, candidate),
-        d = Math.hypot(p.x - fixed.x, p.y - fixed.y);
-      if (d < portDistance) {
-        point = fixed;
-        port = candidate;
-        portDistance = d;
-      }
-    }
+    const snapped = snapPort(n, p, fromPoint, inside);
     const candidateScore = (inside ? -radius : distance) - (n.id === previousId ? radius * 0.2 : 0);
     if (candidateScore < score) {
       score = candidateScore;
       best = {
         node: n,
-        port,
-        anchor: port || (inside && distance > radius) ? undefined : point.anchor,
-        x: point.x,
-        y: point.y,
+        port: snapped.port,
+        anchor: undefined,
+        x: snapped.x,
+        y: snapped.y,
       };
     }
   }
@@ -1251,6 +1277,7 @@ export {
   insertVertex,
   removeVertex,
   portPoint,
+  facingPorts,
   bindingPoint,
   nearestBinding,
   obstacleBoxes,

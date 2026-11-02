@@ -105,10 +105,7 @@ function dropLinkedNode(d, p) {
         (item) => item.type === 'connector' && item.from === source.id && item.to === created.id,
       );
       if (edge && d.fromPort) edge.fromPort = d.fromPort;
-      if (edge && d.fromAnchor) {
-        delete edge.fromPort;
-        edge.fromAnchor = d.fromAnchor;
-      }
+      if (edge) delete edge.fromAnchor;
     } else {
       created = node(
         'shape',
@@ -121,11 +118,12 @@ function dropLinkedNode(d, p) {
         { cornerRadius: 14 },
       );
       state.board.objects.push(created);
+      const sides = M.facingPorts(source, created);
       upsertConnector({
         from: source.id,
         to: created.id,
-        fromPort: d.fromPort,
-        fromAnchor: d.fromAnchor,
+        fromPort: d.fromPort || sides.fromPort,
+        toPort: sides.toPort,
         ...(d.opts || currentLineOptions('curved')),
       });
     }
@@ -153,6 +151,49 @@ function localShapePoint(n, p) {
     x: ((rx + n.w / 2) / Math.max(1, n.w)) * 100,
     y: ((ry + n.h / 2) / Math.max(1, n.h)) * 100,
   };
+}
+
+/** Drop incoming links when the recipient itself is dragged clear of where it was connected. */
+export function detachDraggedRecipients(objects, originals, movingIds) {
+  const removed = [];
+  if (!movingIds?.size) return removed;
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const edge = objects[i];
+    if (edge?.type !== 'connector' || !movingIds.has(edge.to) || movingIds.has(edge.from)) continue;
+    const before = originals.find((item) => item.id === edge.to);
+    const after = objects.find((item) => item.id === edge.to);
+    if (!before || !after) continue;
+    const dx = after.x + after.w / 2 - (before.x + before.w / 2);
+    const dy = after.y + after.h / 2 - (before.y + before.h / 2);
+    if (Math.hypot(dx, dy) < 24) continue;
+    objects.splice(i, 1);
+    removed.push(edge.id);
+  }
+  return removed;
+}
+
+/** Snap a connector end onto a port, or unhook the recipient end when it is dragged clear. */
+export function applyConnectorEndRelease(
+  objects,
+  connectorId,
+  { side, binding, detached, selected } = {},
+) {
+  const connector = objects.find((item) => item.id === connectorId && item.type === 'connector');
+  if (!connector || (side !== 'from' && side !== 'to')) return 'missing';
+  if (binding?.nodeId && objects.some((item) => item.id === binding.nodeId)) {
+    connector[side] = binding.nodeId;
+    delete connector[side + 'Port'];
+    delete connector[side + 'Anchor'];
+    if (binding.port) connector[side + 'Port'] = binding.port;
+    return 'snapped';
+  }
+  if (side === 'to' && detached) {
+    const index = objects.findIndex((item) => item.id === connector.id);
+    if (index >= 0) objects.splice(index, 1);
+    selected?.delete(connector.id);
+    return 'removed';
+  }
+  return 'kept';
 }
 
 function nearestTargetPort(p, excludeId) {
@@ -246,18 +287,18 @@ export function endPointer(e) {
   if (d.type === 'rebind-connector') {
     const draft = state.connectorDraft;
     state.connectorDraft = null;
-    if (draft?.binding && e?.type === 'pointerup') {
-      const connector = state.board.objects.find((n) => n.id === d.id),
-        side = d.side;
-      if (connector)
-        commit(() => {
-          connector[side] = draft.binding.nodeId;
-          delete connector[side + 'Port'];
-          delete connector[side + 'Anchor'];
-          if (draft.binding.port) connector[side + 'Port'] = draft.binding.port;
-          else if (draft.binding.anchor) connector[side + 'Anchor'] = draft.binding.anchor;
+    const changing = Boolean(draft?.binding) || (d.side === 'to' && d.detached);
+    let result = 'kept';
+    if (e?.type === 'pointerup' && changing)
+      commit(() => {
+        result = applyConnectorEndRelease(state.board.objects, d.id, {
+          side: d.side,
+          binding: draft?.binding,
+          detached: d.detached,
+          selected: state.selected,
         });
-    }
+      });
+    if (result === 'removed') toast('Connection removed');
     renderLines();
     return;
   }
@@ -358,6 +399,11 @@ export function endPointer(e) {
     state.selected = M.expandGroups(state.board.objects, [d.id]);
     selectVisual();
     return;
+  }
+  if (d.type === 'move' && d.changed) {
+    const removed = detachDraggedRecipients(state.board.objects, d.original, d.movingIds);
+    for (const id of removed) state.selected.delete(id);
+    if (removed.length) toast(removed.length === 1 ? 'Connection removed' : 'Connections removed');
   }
   if (d.changed) {
     render();
@@ -470,7 +516,15 @@ export function setupCanvas() {
     if (state.tool !== 'connector' && bindingHandle && n?.type === 'connector' && !n.locked) {
       const side = bindingHandle.dataset.connectorEnd,
         other = side === 'from' ? 'to' : 'from';
-      state.drag = { type: 'rebind-connector', id: n.id, side, excludeId: n[other], startPt: p };
+      state.drag = {
+        type: 'rebind-connector',
+        id: n.id,
+        side,
+        excludeId: n[other],
+        startPt: p,
+        origin: p,
+        detached: false,
+      };
       capture(e);
       e.preventDefault();
       return;
@@ -625,8 +679,7 @@ export function setupCanvas() {
       state.drag = {
         type: 'connect-port',
         from: n.id,
-        fromPort: null,
-        fromAnchor: sourceBinding?.anchor,
+        fromPort: sourceBinding?.port || null,
         startPt,
         downPt: p,
         opts,
@@ -826,6 +879,11 @@ export function setupCanvas() {
     if (state.drag.type === 'rebind-connector') {
       const drag = state.drag,
         connector = state.board.objects.find((n) => n.id === drag.id);
+      if (drag.origin && !drag.detached) {
+        const dx = (p.x - drag.origin.x) * state.view.z,
+          dy = (p.y - drag.origin.y) * state.view.z;
+        if (Math.hypot(dx, dy) >= 12) drag.detached = true;
+      }
       const hit = nearestTargetPort(p, drag.excludeId);
       if (!connector) return;
       const temporary = { ...connector },

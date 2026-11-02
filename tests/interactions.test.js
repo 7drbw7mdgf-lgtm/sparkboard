@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setupCanvas, endPointer } from '../src/canvas.js';
+import {
+  setupCanvas,
+  endPointer,
+  applyConnectorEndRelease,
+  detachDraggedRecipients,
+} from '../src/canvas.js';
 import { setupClipboard } from '../src/clipboard.js';
 import { state } from '../src/state.js';
 
@@ -121,6 +126,84 @@ test('lost capture, cancellation and window/board cleanup always release a pan',
     assert.equal(ui.canvas.hasPointerCapture(1), false);
   }
 });
+test('a connector end snaps to a port, and dragging the recipient end away removes it', () => {
+  const objects = [
+    { id: 'a', type: 'sticky', x: 0, y: 0, w: 100, h: 80 },
+    { id: 'b', type: 'sticky', x: 240, y: 0, w: 100, h: 80 },
+    {
+      id: 'link',
+      type: 'connector',
+      from: 'a',
+      to: 'b',
+      fromAnchor: { x: 1, y: 0.2 },
+      toAnchor: { x: 0.2, y: 0.8 },
+    },
+  ];
+  const selected = new Set(['link']);
+  assert.equal(
+    applyConnectorEndRelease(objects, 'link', {
+      side: 'to',
+      binding: { nodeId: 'b', port: 'w' },
+      detached: true,
+      selected,
+    }),
+    'snapped',
+  );
+  assert.equal(objects[2].to, 'b');
+  assert.equal(objects[2].toPort, 'w');
+  assert.equal(objects[2].toAnchor, undefined);
+  assert.deepEqual(objects[2].fromAnchor, { x: 1, y: 0.2 });
+  assert.equal(
+    applyConnectorEndRelease(objects, 'link', {
+      side: 'from',
+      detached: true,
+      selected,
+    }),
+    'kept',
+  );
+  assert.equal(
+    objects.some((item) => item.id === 'link'),
+    true,
+  );
+  assert.equal(
+    applyConnectorEndRelease(objects, 'link', {
+      side: 'to',
+      detached: true,
+      selected,
+    }),
+    'removed',
+  );
+  assert.equal(
+    objects.some((item) => item.id === 'link'),
+    false,
+  );
+  assert.equal(selected.has('link'), false);
+});
+
+test('dragging the recipient node away drops its incoming connection', () => {
+  const pair = [
+    { id: 'a', type: 'sticky', x: 0, y: 0, w: 100, h: 80 },
+    { id: 'b', type: 'sticky', x: 80, y: 0, w: 100, h: 80 },
+    { id: 'link', type: 'connector', from: 'a', to: 'b' },
+    { id: 'out', type: 'connector', from: 'b', to: 'a' },
+  ];
+  const originals = pair.map((item) => ({ ...item }));
+  pair[1].x = 90;
+  assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['b'])), []);
+  pair[1].x = 220;
+  assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['b'])), ['link']);
+  assert.equal(
+    pair.some((item) => item.id === 'link'),
+    false,
+  );
+  assert.equal(
+    pair.some((item) => item.id === 'out'),
+    true,
+  );
+  pair.push({ id: 'link', type: 'connector', from: 'a', to: 'b' });
+  assert.deepEqual(detachDraggedRecipients(pair, originals, new Set(['a', 'b'])), []);
+});
+
 test('pasting with no open tab never edits the last closed board', () => {
   const ui = surface();
   setupClipboard();
