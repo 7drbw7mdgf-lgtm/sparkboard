@@ -47,17 +47,11 @@ export function mobileActionMarkup(
     actions += button('✓ Done', 'done');
   } else if (shape) {
     actions += button('✎ Text', 'edit');
-    if (single.mindmap) {
-      actions += button('＋ Child', 'mind-child');
-      actions += button('🎨 Branch', 'mind-style');
-    }
+    if (single.mindmap) actions += button('🎨 Branch', 'mind-style');
     actions += button('◈ Nodes', 'nodes');
   } else if (single && ['text', 'sticky'].includes(single.type) && !single.locked) {
     actions += button('✎ Text', 'edit');
   }
-  if (!reshaping && diagramMode === 'flowchart' && canConnectNode(single))
-    actions += button('＋ Next', 'flow-next');
-  if (!reshaping && canConnectNode(single)) actions += button('↗ Connect', 'connect');
   if (single?.type === 'connector' && !single.locked)
     actions += button('↝ Route', 'connector-style');
   actions += button('⚙ Format', 'format');

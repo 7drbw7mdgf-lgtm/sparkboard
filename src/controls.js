@@ -1,6 +1,5 @@
 import { isNativeControl } from './keyboard.js';
 import { openConnectorControls } from './connector-edit.js';
-import { addFlowStep } from './flowchart.js';
 import { mindmapShortcut } from './mindmap.js';
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
@@ -185,28 +184,12 @@ export function setupControls() {
           state.selectedVertex = null;
         });
       }
-    } else if (action === 'mind-child') {
-      $('#mindmap-toolbar [data-mm-action="child"]')?.click();
     } else if (action === 'mind-style') {
       document.dispatchEvent(
         new CustomEvent('sparkboard:mind-style', {
           detail: { id: [...state.selected][0] },
         }),
       );
-    } else if (action === 'flow-next') {
-      const id = [...state.selected][0];
-      if (state.selected.size === 1) addFlowStep('process', id);
-    } else if (action === 'connect') {
-      const source = editableNodes()[0];
-      if (
-        state.selected.size !== 1 ||
-        !source ||
-        ['path', 'line', 'connector', 'frame', 'file', 'image', 'embed'].includes(source.type)
-      )
-        return;
-      setTool('connector');
-      state.connectorStart = source.id;
-      toast('Tap the destination node. Tap Done above the dock to cancel.');
     } else if (action === 'connector-style') {
       openConnectorControls([...state.selected][0]);
     } else if (action === 'format') {
@@ -543,7 +526,6 @@ export function setupControls() {
       o: 'circle',
       f: 'frame',
       l: 'line',
-      c: 'connector',
       p: 'pen',
       e: 'eraser',
     };

@@ -76,13 +76,12 @@ test('link creation rejects self links and duplicates', () => {
   assert.equal(objects.length, 3);
 });
 
-test('mobile flowchart selection offers explicit linked next-step action', () => {
+test('flowchart selection does not add a second connect or next-step button', () => {
   const selected = [{ id: 'a', type: 'shape', x: 0, y: 0, w: 100, h: 80 }];
   const standard = mobileActionMarkup(selected, null);
   const flow = mobileActionMarkup(selected, null, 'points', null, 'flowchart');
-  assert.doesNotMatch(standard, /flow-next/);
-  assert.match(flow, /data-mobile-action="flow-next"/);
-  assert.match(flow, /data-mobile-action="connect"/);
+  assert.doesNotMatch(standard, /flow-next|data-mobile-action="connect"/);
+  assert.doesNotMatch(flow, /flow-next|data-mobile-action="connect"/);
 });
 
 test('decision branches get Yes and No labels, while ordinary links stay unlabelled', () => {

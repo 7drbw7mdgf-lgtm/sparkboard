@@ -2315,8 +2315,8 @@ header .divider {
 }
 .object .port {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #fff;
   border: 2px solid #7d8f69;
@@ -2326,6 +2326,11 @@ header .divider {
     transform 0.14s ease;
   z-index: 5;
   cursor: crosshair;
+}
+.object .port::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .object:hover .port,
 .object.selected .port {
@@ -4063,8 +4068,7 @@ body.is-panning #canvas {
 /* Mobile-first editing: no connector tool or accidental drag-to-connect ports.
    Desktop connector tools remain available without a mobile compromise. */
 @media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
-  #tools [data-tool='connector'],
-  #objects .object .port {
+  #tools [data-tool='connector'] {
     display: none !important;
   }
   #line-options[hidden] {
@@ -4985,10 +4989,12 @@ body.is-panning #canvas {
   #tools [data-tool='connector'] {
     display: none !important;
   }
-  #canvas[data-tool='connector'] #objects .object.selected:not(.locked) .port {
+  #canvas[data-tool='connector'] #objects .object.selected:not(.locked) .port,
+  #objects .object.selected:not(.locked) .port,
+  #objects .object:hover:not(.locked) .port {
     display: block !important;
   }
-  #objects .object:not(.selected) .port {
+  #objects .object:not(.selected):not(:hover) .port {
     display: none !important;
   }
 }

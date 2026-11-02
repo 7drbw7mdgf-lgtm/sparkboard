@@ -7,7 +7,7 @@ import { selectIds } from './selection.js';
 import { centerPoint } from './viewport.js';
 import { setTool } from './tools.js';
 import { toast } from './notifications.js';
-import { addFlowStep, startFlowLink } from './flowchart.js';
+import { addFlowStep } from './flowchart.js';
 import { modal } from './dialogs.js';
 import { MIND_PALETTES, applyMindMaster, themeNewMindTopic } from './mindmap-master.js';
 import {
@@ -55,9 +55,10 @@ const style = `
 #mindmap-outline .mmw-row input:focus{border-color:#77aa93;background:white}
 #mindmap-outline .mmw-empty{padding:15px;font-size:13px;color:#7c887f}
 body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{display:none}
-#objects .mm-fold{position:absolute;z-index:3;display:flex;width:max-content;white-space:nowrap;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;border:1.5px solid #7a8e81;background:#fff;color:#3d5446;font:700 12px/1 Manrope,sans-serif;cursor:pointer;translate:-50% -50%;box-shadow:0 2px 6px #2c3a3022;opacity:0;transition:opacity .12s,transform .12s;touch-action:manipulation}
-#objects .object:hover>.mm-fold,#objects .object.selected>.mm-fold,#objects .mm-fold.is-collapsed,#objects .mm-fold:focus-visible{opacity:1}
-#objects .mm-fold:hover{transform:scale(1.12);border-color:#326956}
+#objects .mm-fold,#objects .mm-daughter,#objects .mm-sibling{position:absolute;z-index:6;display:flex;width:max-content;white-space:nowrap;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;border:1.5px solid #7a8e81;background:#fff;color:#3d5446;font:700 12px/1 Manrope,sans-serif;cursor:pointer;translate:-50% -50%;box-shadow:0 2px 6px #2c3a3022;opacity:0;transition:opacity .12s,transform .12s;touch-action:manipulation}
+#objects .mm-daughter,#objects .mm-sibling{width:18px;height:18px;min-width:18px;padding:0;border-radius:50%;border-color:#326956;color:#326956;font-size:14px;line-height:1}
+#objects .object:hover>.mm-fold,#objects .object.selected>.mm-fold,#objects .mm-fold.is-collapsed,#objects .mm-fold:focus-visible,#objects .object:hover>.mm-daughter,#objects .object.selected>.mm-daughter,#objects .mm-daughter:focus-visible,#objects .object:hover>.mm-sibling,#objects .object.selected>.mm-sibling,#objects .mm-sibling:focus-visible{opacity:1}
+#objects .mm-fold:hover,#objects .mm-daughter:hover,#objects .mm-sibling:hover{transform:scale(1.12);border-color:#326956}
 #objects .mm-master{position:absolute;right:7px;top:-25px;z-index:7;min-height:26px;padding:3px 8px;border:1px solid #a7b5a8;border-radius:14px;background:#fff;color:#325b49;font:700 11px Manrope,sans-serif;box-shadow:0 2px 7px #24403018;touch-action:manipulation}
 #objects .mm-master:hover{background:#e9f2ec}
 #mind-master-form{display:grid;gap:13px}
@@ -67,7 +68,7 @@ body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{displa
 #mind-master-form .master-submit{padding:12px;border-radius:10px;color:#fff;background:#286a51;font-weight:700}
 @media(max-width:650px){#objects .mm-master{min-height:34px;top:-36px;padding:6px 10px}}
 #objects .mm-fold.is-collapsed{background:#326956;border-color:#326956;color:#fff}
-@media(hover:none){#objects .mm-fold{opacity:1;min-width:28px;height:28px;border-radius:14px}}
+@media(hover:none){#objects .mm-fold.is-collapsed{opacity:1}#objects .object.selected>.mm-daughter,#objects .object.selected>.mm-sibling,#objects .object.selected>.mm-fold{opacity:1;min-width:28px;height:28px}}
 @media(max-width:1180px){
  #mindmap-toolbar{top:74px;left:18px;right:18px;transform:none;max-width:none;width:auto;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
  .board-badge{top:132px}
@@ -182,32 +183,16 @@ function refreshWorkspace() {
 function syncActionButtons() {
   const bar = $('#mindmap-toolbar');
   if (!bar || !state.board) return;
-  const selected = chosenTopic();
-  const index = indexMindmap(state.board.objects);
-  bar.querySelector('[data-mm-action="sibling"]').disabled = !selected;
-  const fold = bar.querySelector('[data-mm-action="collapse"]');
-  fold.disabled = !selected;
-  const hasBranches = Boolean(selected && index.children.get(selected.id)?.length);
-  fold.textContent = !selected
-    ? 'Collapse'
-    : !hasBranches
-      ? '＋ Branch'
-      : selected.mindCollapsed
-        ? 'Expand'
-        : 'Collapse';
-  fold.title = selected
-    ? hasBranches
-      ? `${selected.mindCollapsed ? 'Expand' : 'Collapse'} this topic`
-      : 'Add a child topic'
-    : 'Select a mind-map topic';
-  bar.querySelector('[data-mm-action="adopt"]').disabled =
-    state.selected.size !== 1 || Boolean(selected);
+  const adopt = bar.querySelector('[data-mm-action="adopt"]');
+  if (adopt) adopt.disabled = state.selected.size !== 1 || Boolean(chosenTopic());
 }
 /** Every mind-map node has a fold toggle; each parent also owns subtree styling. */
 function drawFoldToggles() {
   const host = $('#objects');
   if (!host || !state.board) return;
-  host.querySelectorAll('.mm-fold, .mm-master').forEach((button) => button.remove());
+  host
+    .querySelectorAll('.mm-fold, .mm-master, .mm-daughter, .mm-sibling')
+    .forEach((button) => button.remove());
   const index = indexMindmap(state.board.objects);
   if (!index.nodes.length) return;
   const mindmapMode = ['mindmap', 'outline'].includes(state.diagramMode);
@@ -232,32 +217,49 @@ function drawFoldToggles() {
     const el = host.querySelector(`.object[data-id="${CSS.escape(topic.id)}"]`);
     if (!el) continue;
     const isRoot = !topic.mindParent || !index.byId.has(topic.mindParent);
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = `mm-fold${topic.mindCollapsed ? ' is-collapsed' : ''}`;
     const kids = index.children.get(topic.id) || [];
-    if (kids.length) button.dataset.mmFold = topic.id;
-    else button.dataset.mmAddChild = topic.id;
-    const hiddenCount = hiddenLeavesBelow(topic.id);
-    button.textContent = !kids.length ? '+' : topic.mindCollapsed ? `+${hiddenCount}` : '−';
-    const label = !kids.length
-      ? 'Add a child topic'
-      : topic.mindCollapsed
+    if (kids.length) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `mm-fold${topic.mindCollapsed ? ' is-collapsed' : ''}`;
+      button.dataset.mmFold = topic.id;
+      const hiddenCount = hiddenLeavesBelow(topic.id);
+      button.textContent = topic.mindCollapsed ? `+${hiddenCount}` : '−';
+      const label = topic.mindCollapsed
         ? `Expand: show ${hiddenCount} hidden topic${hiddenCount === 1 ? '' : 's'}`
         : 'Collapse this branch';
-    button.title = label;
-    button.setAttribute('aria-label', label);
-    if (kids.length) button.setAttribute('aria-expanded', String(!topic.mindCollapsed));
-    if (isRoot) {
-      // Roots can have branches on both sides, so their toggle sits underneath.
+      button.title = label;
+      button.setAttribute('aria-label', label);
+      button.setAttribute('aria-expanded', String(!topic.mindCollapsed));
       button.style.left = '50%';
-      button.style.top = 'calc(100% + 34px)'; // clear of the connection port
-    } else {
-      const left = sides.get(topic.id) === 'left';
-      button.style.left = left ? '-34px' : 'calc(100% + 34px)';
-      button.style.top = '50%';
+      button.style.top = '-30px';
+      el.append(button);
     }
-    el.append(button);
+    if (mindmapMode) {
+      const daughter = document.createElement('button');
+      daughter.type = 'button';
+      daughter.className = 'mm-daughter';
+      daughter.dataset.mmAddChild = topic.id;
+      daughter.textContent = '+';
+      daughter.title = 'Add a daughter topic';
+      daughter.setAttribute('aria-label', 'Add a daughter topic');
+      const left = !isRoot && sides.get(topic.id) === 'left';
+      daughter.style.left = left ? '-30px' : 'calc(100% + 30px)';
+      daughter.style.top = '50%';
+      el.append(daughter);
+      if (!isRoot) {
+        const sibling = document.createElement('button');
+        sibling.type = 'button';
+        sibling.className = 'mm-sibling';
+        sibling.dataset.mmAddSibling = topic.id;
+        sibling.textContent = '+';
+        sibling.title = 'Add a sibling below';
+        sibling.setAttribute('aria-label', 'Add a sibling topic');
+        sibling.style.left = '50%';
+        sibling.style.top = 'calc(100% + 30px)';
+        el.append(sibling);
+      }
+    }
     // Show contextual styling on the selected topic, not dozens of duplicate labels.
     if (mindmapMode && state.selected.has(topic.id)) {
       const master = document.createElement('button');
@@ -430,10 +432,7 @@ export function setupMindmapWorkspace() {
     <button type="button" data-mm-action="task" class="mmw-task-action" title="Create a task and send it to Sai/Benchline">✓ Task</button>
     <div class="mmw-actions" data-mm-actions="mindmap" hidden>
       <button data-mm-action="root" title="Create a root topic">＋ Root</button>
-      <button data-mm-action="child" title="Add child · Tab">＋ Branch</button>
-      <button data-mm-action="sibling" title="Add sibling · Enter">＋ Sibling</button>
       <button data-mm-action="layout" title="Arrange topics automatically">Arrange</button>
-      <button data-mm-action="collapse" title="Collapse or expand selected topic">Collapse</button>
       <button data-mm-action="adopt" title="Convert selected object and connected descendants">Convert</button>
     </div>
     <div class="mmw-actions" data-mm-actions="flowchart" hidden>
@@ -442,7 +441,6 @@ export function setupMindmapWorkspace() {
       <button data-mm-action="decision">◇ Decision</button>
       <button data-mm-action="data">▱ Data</button>
       <button data-mm-action="end">◎ End</button>
-      <button data-mm-action="flow-link" title="Connect selected nodes, or choose a destination">↗ Link nodes</button>
     </div>`;
   const panel = document.createElement('aside');
   panel.id = 'mindmap-panel';
@@ -460,21 +458,13 @@ export function setupMindmapWorkspace() {
     // Hand focus back to the canvas so Enter / Tab / undo work on the map straight away
     // (otherwise Enter would just click this button again).
     event.target.closest('button')?.blur();
-    const selected = chosenTopic();
     if (action === 'task') document.dispatchEvent(new Event('sparkboard:new-task'));
     if (action === 'root') placeRoot();
-    if (action === 'child') placeChild(selected?.id || null);
-    if (action === 'sibling' && selected) placeSibling(selected.id);
     if (action === 'layout') {
       if (!indexMindmap(state.board.objects).nodes.length)
         return toast('Create or convert a topic first');
       commit(() => layoutMindmap(state.board.objects));
       toast('Mind map arranged · other canvas objects unchanged');
-    }
-    if (action === 'collapse' && selected) {
-      if ((indexMindmap(state.board.objects).children.get(selected.id) || []).length)
-        toggleCollapse(selected.id);
-      else placeChild(selected.id);
     }
     if (action === 'adopt') {
       const id = [...state.selected][0];
@@ -483,14 +473,14 @@ export function setupMindmapWorkspace() {
       toast('Existing objects converted without duplicating them');
     }
     if (['start', 'process', 'decision', 'data', 'end'].includes(action)) addFlowStep(action);
-    if (action === 'flow-link') startFlowLink();
   });
   panel.addEventListener('click', (event) => {
     if (event.target.closest('[data-mm-close]')) return changeMode('mindmap');
     const toggle = event.target.closest('[data-mm-toggle]')?.dataset.mmToggle;
     if (toggle) {
       const children = indexMindmap(state.board.objects).children.get(toggle) || [];
-      return children.length ? toggleCollapse(toggle) : placeChild(toggle);
+      if (children.length) toggleCollapse(toggle);
+      return;
     }
     const focus = event.target.closest('[data-mm-focus]')?.dataset.mmFocus;
     if (focus) {
@@ -515,7 +505,10 @@ export function setupMindmapWorkspace() {
   });
   // On-canvas collapse toggles: keep the canvas from treating the press as a drag or edit.
   const objectsHost = $('#objects');
-  const foldTarget = (event) => event.target.closest?.('[data-mm-fold],[data-mm-master]');
+  const foldTarget = (event) =>
+    event.target.closest?.(
+      '[data-mm-fold],[data-mm-master],[data-mm-add-child],[data-mm-add-sibling]',
+    );
   for (const type of ['pointerdown', 'mousedown', 'dblclick'])
     objectsHost?.addEventListener(type, (event) => {
       if (!foldTarget(event)) return;
@@ -528,6 +521,7 @@ export function setupMindmapWorkspace() {
     event.stopPropagation();
     if (button.dataset.mmFold) toggleCollapse(button.dataset.mmFold);
     if (button.dataset.mmAddChild) placeChild(button.dataset.mmAddChild);
+    if (button.dataset.mmAddSibling) placeSibling(button.dataset.mmAddSibling);
     if (button.dataset.mmMaster) showMindMaster(button.dataset.mmMaster);
   });
   refreshWorkspace();

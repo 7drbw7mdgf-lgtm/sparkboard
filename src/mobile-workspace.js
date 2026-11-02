@@ -1,7 +1,7 @@
 import { $ } from './core.js';
 import { state } from './state.js';
 import { setTool } from './tools.js';
-import { addFlowStep, startFlowLink } from './flowchart.js';
+import { addFlowStep } from './flowchart.js';
 import { toast } from './notifications.js';
 import { isCompactEditor } from './mobile-editor-policy.js';
 import { addAt } from './canvas.js';
@@ -24,7 +24,7 @@ const mobileStyle = `
   #mobile-workspace-dock .mwd-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;padding:2px;background:#f3f6f2;border-radius:14px}
   #mobile-workspace-dock .mwd-modes button{min-height:34px;border:0;border-radius:12px;background:transparent;color:#5d6e64;font:700 11px/1 Manrope,sans-serif;padding:7px 2px;touch-action:manipulation}
   #mobile-workspace-dock .mwd-modes button[aria-pressed="true"]{background:#fff;color:#24694e;box-shadow:0 1px 4px #20382e18}
-  #mobile-workspace-dock .mwd-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  #mobile-workspace-dock .mwd-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
   #mobile-workspace-dock .mwd-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:13px;color:#63736b;font:700 10px/1.1 Manrope,sans-serif;padding:4px 1px;touch-action:manipulation}
   #mobile-workspace-dock .mwd-actions button .mwd-icon{font:700 21px/1 sans-serif}
   #mobile-workspace-dock .mwd-actions button[aria-pressed="true"]{background:#e5f1e9;color:#24694e}
@@ -114,16 +114,12 @@ function sheetContents(section) {
       ['Decision', '◇', 'flow', 'decision'],
       ['Input / output', '▱', 'flow', 'data'],
       ['End', '◎', 'flow', 'end'],
-      ['Link nodes', '↗', 'connect', ''],
     ];
   } else if (current === 'mindmap' || current === 'outline') {
     choices = [
       ['New task', '✓', 'task', ''],
       ['Root topic', '◉', 'map', 'root'],
-      ['Child branch', '↳', 'map', 'child'],
-      ['Sibling topic', '⊕', 'map', 'sibling'],
       ['Arrange', '☷', 'map', 'layout'],
-      ['Collapse / expand', '⊟', 'map', 'collapse'],
       ['Branch styles', '🎨', 'map-style', ''],
       ['Connection styles', '↝', 'connection', ''],
       ['Shapes', '◇', 'picker', 'shapes'],
@@ -210,7 +206,6 @@ function choose(action, value) {
   closeSheet();
   if (action === 'task') document.dispatchEvent(new Event('sparkboard:new-task'));
   else if (action === 'flow') addFlowStep(value);
-  else if (action === 'connect') startFlowLink();
   else if (action === 'connection') {
     const edge = state.board?.objects.find(
       (item) => state.selected.has(item.id) && item.type === 'connector',
@@ -266,7 +261,6 @@ export function setupMobileWorkspace() {
     </div>
     <div class="mwd-actions">
     <button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
-    <button type="button" data-mw-action="connect"><span class="mwd-icon">↗</span>Link</button>
     <button type="button" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">☷</span>Tools</button>
     </div>`;
   const status = document.createElement('div');
@@ -300,9 +294,6 @@ export function setupMobileWorkspace() {
     } else if (button.dataset.mwTool) {
       closeSheet();
       setTool(button.dataset.mwTool);
-    } else if (button.dataset.mwAction === 'connect') {
-      closeSheet();
-      startFlowLink();
     } else if (button.dataset.mwAction) showSheet(button.dataset.mwAction);
     syncDock();
   });

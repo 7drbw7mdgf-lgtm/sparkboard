@@ -82,7 +82,6 @@ export function setupTools() {
     'text',
     'shapes',
     'line',
-    'connector',
     'pen',
     'eraser',
     'media',
@@ -91,7 +90,7 @@ export function setupTools() {
   ]
     .map(
       (k, i) =>
-        (i === 2 || i === 9 ? '<div class="tool-sep"></div>' : '') +
+        (k === 'sticky' || k === 'media' ? '<div class="tool-sep"></div>' : '') +
         (k === 'shapes'
           ? `<div class="shape-picker"><button id="shape-toggle" data-label="Shapes" aria-label="Shapes" aria-expanded="false" aria-controls="shape-menu">${svgIcon('shape')}<span class="expand-caret" aria-hidden="true">›</span></button><div id="shape-menu" role="group" aria-label="Choose a shape" hidden><div class="shape-menu-head"><span class="shape-menu-title">SHAPE LIBRARY</span><span>${M.shapes.length} shapes</span></div><input id="shape-search" type="search" placeholder="Find a shape…" aria-label="Search shapes"><div id="shape-categories" class="shape-categories" role="group" aria-label="Shape categories">${categoryButtons('desktop')}</div><div id="shape-grid">${M.shapes.map((k) => `<button data-tool="${k}" aria-label="${shapeNames[k]}" data-shape-name="${shapeNames[k].toLowerCase()}" data-category="${shapeCategory(k)}">${svgIcon(k)}<span>${shapeNames[k]}</span></button>`).join('')}</div><p id="shape-empty" hidden>No matching shapes.</p><p class="shape-tip">Choose a shape, then click the canvas.</p></div></div>`
           : `<button data-tool="${k}" data-label="${labels[k]}" aria-label="${labels[k]}">${svgIcon(k)}</button>`),

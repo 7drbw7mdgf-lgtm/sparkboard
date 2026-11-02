@@ -2,12 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { mobileActionMarkup, canConnectNode } from '../src/mobile-actions.js';
-import { toolAvailableOnLayout } from '../src/mobile-editor-policy.js';
 
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
 const canvas = readFileSync(new URL('../src/canvas.js', import.meta.url), 'utf8');
-const controls = readFileSync(new URL('../src/controls.js', import.meta.url), 'utf8');
 
 test('marketing home has original visual demonstration, features, practical use cases and authentic login controls', () => {
   for (const heading of [
@@ -44,27 +42,21 @@ test('marketing home has original visual demonstration, features, practical use 
   assert.match(css, /@media \(max-width: 560px\)/);
 });
 
-test('mobile connector works from a selected item without requiring its toolbar icon', () => {
+test('shapes connect by dragging the nodes that appear on hover or selection', () => {
   const sticky = { id: 'n1', type: 'sticky', x: 0, y: 0, w: 200, h: 200 };
-  assert.equal(toolAvailableOnLayout('connector', true), true);
   assert.equal(canConnectNode(sticky), true);
-  assert.match(mobileActionMarkup([sticky], null), /data-mobile-action="connect"/);
-  assert.match(controls, /action === 'connect'/);
-  assert.match(controls, /state\.connectorStart = source\.id/);
-  assert.match(canvas, /if \(state\.tool === 'connector'\)/);
-  // Mobile taps can land directly on a shape's outline handle; Connect must take precedence.
-  assert.match(canvas, /state\.tool !== 'connector' && vertexEl && n/);
-  assert.match(canvas, /state\.tool !== 'connector' && edgeEl && n/);
-  assert.match(canvas, /if \(isCompactEditor\(\) && wasConnecting\) setTool\('select'\)/);
-  assert.match(css, /#canvas\[data-tool='connector'\] #objects/);
-
-  assert.match(css, /#tools \[data-tool='connector'\] \{\s*display:\s*none !important;/);
-  assert.doesNotMatch(
-    mobileActionMarkup([{ ...sticky, type: 'line' }], null),
-    /data-mobile-action="connect"/,
+  assert.doesNotMatch(mobileActionMarkup([sticky], null), /data-mobile-action="connect"/);
+  const controls = readFileSync(new URL('../src/controls.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(controls, /action === 'connect'/);
+  assert.match(canvas, /e\.target\.closest\('\.port'\)/);
+  assert.doesNotMatch(canvas, /portEl &&\s*\n\s*!isCompactEditor\(\)/);
+  assert.match(css, /\.object:hover \.port/);
+  assert.match(css, /\.object\.selected \.port/);
+  assert.match(css, /#objects \.object\.selected:not\(\.locked\) \.port/);
+  const tools = readFileSync(new URL('../src/tools.js', import.meta.url), 'utf8');
+  const palette = tools.slice(
+    tools.indexOf('export function setupTools'),
+    tools.indexOf('export function setTool'),
   );
-  assert.doesNotMatch(
-    mobileActionMarkup([{ ...sticky, locked: true }], null),
-    /data-mobile-action="connect"/,
-  );
+  assert.doesNotMatch(palette, /'connector'/);
 });

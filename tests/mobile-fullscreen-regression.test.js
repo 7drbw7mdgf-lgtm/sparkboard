@@ -47,13 +47,17 @@ test('mobile node labels and mind-map branches have direct actions', () => {
     'mindmap',
   );
   assert.match(actions, /data-mobile-action="edit"/);
-  assert.match(actions, /data-mobile-action="mind-child"/);
+  assert.doesNotMatch(actions, /data-mobile-action="mind-child"/);
   assert.match(actions, /data-mobile-action="mind-style"/);
+  const mindmap = source('src/mindmap.js');
+  assert.match(mindmap, /mm-daughter/);
+  assert.match(mindmap, /mm-sibling/);
+  assert.match(mindmap, /data-mm-add-sibling/);
 });
 
 test('mind-map canvas controls do not accumulate duplicate style buttons', () => {
   const mindmap = source('src/mindmap.js');
-  assert.match(mindmap, /querySelectorAll\('\.mm-fold, \.mm-master'\)/);
+  assert.match(mindmap, /querySelectorAll\('\.mm-fold, \.mm-master/);
   assert.match(mindmap, /mindmapMode && state\.selected\.has\(topic\.id\)/);
   assert.match(mindmap, /data-mm-add-child|mmAddChild/);
   assert.match(mindmap, /sparkboard:selection', drawFoldToggles/);
