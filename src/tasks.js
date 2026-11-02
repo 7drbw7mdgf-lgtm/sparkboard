@@ -1,4 +1,4 @@
-import { $, esc, uid, node } from './core.js';
+import { $, uid, node } from './core.js';
 import { state } from './state.js';
 import { commit } from './history.js';
 import { modal } from './dialogs.js';
@@ -33,7 +33,7 @@ function decorateTasks() {
     tag.textContent = item.sparkTask.pending ? '✓ Task · saved here' : '✓ Task';
     tag.title = item.sparkTask.pending
       ? 'Stored on this board; Sai handoff failed in this browser'
-      : 'Task sent to Sai/Benchline on this browser';
+      : 'Task queued for Sai/Benchline in this browser';
     element.append(tag);
   });
 }
@@ -104,7 +104,7 @@ function createTask() {
     }
     $('#dialog')?.close();
     toast(success
-      ? 'Task added · available in Sai/Benchline in this browser'
+      ? 'Task added · queued for Sai/Benchline in this browser'
       : 'Task saved on board · Sai handoff unavailable; check browser storage');
   });
 }
