@@ -1,6 +1,8 @@
 import { $, uid, node } from './core.js';
 import { state } from './state.js';
 import { commit } from './history.js';
+import { render } from './rendering.js';
+import { save } from './boards.js';
 import { modal } from './dialogs.js';
 import { toast } from './notifications.js';
 import { centerPoint } from './viewport.js';
@@ -97,10 +99,11 @@ function createTask() {
     });
     const success = publishTask(task);
     if (success) {
-      commit(() => {
-        const item = state.board?.objects.find((n) => n.id === nodeId);
-        if (item?.sparkTask) item.sparkTask.pending = false;
-      });
+      // Handoff confirmation is not a user edit: don't add a phantom Undo step.
+      const item = state.board?.objects.find((n) => n.id === nodeId);
+      if (item?.sparkTask) item.sparkTask.pending = false;
+      render();
+      save();
     }
     $('#dialog')?.close();
     toast(success
