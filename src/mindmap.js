@@ -14,7 +14,7 @@ import {
   appendMindNode,
   addMindChild,
   adoptMindTree,
-  descendantCount,
+  hiddenMindmapIds,
   indexMindmap,
   insertMindSibling,
   layoutMindmap,
@@ -211,6 +211,20 @@ function drawFoldToggles() {
   if (!index.nodes.length) return;
   const mindmapMode = ['mindmap', 'outline'].includes(state.diagramMode);
   const sides = mindSides(state.board.objects, index);
+  const hidden = hiddenMindmapIds(state.board.objects);
+  const hiddenLeavesBelow = (id) => {
+    const stack = [...(index.children.get(id) || [])];
+    const visited = new Set([id]);
+    let count = 0;
+    while (stack.length) {
+      const item = stack.pop();
+      if (visited.has(item.id)) continue;
+      visited.add(item.id);
+      if (hidden.has(item.id)) count++;
+      stack.push(...(index.children.get(item.id) || []));
+    }
+    return count;
+  };
   for (const topic of index.nodes) {
     // Outside mind-map mode, only collapsed topics need their toggle visible.
     if (!mindmapMode && !topic.mindCollapsed) continue;
@@ -223,7 +237,7 @@ function drawFoldToggles() {
     const kids = index.children.get(topic.id) || [];
     if (kids.length) button.dataset.mmFold = topic.id;
     else button.dataset.mmAddChild = topic.id;
-    const hiddenCount = descendantCount(state.board.objects, topic.id, index);
+    const hiddenCount = hiddenLeavesBelow(topic.id);
     button.textContent = !kids.length ? '+' : topic.mindCollapsed ? `+${hiddenCount}` : '−';
     const label = !kids.length
       ? 'Add a child topic'
