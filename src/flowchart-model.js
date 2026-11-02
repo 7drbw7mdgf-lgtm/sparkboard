@@ -98,11 +98,18 @@ export function connectFlowNodes(objects, fromId, toId, makeId) {
   return edge;
 }
 
-export function createFlowStep(objects, { role = 'process', fromId = null, makeId, center } = {}) {
+export function createFlowStep(
+  objects,
+  { role = 'process', fromId = null, makeId, center, dropPosition = null } = {},
+) {
   const style = FLOW_STEPS[role];
   if (!style || typeof makeId !== 'function') throw Error('Invalid flowchart step.');
   const source = objects.find((o) => o.id === fromId && isFlowNode(o));
-  const position = flowPosition(objects, source, style, center);
+  // A dragged connector ends where the user releases it; toolbar quick-add still uses auto-layout.
+  const position =
+    dropPosition && Number.isFinite(dropPosition.x) && Number.isFinite(dropPosition.y)
+      ? { x: Math.round(dropPosition.x), y: Math.round(dropPosition.y) }
+      : flowPosition(objects, source, style, center);
   const created = {
     id: makeId(),
     type: style.type,

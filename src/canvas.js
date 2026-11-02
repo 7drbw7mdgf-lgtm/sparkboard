@@ -9,6 +9,7 @@ import { state } from './state.js';
 import { commit, snapshot, updateHistory } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
 import { allowDoubleClickEdit, isCompactEditor } from './mobile-editor-policy.js';
+import { createFlowStep } from './flowchart-model.js';
 
 function roundPt(p) {
   return {
@@ -69,6 +70,55 @@ function upsertConnector(props) {
   state.board.objects.push(created);
   M.dedupeConnectors(state.board.objects);
   return created.id;
+}
+
+/** Release a dragged connector onto empty canvas to place and link its new endpoint. */
+function dropLinkedNode(d, p) {
+  const source = state.board?.objects.find((item) => item.id === d.from);
+  if (
+    !source ||
+    source.locked ||
+    ['connector', 'line', 'path', 'frame', 'image', 'file', 'embed'].includes(source.type)
+  )
+    return false;
+  let created;
+  commit(() => {
+    if (state.board.diagramView === 'flowchart') {
+      created = createFlowStep(state.board.objects, {
+        role: 'process',
+        fromId: source.id,
+        makeId: uid,
+        dropPosition: { x: p.x - 102, y: p.y - 48 },
+      });
+      // Preserve the explicit connection handle where the user started dragging.
+      const edge = state.board.objects.find(
+        (item) => item.type === 'connector' && item.from === source.id && item.to === created.id,
+      );
+      if (edge && d.fromPort) edge.fromPort = d.fromPort;
+      if (edge && d.fromAnchor) {
+        delete edge.fromPort;
+        edge.fromAnchor = d.fromAnchor;
+      }
+    } else {
+      created = node(
+        'shape', Math.round(p.x - 100), Math.round(p.y - 50), 200, 100,
+        'New node', '#e7edff', { cornerRadius: 14 },
+      );
+      state.board.objects.push(created);
+      upsertConnector({
+        from: source.id,
+        to: created.id,
+        fromPort: d.fromPort,
+        fromAnchor: d.fromAnchor,
+        ...(d.opts || currentLineOptions('curved')),
+      });
+    }
+    state.selected = new Set([created.id]);
+  });
+  state.connectorStart = null;
+  setTool('select');
+  toast('Linked node added · drag it to adjust the layout');
+  return true;
 }
 
 function localShapePoint(n, p) {
@@ -218,6 +268,12 @@ export function endPointer(e) {
       if (d.fromTool) setTool('select');
       selectVisual();
     } else {
+      // A short tap still enters the usual two-click connector flow. Only an
+      // intentional drag into blank space creates an additional shape.
+      const release = point(e);
+      const moved = d.downPt && Math.hypot(release.x - d.downPt.x, release.y - d.downPt.y)
+        * state.view.z >= 48;
+      if (moved && dropLinkedNode(d, release)) return;
       if (d.fromTool) {
         state.connectorStart = d.from;
         toast('Click another object to connect it');
@@ -420,6 +476,7 @@ export function setupCanvas() {
         from: n.id,
         fromPort,
         startPt,
+        downPt: p,
         opts,
       };
       capture(e);
@@ -556,6 +613,7 @@ export function setupCanvas() {
         fromPort: null,
         fromAnchor: sourceBinding?.anchor,
         startPt,
+        downPt: p,
         opts,
         fromTool: true,
       };

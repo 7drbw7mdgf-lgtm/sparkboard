@@ -5247,3 +5247,36 @@ body.is-panning #canvas {
     min-height: 43px;
   }
 }
+
+
+/* Desktop toolbar can dock to the left or below the whiteboard without hiding tools. */
+#tool-dock-toggle { font-size: 22px; font-weight: 700; line-height: 1; color: #5e766b; }
+#tool-dock-toggle[aria-pressed="true"] { background: #e7f1e9; color: #286a51; }
+@media (min-width: 651px) and (pointer: fine) {
+  #tools { --tool-size: clamp(22px, calc((100dvh - 245px) / 13), 42px); }
+  #tools[data-dock="bottom"] {
+    --tool-size: clamp(28px, calc((100vw - 135px) / 13), 42px);
+    position: fixed;
+    left: 50%; right: auto; top: auto; bottom: 16px;
+    transform: translateX(-50%);
+    display: flex; flex-direction: row; align-items: center;
+    width: max-content; max-width: calc(100vw - 20px);
+    max-height: none; padding: 7px; gap: 4px;
+    border-radius: 16px;
+  }
+  #tools[data-dock="bottom"] > .tool-sep {
+    width: 1px; height: 26px; flex: 0 0 1px; margin: 2px 3px;
+  }
+  #tools[data-dock="bottom"] #shape-menu {
+    left: -106px; top: auto; bottom: calc(100% + 12px);
+    max-height: min(60dvh, 520px);
+  }
+  #tools[data-dock="bottom"] > button::after,
+  #tools[data-dock="bottom"] #shape-toggle::after {
+    left: 50%; top: auto; bottom: calc(100% + 9px);
+    transform: translateX(-50%);
+  }
+}
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  #tool-dock-toggle { display: none !important; }
+}

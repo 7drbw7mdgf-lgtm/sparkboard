@@ -97,9 +97,32 @@ export function setupTools() {
           : `<button data-tool="${k}" data-label="${labels[k]}" aria-label="${labels[k]}">${svgIcon(k)}</button>`),
     )
     .join('');
+  const toolbar = $('#tools');
+  toolbar.insertAdjacentHTML(
+    'beforeend',
+    '<div class="tool-sep" aria-hidden="true"></div><button type="button" id="tool-dock-toggle" data-label="Move toolbar to bottom" aria-label="Move toolbar to bottom" title="Move toolbar to bottom">⇆</button>',
+  );
+  const dockButton = $('#tool-dock-toggle');
+  const setDock = (dock) => {
+    const bottom = dock === 'bottom';
+    toolbar.dataset.dock = bottom ? 'bottom' : 'left';
+    const label = bottom ? 'Move toolbar to left' : 'Move toolbar to bottom';
+    dockButton.setAttribute('aria-label', label);
+    dockButton.dataset.label = label;
+    dockButton.title = label;
+    dockButton.setAttribute('aria-pressed', String(bottom));
+    try { window.localStorage.setItem('sparkboard:toolbar-dock', toolbar.dataset.dock); } catch {}
+  };
+  let previousDock = 'left';
+  try { previousDock = window.localStorage.getItem('sparkboard:toolbar-dock') || 'left'; } catch {}
+  setDock(previousDock);
   $('#tools').onclick = (e) => {
     const b = e.target.closest('button');
     if (!b) return;
+    if (b.id === 'tool-dock-toggle') {
+      setDock(toolbar.dataset.dock === 'bottom' ? 'left' : 'bottom');
+      return;
+    }
     if (b.id === 'shape-toggle') {
       if (matchMedia('(max-width: 650px), (max-height: 500px) and (pointer: coarse)').matches) {
         showMobileShapePicker();
@@ -195,7 +218,7 @@ export function setTool(t) {
         ? 'Drag anywhere to draw a line; select it to format later'
         : 'Drag on the canvas to draw a line · Format options on the right'
       : t === 'connector'
-        ? 'Click or drag between two objects to connect them · Format options on the right'
+        ? 'Connect two objects, or drag into empty space to drop a linked node'
         : t === 'pen'
           ? 'Draw smooth strokes on the canvas · Pen format on the right'
           : t === 'eraser'
