@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import ftplib
 import ssl
 import unittest
 from unittest.mock import patch, MagicMock
@@ -71,6 +72,38 @@ class RetryTests(unittest.TestCase):
                 )
         self.assertEqual(len(sessions), 3)
         self.assertEqual(publish.call_count, 3)
+
+    def test_temporary_data_connection_reply_reopens_the_session(self):
+        sessions = []
+
+        def factory():
+            session = Connection()
+            sessions.append(session)
+            return session
+
+        with patch.object(module, 'verify_live_root'), patch.object(
+            module, 'deploy', side_effect=[ftplib.error_temp('425 Cannot open data connection.'), 'c' * 40]
+        ):
+            revision = module.publish_with_retries(
+                factory, Path('build/website'), attempts=3, pause=lambda _: None
+            )
+        self.assertEqual(revision, 'c' * 40)
+        self.assertEqual(len(sessions), 2)
+
+
+class UploadTests(unittest.TestCase):
+    def test_data_connection_425_stays_temporary_so_publish_can_retry(self):
+        spec = importlib.util.spec_from_file_location(
+            'ftps_client_retry', Path(__file__).resolve().parents[1] / 'scripts/ftps_client.py'
+        )
+        client = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(client)
+        ftp = MagicMock()
+        ftp.storbinary.side_effect = ftplib.error_temp('425 Cannot open data connection.')
+        upload = client.Upload(ftp, 'style.css')
+        upload.write(b'body{}')
+        with self.assertRaises(ftplib.error_temp):
+            upload.close()
 
 
 if __name__ == '__main__':

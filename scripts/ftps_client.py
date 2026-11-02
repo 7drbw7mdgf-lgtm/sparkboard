@@ -24,6 +24,10 @@ class Upload(io.BytesIO):
             try:
                 self.seek(0)
                 self.ftp.storbinary('STOR ' + self.name, self)
+            except ftplib.error_temp:
+                # 425 and other 4xx replies are transient. The publisher retries
+                # them on a fresh session; wrapping them hides that.
+                raise
             except ftplib.Error as error:
                 raise transfer_error('file upload', error) from None
             finally:
