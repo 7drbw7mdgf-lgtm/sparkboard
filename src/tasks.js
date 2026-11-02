@@ -60,9 +60,11 @@ function createTask() {
     const data = new FormData(form);
     const name = String(data.get('name') || '').trim();
     if (!name || !state.board) return;
-    const selected = state.selected.size === 1
-      ? state.board.objects.find((item) => state.selected.has(item.id) && isMindNode(item))
+    const parent = state.selected.size === 1
+      ? state.board.objects.find((item) => state.selected.has(item.id) &&
+        !['connector', 'line', 'path', 'image', 'file', 'embed', 'frame'].includes(item.type))
       : null;
+    const selected = parent && isMindNode(parent) ? parent : null;
     const p = centerPoint();
     const taskId = uid();
     const nodeId = uid();
@@ -90,9 +92,20 @@ function createTask() {
           id: nodeId, connectorId: uid(), x: p.x - 100, y: p.y - 37, text: name,
         });
       } else {
-        item = node('shape', p.x - 110, p.y - 45, 220, 90, name, '#d6ecde');
+        item = node(
+          'shape',
+          parent ? parent.x + parent.w + 105 : p.x - 110,
+          parent ? parent.y : p.y - 45,
+          220, 90, name, '#d6ecde',
+        );
         item.id = nodeId;
         state.board.objects.push(item);
+        if (parent) {
+          state.board.objects.push({
+            id: uid(), type: 'connector', from: parent.id, to: item.id,
+            route: 'elbow', endArrow: 'arrow', color: '#65937c',
+          });
+        }
       }
       item.sparkTask = { ...task, pending: true };
       state.selected = new Set([item.id]);
