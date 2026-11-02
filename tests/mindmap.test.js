@@ -64,6 +64,9 @@ test('collapsed branches hide leaves but preserve every parent topic in view', (
   appendMindNode(objects, { id: 'grandchild', connectorId: 'eg', parentId: 'child' });
   assert.deepEqual([...hiddenMindmapIds(objects)].sort(), ['grandchild']);
   assert.equal(objects.length, 5);
+  const child = objects.find((item) => item.id === 'child');
+  layoutMindmap(objects);
+  assert.equal(child.x, objects[0].x + objects[0].w + 105, 'visible parent stays attached to its collapsed root');
   assert.equal(outlineMindmap(objects).find((row) => row.id === 'child').concealed, false);
   assert.equal(outlineMindmap(objects).find((row) => row.id === 'grandchild').concealed, true);
   objects[0].mindCollapsed = false;
