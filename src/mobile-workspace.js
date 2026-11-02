@@ -8,6 +8,7 @@ import { addAt } from './canvas.js';
 import { centerPoint } from './viewport.js';
 import { setDiagramView } from './mindmap.js';
 import { mobileWorkspaceMenus } from './mobile-menus.js';
+import { svgIcon } from './icons.js';
 
 const mobileStyle = `
 #mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet,#mobile-tool-active{display:none}
@@ -20,21 +21,20 @@ const mobileStyle = `
   #mindmap-toolbar{display:none!important}
   #mobile-workspace-mode{position:fixed;top:calc(124px + env(safe-area-inset-top));left:12px;z-index:19;align-items:center;gap:8px;border:1px solid #e6e8ee;background:#fff;box-shadow:0 6px 20px #18274b14;border-radius:10px;min-height:40px;padding:0 11px;font:600 12px/1 'DM Sans',sans-serif;color:#5c6570}
   #mobile-workspace-mode select{border:0;outline:0;background:transparent;color:#1f2430;font:600 14px/1 'DM Sans',sans-serif;min-height:40px;padding:0 16px 0 0;font-size:16px}
-  #mobile-workspace-dock{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px;z-index:45;height:auto;padding:8px;gap:8px;border:1px solid #e6e8ee;border-radius:14px;background:#fff;box-shadow:0 8px 28px #18274b1f}
-  #mobile-workspace-dock .mwd-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;padding:2px;background:#f3f4f6;border-radius:10px}
-  #mobile-workspace-dock .mwd-modes button{min-height:32px;border:0;border-radius:8px;background:transparent;color:#5c6570;font:600 12px/1 'DM Sans',sans-serif;padding:7px 2px;touch-action:manipulation}
-  #mobile-workspace-dock .mwd-modes button[aria-pressed="true"]{background:#fff;color:#4262ff;box-shadow:0 1px 2px #18274b14}
-  #mobile-workspace-dock .mwd-hint{margin:0;padding:0 4px;color:#6b7280;font:400 12px/1.35 'DM Sans',sans-serif}
-  #mobile-workspace-dock .mwd-context{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 0 2px;border-bottom:1px solid #eef0f4}
-  #mobile-workspace-dock .mwd-context[hidden]{display:none}
-  #mobile-workspace-dock .mwd-context button{flex:0 0 auto;min-height:34px;padding:0 12px;border:1px solid #e2e5ee;border-radius:8px;background:#fff;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif;touch-action:manipulation}
-  #mobile-workspace-dock .mwd-context button[aria-pressed="true"]{background:#e8edff;border-color:#c9d2ff;color:#4262ff}
-  #mobile-workspace-dock .mwd-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  #mobile-workspace-dock .mwd-tools{min-height:40px;padding:0 14px;border:1px solid #e2e5ee;border-radius:10px;background:#fff;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif;touch-action:manipulation}
-  #mobile-workspace-dock .mwd-tools[aria-expanded="true"]{background:#f3f4f6}
-  #mobile-workspace-dock .mwd-add{min-height:40px;padding:0 18px;border:0;border-radius:10px;background:#4262ff;color:#fff;font:600 13px/1 'DM Sans',sans-serif;touch-action:manipulation}
-  #mobile-workspace-dock .mwd-add[aria-expanded="true"]{background:#2f4fe0}
-  #mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:8px;right:8px;bottom:calc(var(--mwd-offset, 148px) + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #e6e8ee;border-radius:14px;padding:12px 8px 8px;box-shadow:0 8px 28px #18274b24;color:#1f2430}
+  #mobile-workspace-dock{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));z-index:45;height:auto;padding:0;gap:8px;border:0;background:transparent;box-shadow:none;pointer-events:none;align-items:center}
+  #mobile-workspace-dock .mwd-circles,#mobile-workspace-dock .mwd-fan{pointer-events:auto}
+  #mobile-workspace-dock .mwd-circles{display:flex;align-items:flex-end;justify-content:center;gap:10px}
+  #mobile-workspace-dock .mwd-circle{width:40px;height:40px;padding:0;border:1px solid #e4e7ee;border-radius:50%;background:#fff;color:#1f2430;box-shadow:0 6px 16px #18274b22;display:grid;place-items:center;touch-action:manipulation;transition:transform .12s ease}
+  #mobile-workspace-dock .mwd-circle.mwd-main{width:56px;height:56px}
+  #mobile-workspace-dock .mwd-circle:active,#mobile-workspace-dock .mwd-circle[aria-expanded="true"]{transform:scale(1.14)}
+  #mobile-workspace-dock .mwd-circle[aria-expanded="true"],#mobile-workspace-dock .mwd-circle[aria-pressed="true"]{background:#4262ff;color:#fff;border-color:#4262ff}
+  #mobile-workspace-dock .mwd-circle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+  #mobile-workspace-dock .mwd-circle.mwd-main svg{width:24px;height:24px}
+  #mobile-workspace-dock .mwd-circle svg polygon{fill:currentColor;stroke:none}
+  #mobile-workspace-dock .mwd-fan{display:flex;flex-wrap:nowrap;justify-content:safe center;gap:6px;max-width:calc(100vw - 16px);overflow-x:auto;scrollbar-width:none;padding:0 4px}
+  #mobile-workspace-dock .mwd-fan[hidden]{display:none}
+  #mobile-workspace-dock .mwd-fan .mwd-circle{flex:0 0 40px}
+  #mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:8px;right:8px;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #e6e8ee;border-radius:14px;padding:12px 8px 8px;box-shadow:0 8px 28px #18274b24;color:#1f2430}
   #mobile-tool-sheet h3{font:650 15px/1.2 'DM Sans',sans-serif;margin:0}
   #mobile-tool-sheet p{font-size:12px;color:#6b7280;margin:4px 0 8px;line-height:1.4;padding:0 4px}
   #mobile-tool-sheet .mw-list{display:flex;flex-direction:column}
@@ -42,17 +42,17 @@ const mobileStyle = `
   #mobile-tool-sheet .mw-row:active{background:#f3f4f6}
   #mobile-tool-sheet .mw-sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 4px}
   #mobile-tool-sheet .mw-close{min-height:32px;padding:0 10px;border-radius:8px;background:#f3f4f6;color:#1f2430;font:600 13px/1 'DM Sans',sans-serif}
-  #mobile-selection-actions:not([hidden]){bottom:calc(var(--mwd-offset, 148px) + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 16px);z-index:43}
+  #mobile-selection-actions:not([hidden]){bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 16px);z-index:43}
   .bottom-left,.zoom{display:none!important}
   #canvas{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important}
-  #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(var(--mwd-offset, 148px) + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:6px 6px 6px 12px;border:1px solid #e6e8ee;border-radius:10px;background:#fff;box-shadow:0 6px 20px #18274b1a;font:600 13px 'DM Sans',sans-serif;color:#1f2430;max-width:calc(100vw - 24px)}
+  #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:6px 6px 6px 12px;border:1px solid #e6e8ee;border-radius:10px;background:#fff;box-shadow:0 6px 20px #18274b1a;font:600 13px 'DM Sans',sans-serif;color:#1f2430;max-width:calc(100vw - 24px)}
   #mobile-tool-active button{min-height:34px;padding:6px 12px;border-radius:8px;background:#4262ff;color:#fff;font-weight:600;touch-action:manipulation}
-  #mindmap-panel:not([hidden]){top:calc(62px + env(safe-area-inset-top));left:8px;right:8px;bottom:calc(var(--mwd-offset, 148px) + env(safe-area-inset-bottom));width:auto;border-radius:14px;border-color:#e6e8ee;box-shadow:0 8px 28px #18274b1f;z-index:35}
-  #toast{bottom:calc(var(--mwd-offset, 148px) + 72px + env(safe-area-inset-bottom))}
+  #mindmap-panel:not([hidden]){top:calc(62px + env(safe-area-inset-top));left:8px;right:8px;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom));width:auto;border-radius:14px;border-color:#e6e8ee;box-shadow:0 8px 28px #18274b1f;z-index:35}
+  #toast{bottom:calc(var(--mwd-offset, 80px) + 72px + env(safe-area-inset-bottom))}
   #drawing-options:not([hidden]){position:fixed!important;top:calc(62px + env(safe-area-inset-top))!important;bottom:auto!important;left:12px!important;right:auto!important;width:min(244px,calc(100vw - 24px))!important;max-height:160px!important;padding:11px!important;z-index:39;border-radius:12px;box-shadow:0 8px 24px #18274b1a}
   #drawing-options .panel-heading{display:none}
   #drawing-options .inspector-section{padding:0}
-  #inspector:not([hidden]){position:fixed;left:8px!important;right:8px!important;top:auto!important;bottom:calc(var(--mwd-offset, 148px) + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(52dvh,460px)!important;z-index:52;border-radius:14px;border:1px solid #e6e8ee;box-shadow:0 10px 32px #18274b24}
+  #inspector:not([hidden]){position:fixed;left:8px!important;right:8px!important;top:auto!important;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(52dvh,460px)!important;z-index:52;border-radius:14px;border:1px solid #e6e8ee;box-shadow:0 10px 32px #18274b24}
   #inspector .format-heading{padding:4px 4px 8px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
   #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
@@ -68,10 +68,17 @@ const mobileStyle = `
 function mode() {
   return state.board?.diagramView || (state.board?.kind === 'mindmap' ? 'mindmap' : 'canvas');
 }
+function closeFan() {
+  const dock = $('#mobile-workspace-dock');
+  const fan = dock?.querySelector('[data-mw-fan]');
+  if (fan) fan.hidden = true;
+  dock?.querySelector('[data-mw-action="view"]')?.setAttribute('aria-expanded', 'false');
+  dock?.querySelector('[data-mw-action="more"]')?.setAttribute('aria-expanded', 'false');
+  placeChrome();
+}
 function closeSheet() {
   $('#mobile-tool-sheet').hidden = true;
-  $('#mobile-workspace-dock [data-mw-action="add"]').setAttribute('aria-expanded', 'false');
-  $('#mobile-workspace-dock [data-mw-action="more"]').setAttribute('aria-expanded', 'false');
+  closeFan();
 }
 function rowButton(item) {
   return `<button type="button" class="mw-row" data-mw-item="${item.action}" data-mw-value="${item.value}">${item.label}</button>`;
@@ -96,14 +103,6 @@ function showSheet(section) {
   sheet.dataset.section = section;
   sheetContents(section);
   sheet.hidden = false;
-  $('#mobile-workspace-dock [data-mw-action="add"]').setAttribute(
-    'aria-expanded',
-    String(section === 'add'),
-  );
-  $('#mobile-workspace-dock [data-mw-action="more"]').setAttribute(
-    'aria-expanded',
-    String(section === 'more'),
-  );
 }
 
 function placeChrome() {
@@ -112,26 +111,81 @@ function placeChrome() {
   const height = Math.ceil(dock.getBoundingClientRect().height);
   document.documentElement.style.setProperty('--mwd-offset', `${height + 16}px`);
 }
-function renderContext(current) {
-  const dock = $('#mobile-workspace-dock');
+const fanGlyph = {
+  canvas: 'frame',
+  mindmap: 'map',
+  flowchart: 'diamond',
+  outline: 'format',
+  pen: 'pen',
+  line: 'line',
+  eraser: 'eraser',
+  'search-board': 'search',
+  fit: 'frame',
+  undo: 'undo',
+  redo: 'redo',
+  templates: 'templates',
+  export: 'export',
+  scenes: 'scenes',
+  shapes: 'shape',
+  media: 'media',
+  embed: 'embed',
+  link: 'link',
+  sticky: 'sticky',
+  text: 'text',
+  task: 'check',
+  root: 'map',
+  layout: 'grid',
+  adopt: 'reshape',
+  start: 'circle',
+  process: 'shape',
+  decision: 'diamond',
+  data: 'parallelogram',
+  end: 'pill',
+  board: 'grid',
+  'map-style': 'format',
+};
+function fanChoices(section, current) {
   const menus = mobileWorkspaceMenus(current);
-  const hint = dock.querySelector('[data-mw-hint]');
-  if (hint && hint.textContent !== menus.hint) hint.textContent = menus.hint;
-  const host = dock.querySelector('[data-mw-context]');
-  const markup = menus.context
-    .map(
-      (item) =>
-        `<button type="button" data-mw-item="${item.action}" data-mw-value="${item.value}">${item.label}</button>`,
-    )
-    .join('');
-  if (host.dataset.markup !== markup) {
-    host.innerHTML = markup;
-    host.dataset.markup = markup;
+  if (section === 'view') {
+    return [
+      { label: 'Canvas', action: 'mode', value: 'canvas' },
+      { label: 'Map', action: 'mode', value: 'mindmap' },
+      { label: 'Flow', action: 'mode', value: 'flowchart' },
+      { label: 'Outline', action: 'mode', value: 'outline' },
+    ];
   }
-  host.hidden = menus.context.length === 0;
-  host.querySelectorAll('[data-mw-item="tool"]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(state.tool === button.dataset.mwValue));
-  });
+  const primary = new Set(['sticky', 'text', 'shapes']);
+  const extras = menus.add.filter((item) => !primary.has(item.value));
+  return [...menus.context, ...extras, { label: 'Tools', action: 'board', value: '' }];
+}
+function renderFan(section) {
+  const fan = $('#mobile-workspace-dock [data-mw-fan]');
+  const current = mode();
+  const markup = fanChoices(section, current)
+    .map((item) => {
+      const pressed =
+        item.action === 'mode'
+          ? item.value === current
+          : item.action === 'tool' && state.tool === item.value;
+      const attrs =
+        item.action === 'board'
+          ? 'data-mw-action="board"'
+          : `data-mw-item="${item.action}" data-mw-value="${item.value}"`;
+      const glyph = fanGlyph[item.value] || fanGlyph[item.action] || 'shape';
+      return `<button type="button" class="mwd-circle" ${attrs} aria-label="${item.label}" title="${item.label}" aria-pressed="${pressed}">${svgIcon(glyph)}</button>`;
+    })
+    .join('');
+  fan.dataset.section = section;
+  fan.innerHTML = markup;
+  fan.hidden = false;
+}
+function toggleFan(section) {
+  const fan = $('#mobile-workspace-dock [data-mw-fan]');
+  if (!fan.hidden && fan.dataset.section === section) closeFan();
+  else {
+    $('#mobile-tool-sheet').hidden = true;
+    renderFan(section);
+  }
 }
 function syncDock() {
   const dock = $('#mobile-workspace-dock');
@@ -139,12 +193,18 @@ function syncDock() {
   if (!dock || !select || !state.board) return;
   const current = mode();
   select.value = current;
-  dock.querySelectorAll('[data-mw-mode]').forEach((button) => {
-    const on = button.dataset.mwMode === current;
-    button.setAttribute('aria-pressed', String(on));
-    button.setAttribute('aria-selected', String(on));
-  });
-  renderContext(current);
+  const fan = dock.querySelector('[data-mw-fan]');
+  if (fan && !fan.hidden) renderFan(fan.dataset.section);
+  dock
+    .querySelector('[data-mw-action="view"]')
+    ?.setAttribute('aria-expanded', String(fan && !fan.hidden && fan.dataset.section === 'view'));
+  dock
+    .querySelector('[data-mw-action="more"]')
+    ?.setAttribute('aria-expanded', String(fan && !fan.hidden && fan.dataset.section === 'more'));
+  const viewButton = dock.querySelector('[data-mw-action="view"]');
+  if (viewButton)
+    viewButton.textContent =
+      { canvas: 'C', mindmap: 'M', flowchart: 'F', outline: 'O' }[current] || 'C';
   const sheet = $('#mobile-tool-sheet');
   if (!sheet.hidden && sheet.dataset.renderedMode !== mode()) sheetContents(sheet.dataset.section);
   const status = $('#mobile-tool-active');
@@ -216,17 +276,13 @@ export function setupMobileWorkspace() {
   const dock = document.createElement('nav');
   dock.id = 'mobile-workspace-dock';
   dock.setAttribute('aria-label', 'Mobile editing tools');
-  dock.innerHTML = `<div class="mwd-modes" role="tablist" aria-label="Board view">
-      <button type="button" role="tab" data-mw-mode="canvas">Canvas</button>
-      <button type="button" role="tab" data-mw-mode="mindmap">Map</button>
-      <button type="button" role="tab" data-mw-mode="flowchart">Flow</button>
-      <button type="button" role="tab" data-mw-mode="outline">Outline</button>
-    </div>
-    <p class="mwd-hint" data-mw-hint></p>
-    <div class="mwd-context" data-mw-context role="toolbar" aria-label="Actions for this view"></div>
-    <div class="mwd-actions">
-      <button type="button" class="mwd-tools" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet">Tools</button>
-      <button type="button" class="mwd-add" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet">Add</button>
+  dock.innerHTML = `<div class="mwd-fan" data-mw-fan hidden></div>
+    <div class="mwd-circles">
+      <button type="button" class="mwd-circle mwd-main" data-mw-item="tool" data-mw-value="sticky" aria-label="Sticky note">${svgIcon('sticky')}</button>
+      <button type="button" class="mwd-circle mwd-main" data-mw-item="tool" data-mw-value="text" aria-label="Text">${svgIcon('text')}</button>
+      <button type="button" class="mwd-circle mwd-main" data-mw-item="picker" data-mw-value="shapes" aria-label="Shapes">${svgIcon('shape')}</button>
+      <button type="button" class="mwd-circle" data-mw-action="view" aria-label="Board view" aria-expanded="false">C</button>
+      <button type="button" class="mwd-circle" data-mw-action="more" aria-label="More tools" aria-expanded="false">${svgIcon('more')}</button>
     </div>`;
   const status = document.createElement('div');
   status.id = 'mobile-tool-active';
@@ -253,11 +309,12 @@ export function setupMobileWorkspace() {
   dock.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button) return;
-    if (button.dataset.mwMode) {
-      closeSheet();
-      setDiagramView(button.dataset.mwMode);
+    if (button.dataset.mwAction === 'view' || button.dataset.mwAction === 'more')
+      toggleFan(button.dataset.mwAction);
+    else if (button.dataset.mwAction === 'board') {
+      closeFan();
+      showSheet('more');
     } else if (button.dataset.mwItem) choose(button.dataset.mwItem, button.dataset.mwValue);
-    else if (button.dataset.mwAction) showSheet(button.dataset.mwAction);
     syncDock();
   });
   sheet.addEventListener('click', (event) => {
@@ -266,11 +323,22 @@ export function setupMobileWorkspace() {
     if (item) choose(item.dataset.mwItem, item.dataset.mwValue);
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!sheet.hidden && !sheet.contains(event.target) && !dock.contains(event.target))
+    const fanOpen = !dock.querySelector('[data-mw-fan]')?.hidden;
+    if (
+      (!sheet.hidden || fanOpen) &&
+      !sheet.contains(event.target) &&
+      !dock.contains(event.target)
+    ) {
       closeSheet();
+      syncDock();
+    }
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !sheet.hidden) closeSheet();
+    const fanOpen = !dock.querySelector('[data-mw-fan]')?.hidden;
+    if (event.key === 'Escape' && (!sheet.hidden || fanOpen)) {
+      closeSheet();
+      syncDock();
+    }
   });
   document.addEventListener('sparkboard:render', syncDock);
   document.addEventListener('sparkboard:mode', () => {

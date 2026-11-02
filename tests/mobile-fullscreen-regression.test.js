@@ -51,6 +51,15 @@ test('each mobile view changes the dock, and Add does not repeat Tools', () => {
   assert.ok(flow.context.some((item) => item.value === 'process'));
   assert.ok(map.context.some((item) => item.value === 'root'));
   assert.ok(canvas.add.some((item) => item.value === 'sticky'));
+  const mobile = source('src/mobile-workspace.js');
+  assert.match(mobile, /class="mwd-circle mwd-main"[^>]*data-mw-value="sticky"/);
+  assert.match(mobile, /data-mw-value="text"/);
+  assert.match(mobile, /data-mw-value="shapes"/);
+  assert.match(mobile, /border-radius:50%/);
+  assert.doesNotMatch(mobile, /class="mwd-hint"/);
+  assert.doesNotMatch(mobile, /class="mwd-modes"/);
+  assert.match(mobile, /data-mw-fan/);
+  assert.doesNotMatch(mobile, /data-mw-action="add"/);
   assert.equal(
     canvas.tools.some((item) => item.value === 'sticky'),
     false,
