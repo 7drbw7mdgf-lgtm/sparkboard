@@ -412,6 +412,7 @@ export function setupMindmapWorkspace() {
         `<button type="button" data-mm-mode="${id}" aria-pressed="false">${label}</button>`,
     )
     .join('')}</div>
+    <button type="button" data-mm-action="task" class="mmw-task-action" title="Create a task and send it to Sai/Benchline">✓ Task</button>
     <div class="mmw-actions" data-mm-actions="mindmap" hidden>
       <button data-mm-action="root" title="Create a root topic">＋ Root</button>
       <button data-mm-action="child" title="Add child · Tab">＋ Branch</button>
@@ -445,6 +446,7 @@ export function setupMindmapWorkspace() {
     // (otherwise Enter would just click this button again).
     event.target.closest('button')?.blur();
     const selected = chosenTopic();
+    if (action === 'task') document.dispatchEvent(new Event('sparkboard:new-task'));
     if (action === 'root') placeRoot();
     if (action === 'child') placeChild(selected?.id || null);
     if (action === 'sibling' && selected) placeSibling(selected.id);
