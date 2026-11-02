@@ -10,6 +10,7 @@ import { commit, snapshot, updateHistory } from './history.js';
 import { $, M, colors, node, uid } from './core.js';
 import { allowDoubleClickEdit, isCompactEditor } from './mobile-editor-policy.js';
 import { createFlowStep } from './flowchart-model.js';
+import { addMindChild, isMindNode, layoutMindmap } from './mindmap-model.js';
 
 function roundPt(p) {
   return {
@@ -81,9 +82,18 @@ function dropLinkedNode(d, p) {
     ['connector', 'line', 'path', 'frame', 'image', 'file', 'embed'].includes(source.type)
   )
     return false;
+  const mode = state.board.diagramView || (state.board.kind === 'mindmap' ? 'mindmap' : 'canvas');
   let created;
   commit(() => {
-    if (state.board.diagramView === 'flowchart') {
+    if ((mode === 'mindmap' || mode === 'outline') && isMindNode(source)) {
+      source.mindCollapsed = false;
+      created = addMindChild(state.board.objects, {
+        id: uid(),
+        connectorId: uid(),
+        parentId: source.id,
+      });
+      layoutMindmap(state.board.objects);
+    } else if (mode === 'flowchart') {
       created = createFlowStep(state.board.objects, {
         role: 'process',
         fromId: source.id,
@@ -117,7 +127,11 @@ function dropLinkedNode(d, p) {
   });
   state.connectorStart = null;
   setTool('select');
-  toast('Linked node added · drag it to adjust the layout');
+  toast(
+    mode === 'mindmap' || mode === 'outline'
+      ? 'Branch added · drag into empty space for another'
+      : 'Linked node added · drag it to adjust the layout',
+  );
   return true;
 }
 

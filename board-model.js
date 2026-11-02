@@ -691,7 +691,7 @@ function connectorRoute(n, objects = [], context) {
               [anchors[0]],
             )
           : anchors;
-      return { ...routedPath(path, n.route === 'curved'), manual: true };
+      return { ...routedPath(path, routeSmoothing(n.route)), manual: true };
     }
   }
   if (n.avoidObstacles === false) return candidate;
@@ -716,8 +716,13 @@ function connectorRoute(n, objects = [], context) {
     return candidate;
   const points = avoidObstacles(candidate.start, candidate.end, first, last, boxes, a.id, b.id);
   return points
-    ? { ...routedPath(points, n.route === 'curved'), rerouted: true }
+    ? { ...routedPath(points, routeSmoothing(n.route)), rerouted: true }
     : { ...candidate, obstructed: true };
+}
+
+/** Elbows get a short fillet; curves get a longer one. Straights stay linear. */
+function routeSmoothing(route) {
+  return route === 'elbow' ? 'elbow' : route === 'curved';
 }
 
 function dedupeConnectors(objects = []) {

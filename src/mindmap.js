@@ -30,10 +30,11 @@ const modes = [
   ['outline', 'Outline'],
 ];
 const style = `
-#mindmap-toolbar{position:fixed;top:94px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 30px);padding:6px;background:#fff;border:1px solid #e6e8e5;box-shadow:0 8px 25px #2c3a3019;border-radius:13px;color:#303931;font-size:12px}
-#mindmap-toolbar .mmw-modes,#mindmap-toolbar .mmw-actions{display:flex;align-items:center;gap:3px}
-#mindmap-toolbar .mmw-modes{background:#f1f3ef;border-radius:9px;padding:3px}
-#mindmap-toolbar button{white-space:nowrap;padding:8px 10px;min-height:34px;border-radius:7px;font-weight:600}
+#mindmap-toolbar{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:21;display:flex;align-items:center;gap:6px;max-width:min(720px,calc(100vw - 520px));height:46px;padding:5px;background:#fffffff2;border:1px solid #e5e8df;box-shadow:0 4px 20px #29362009;border-radius:12px;color:#303931;font-size:12px;pointer-events:auto}
+#mindmap-toolbar .mmw-modes,#mindmap-toolbar .mmw-actions{display:flex;align-items:center;gap:3px;min-width:0}
+#mindmap-toolbar .mmw-modes{background:#f1f3ef;border-radius:9px;padding:3px;flex:0 0 auto}
+#mindmap-toolbar .mmw-actions{overflow-x:auto;scrollbar-width:none}
+#mindmap-toolbar button{white-space:nowrap;padding:6px 10px;min-height:34px;border-radius:8px;font-weight:600}
 #mindmap-toolbar button[aria-pressed="true"]{background:#fff;color:#326956;box-shadow:0 1px 5px #283c301a}
 #mindmap-toolbar .mmw-actions button{background:#f5f7f3}
 #mindmap-toolbar .mmw-actions button:disabled{opacity:.4;cursor:not-allowed}
@@ -67,13 +68,13 @@ body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{displa
 @media(max-width:650px){#objects .mm-master{min-height:34px;top:-36px;padding:6px 10px}}
 #objects .mm-fold.is-collapsed{background:#326956;border-color:#326956;color:#fff}
 @media(hover:none){#objects .mm-fold{opacity:1;min-width:28px;height:28px;border-radius:14px}}
-@media(max-width:900px){
- #mindmap-toolbar{left:12px;right:12px;transform:none;max-width:none;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
- #mindmap-toolbar button{padding:7px 9px}
- #mindmap-panel{right:12px;top:155px;bottom:110px}
+@media(max-width:1180px){
+ #mindmap-toolbar{top:74px;left:18px;right:18px;transform:none;max-width:none;width:auto;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
+ .board-badge{top:132px}
+ #mindmap-panel{right:12px;top:132px;bottom:110px}
 }
 @media(max-width:650px){
- #mindmap-toolbar{top:76px;left:8px;right:8px;padding:5px;gap:6px}
+ #mindmap-toolbar{top:74px;left:8px;right:8px;height:auto;padding:5px;gap:6px}
  #mindmap-toolbar button{min-height:37px}
  #mindmap-panel{top:133px;left:8px;right:8px;width:auto;bottom:95px}
 }

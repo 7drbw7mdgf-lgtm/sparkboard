@@ -171,6 +171,25 @@ test('multiple and rotated obstacles reroute after an intervening object is move
   assert.notEqual(M.connectorRoute(connector, objects).d, before);
 });
 
+test('rerouted wires keep a wide clearance and fillet elbow and curved corners', () => {
+  const a = note('a'),
+    b = note('b', 440, 0),
+    obstacle = note('obstacle', 210, -30, { w: 120, h: 140 });
+  const margin = M.obstacleBoxes([obstacle], 18)[0];
+  for (const style of ['straight', 'curved', 'elbow']) {
+    const route = M.connectorRoute(
+      { from: 'a', to: 'b', fromPort: 'e', toPort: 'w', route: style },
+      [a, b, obstacle],
+    );
+    assert.equal(route.rerouted, true, style);
+    for (let i = 1; i < route.points.length; i++)
+      assert.equal(segmentHitsBox(route.points[i - 1], route.points[i], margin), false, style);
+    if (style === 'straight') assert.equal(route.d.includes('Q'), false);
+    else assert.equal(route.d.includes('Q'), true, style);
+  }
+});
+
+
 test('binding metadata survives portable backups and rejects malformed anchors', () => {
   const objects = [
     note('a'),

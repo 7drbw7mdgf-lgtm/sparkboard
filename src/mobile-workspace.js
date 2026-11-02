@@ -11,7 +11,8 @@ const mobileStyle = `
 #mobile-workspace-dock,#mobile-workspace-mode,#mobile-tool-sheet,#mobile-tool-active{display:none}
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){
   body:not(.workspace-empty) #mobile-workspace-dock{display:grid}
-  body:not(.workspace-empty) #mobile-workspace-mode{display:flex}
+  /* View switching lives in the bottom dock, with Add / Link / Tools. */
+  body:not(.workspace-empty) #mobile-workspace-mode{display:none}
   /* The former opaque 116px header obscured the supposedly full-screen board. */
   .workspace-header{height:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none}
   #tools{display:none!important}
@@ -19,13 +20,17 @@ const mobileStyle = `
   #mindmap-toolbar{display:none!important}
   #mobile-workspace-mode{position:fixed;top:calc(124px + env(safe-area-inset-top));left:12px;z-index:19;align-items:center;gap:8px;border:1px solid #d8e1db;background:#fff;box-shadow:0 6px 20px #152d251b;border-radius:13px;min-height:40px;padding:0 11px;font:700 12px/1 Manrope,sans-serif;color:#476354}
   #mobile-workspace-mode select{border:0;outline:0;background:transparent;color:#264c40;font:700 14px/1 Manrope,sans-serif;min-height:40px;padding:0 16px 0 0;font-size:16px}
-  #mobile-workspace-dock{position:fixed;bottom:calc(9px + env(safe-area-inset-bottom));left:9px;right:9px;z-index:45;height:68px;padding:7px;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border:1px solid #d7e0d9;border-radius:20px;background:#fff;box-shadow:0 12px 36px #20382e35;align-items:stretch}
-  #mobile-workspace-dock button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:13px;color:#63736b;font:700 10px/1.1 Manrope,sans-serif;padding:4px 1px;touch-action:manipulation}
-  #mobile-workspace-dock button .mwd-icon{font:700 21px/1 sans-serif}
-  #mobile-workspace-dock button[aria-pressed="true"]{background:#e5f1e9;color:#24694e}
-  #mobile-workspace-dock button[data-mw-action="add"]{background:#286a51;color:#fff}
-  #mobile-workspace-dock button[data-mw-action="add"][aria-expanded="true"]{background:#184d3a}
-  #mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:9px;right:9px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #dce5df;border-radius:19px;padding:16px;box-shadow:0 6px 34px #13281f36;color:#253b31}
+  #mobile-workspace-dock{position:fixed;bottom:calc(9px + env(safe-area-inset-bottom));left:9px;right:9px;z-index:45;height:auto;padding:6px;grid-template-columns:minmax(0,1fr);gap:4px;border:1px solid #d7e0d9;border-radius:20px;background:#fff;box-shadow:0 12px 36px #20382e35;align-items:stretch}
+  #mobile-workspace-dock .mwd-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;padding:2px;background:#f3f6f2;border-radius:14px}
+  #mobile-workspace-dock .mwd-modes button{min-height:34px;border:0;border-radius:12px;background:transparent;color:#5d6e64;font:700 11px/1 Manrope,sans-serif;padding:7px 2px;touch-action:manipulation}
+  #mobile-workspace-dock .mwd-modes button[aria-pressed="true"]{background:#fff;color:#24694e;box-shadow:0 1px 4px #20382e18}
+  #mobile-workspace-dock .mwd-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  #mobile-workspace-dock .mwd-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:13px;color:#63736b;font:700 10px/1.1 Manrope,sans-serif;padding:4px 1px;touch-action:manipulation}
+  #mobile-workspace-dock .mwd-actions button .mwd-icon{font:700 21px/1 sans-serif}
+  #mobile-workspace-dock .mwd-actions button[aria-pressed="true"]{background:#e5f1e9;color:#24694e}
+  #mobile-workspace-dock .mwd-actions button[data-mw-action="add"]{background:#286a51;color:#fff}
+  #mobile-workspace-dock .mwd-actions button[data-mw-action="add"][aria-expanded="true"]{background:#184d3a}
+  #mobile-tool-sheet:not([hidden]){display:block;position:fixed;left:9px;right:9px;bottom:calc(128px + env(safe-area-inset-bottom));z-index:44;max-height:min(62dvh,470px);overflow:auto;overscroll-behavior:contain;background:#fff;border:1px solid #dce5df;border-radius:19px;padding:16px;box-shadow:0 6px 34px #13281f36;color:#253b31}
   #mobile-tool-sheet h3{font:750 16px/1.25 Manrope,sans-serif;margin:0 0 5px}
   #mobile-tool-sheet p{font-size:12px;color:#78867c;margin:0 0 12px;line-height:1.4}
   #mobile-tool-sheet .mw-tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -36,21 +41,21 @@ const mobileStyle = `
   #mobile-tool-sheet .mw-close{font-size:22px;border-radius:10px;background:#f1f4f1;width:36px;height:36px}
   #mobile-tool-sheet .mw-sheet-section{border-top:1px solid #edf1ed;padding-top:12px;margin-top:14px}
   #mobile-tool-sheet .mw-sheet-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:#87978b;margin-bottom:8px}
-  #mobile-selection-actions:not([hidden]){bottom:calc(91px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 18px);z-index:43}
+  #mobile-selection-actions:not([hidden]){bottom:calc(132px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 18px);z-index:43}
   #mobile-selection-actions:not([hidden]) .mobile-actions-inner{box-shadow:0 6px 22px #213a3026}
   /* Fit, zoom and undo/redo remain available via Tools, not floating over nodes. */
   .bottom-left,.zoom{display:none!important}
   /* Float the controls over a truly full-screen canvas. */
   #canvas{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important}
-  #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(91px + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:7px 8px 7px 13px;border:1px solid #c9dcd0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #1a332a30;font:700 12px Manrope,sans-serif;color:#355a46;max-width:calc(100vw - 24px)}
+  #mobile-tool-active:not([hidden]){display:flex;position:fixed;right:12px;bottom:calc(132px + env(safe-area-inset-bottom));z-index:46;align-items:center;gap:10px;padding:7px 8px 7px 13px;border:1px solid #c9dcd0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #1a332a30;font:700 12px Manrope,sans-serif;color:#355a46;max-width:calc(100vw - 24px)}
   #mobile-tool-active button{min-height:36px;padding:6px 12px;border-radius:9px;background:#286a51;color:#fff;font-weight:700;touch-action:manipulation}
-  #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(92px + env(safe-area-inset-bottom));z-index:35}
-  #toast{bottom:calc(178px + env(safe-area-inset-bottom))}
+  #mindmap-panel:not([hidden]){top:calc(174px + env(safe-area-inset-top));bottom:calc(128px + env(safe-area-inset-bottom));z-index:35}
+  #toast{bottom:calc(214px + env(safe-area-inset-bottom))}
   /* Pen width and colour remain usable, without opening a full-screen sheet. */
   #drawing-options:not([hidden]){position:fixed!important;top:calc(174px + env(safe-area-inset-top))!important;bottom:auto!important;left:12px!important;right:auto!important;width:min(244px,calc(100vw - 24px))!important;max-height:160px!important;padding:11px!important;z-index:39;border-radius:13px;box-shadow:0 7px 25px #1634272a}
   #drawing-options .panel-heading{display:none}
   #drawing-options .inspector-section{padding:0}
-  #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(88px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
+  #inspector:not([hidden]){position:fixed;left:9px!important;right:9px!important;top:auto!important;bottom:calc(128px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(57dvh,490px)!important;z-index:52;border-radius:19px;box-shadow:0 10px 36px #152f2536}
   #inspector .format-heading{padding:7px 10px 12px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
   #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #286a51;outline-offset:2px}
@@ -58,11 +63,11 @@ const mobileStyle = `
 }
 @media(max-height:500px) and (pointer:coarse){
   #mobile-workspace-mode{top:calc(82px + env(safe-area-inset-top));left:10px}
-  #mobile-workspace-dock{height:60px}
-  #mobile-tool-sheet:not([hidden]){max-height:60dvh;bottom:calc(78px + env(safe-area-inset-bottom))}
+  #mobile-workspace-dock{height:auto}
+  #mobile-tool-sheet:not([hidden]){max-height:60dvh;bottom:calc(118px + env(safe-area-inset-bottom))}
   #canvas{inset:0!important;height:100dvh!important}
-  #mobile-tool-active:not([hidden]){bottom:calc(80px + env(safe-area-inset-bottom))}
-  #mobile-selection-actions:not([hidden]){bottom:calc(78px + env(safe-area-inset-bottom))!important}
+  #mobile-tool-active:not([hidden]){bottom:calc(118px + env(safe-area-inset-bottom))}
+  #mobile-selection-actions:not([hidden]){bottom:calc(118px + env(safe-area-inset-bottom))!important}
 }
 `;
 
@@ -173,6 +178,11 @@ function syncDock() {
   const select = $('#mobile-workspace-mode select');
   if (!dock || !select || !state.board) return;
   select.value = mode();
+  dock.querySelectorAll('[data-mw-mode]').forEach((button) => {
+    const on = button.dataset.mwMode === mode();
+    button.setAttribute('aria-pressed', String(on));
+    button.setAttribute('aria-selected', String(on));
+  });
   dock
     .querySelectorAll('[data-mw-tool]')
     .forEach((button) =>
@@ -248,9 +258,17 @@ export function setupMobileWorkspace() {
   const dock = document.createElement('nav');
   dock.id = 'mobile-workspace-dock';
   dock.setAttribute('aria-label', 'Mobile editing tools');
-  dock.innerHTML = `<button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
+  dock.innerHTML = `<div class="mwd-modes" role="tablist" aria-label="Board view">
+      <button type="button" role="tab" data-mw-mode="canvas">Canvas</button>
+      <button type="button" role="tab" data-mw-mode="mindmap">Map</button>
+      <button type="button" role="tab" data-mw-mode="flowchart">Flow</button>
+      <button type="button" role="tab" data-mw-mode="outline">Outline</button>
+    </div>
+    <div class="mwd-actions">
+    <button type="button" data-mw-action="add" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">＋</span>Add</button>
     <button type="button" data-mw-action="connect"><span class="mwd-icon">↗</span>Link</button>
-    <button type="button" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">☷</span>Tools</button>`;
+    <button type="button" data-mw-action="more" aria-expanded="false" aria-controls="mobile-tool-sheet"><span class="mwd-icon">☷</span>Tools</button>
+    </div>`;
   const status = document.createElement('div');
   status.id = 'mobile-tool-active';
   status.hidden = true;
@@ -276,7 +294,10 @@ export function setupMobileWorkspace() {
   dock.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button) return;
-    if (button.dataset.mwTool) {
+    if (button.dataset.mwMode) {
+      closeSheet();
+      $('#mindmap-toolbar [data-mm-mode="' + button.dataset.mwMode + '"]')?.click();
+    } else if (button.dataset.mwTool) {
       closeSheet();
       setTool(button.dataset.mwTool);
     } else if (button.dataset.mwAction === 'connect') {

@@ -88,7 +88,7 @@ export function shapeContains(n, p, vertices) {
   return inside;
 }
 
-export function obstacleBoxes(objects, padding = 16) {
+export function obstacleBoxes(objects, padding = 18) {
   return objects
     .filter((n) => !['connector', 'line', 'path', 'frame'].includes(n.type) && n.w > 0 && n.h > 0)
     .map((n) => {
@@ -188,7 +188,7 @@ class Queue {
 }
 
 function exitStub(point, normal, box) {
-  let length = 28;
+  let length = 34;
   if (box) {
     const tx =
       normal.nx > EPS
@@ -312,7 +312,7 @@ export function avoidObstacles(start, end, firstNormal, lastNormal, boxes, from,
       if (!edges.has(edgeKey)) edges.set(edgeKey, !inside(q) && !pathBlocked([p, q], selected));
       if (!edges.get(edgeKey)) continue;
       const cost =
-          current.cost + distance(p, q) + (direction && direction !== nextDirection ? 20 : 0),
+          current.cost + distance(p, q) + (direction && direction !== nextDirection ? 28 : 0),
         key = next * 3 + nextDirection;
       if (cost >= (costs.get(key) ?? Infinity)) continue;
       costs.set(key, cost);
@@ -335,8 +335,11 @@ export function routedPath(points, rounded = false) {
     const point = points[i],
       next = points[i + 1],
       previous = points[i - 1];
+    const fillet = rounded === 'elbow' ? 16 : rounded ? 26 : 0;
     const radius =
-      rounded && next ? Math.min(8, distance(previous, point) / 3, distance(point, next) / 3) : 0;
+      fillet && next
+        ? Math.min(fillet, distance(previous, point) / 2.4, distance(point, next) / 2.4)
+        : 0;
     if (!radius) {
       d += ` L${point.x},${point.y}`;
       continue;

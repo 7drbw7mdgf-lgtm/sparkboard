@@ -8,6 +8,18 @@ export function deleteSelected() {
   if (!editableNodes().length) return;
   commit(() => {
     const ids = new Set(editableNodes().map((n) => n.id));
+    // A deleted mind-map topic takes its unlocked descendants with it, and every
+    // connector that touched any of those nodes leaves with them.
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (const item of state.board.objects) {
+        if (item.locked || !item.mindParent || ids.has(item.id) || !ids.has(item.mindParent))
+          continue;
+        ids.add(item.id);
+        grew = true;
+      }
+    }
     state.board.objects = state.board.objects.filter(
       (n) => !ids.has(n.id) && !ids.has(n.from) && !ids.has(n.to),
     );
