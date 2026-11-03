@@ -74,6 +74,7 @@ export function setupStartupScreen() {
     screen.setAttribute('aria-busy', 'false');
     setBackgroundInert(true);
     screen.scrollTop = 0;
+    screen.querySelector('.landing-page')?.scrollTo?.(0, 0);
     screen.querySelector('#landing-headline')?.focus({ preventScroll: true });
   }
 
@@ -98,6 +99,30 @@ export function setupStartupScreen() {
   });
 
   guest.onclick = () => dismiss({ remember: true });
+
+  const menu = screen.querySelector('.landing-menu');
+  screen.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link || !screen.contains(link)) return;
+    const target = document.getElementById(link.getAttribute('href').slice(1));
+    if (!target) return;
+    event.preventDefault();
+    const page = screen.querySelector('.landing-page');
+    const scroller = page && getComputedStyle(page).overflowY === 'auto' ? page : screen;
+    const header = screen.querySelector('.landing-nav')?.getBoundingClientRect().height || 0;
+    const top =
+      target.getBoundingClientRect().top -
+      scroller.getBoundingClientRect().top +
+      scroller.scrollTop -
+      header -
+      8;
+    scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    if (menu?.contains(link)) menu.open = false;
+  });
+  screen.addEventListener('pointerdown', (event) => {
+    if (!menu?.open || menu.contains(event.target)) return;
+    menu.open = false;
+  });
 
   form.onsubmit = async (event) => {
     event.preventDefault();
@@ -146,6 +171,8 @@ export function setupStartupScreen() {
       signInEmail = emailEnabled ? onEmail : null;
       signInProvider = onProvider || null;
       form.hidden = !emailEnabled;
+      const divider = screen.querySelector('.start-divider');
+      if (divider) divider.hidden = !(emailEnabled || enabledProviders.length);
       providers.replaceChildren();
       for (const key of enabledProviders) {
         if (!Object.hasOwn(authProviders, key)) continue;

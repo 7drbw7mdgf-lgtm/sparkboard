@@ -36,6 +36,18 @@
             <a class="landing-nav-cta" href="#start-auth"
               >Get started <span aria-hidden="true">↗</span></a
             >
+            <details class="landing-menu">
+              <summary>Menu</summary>
+              <nav class="landing-menu-panel" aria-label="Sections">
+                <a href="#start-auth">Start a board</a>
+                <a href="#start-features">Features</a>
+                <a href="#start-steps">How it works</a>
+                <a href="#start-uses">Use cases</a>
+                <a href="#start-benchline">Planner</a>
+                <a href="/sai/">Benchline</a>
+                <a href="/pulse/">Pulse literature</a>
+              </nav>
+            </details>
           </div>
         </div>
         <main id="landing-top" class="landing-content">
@@ -314,6 +326,10 @@
                 Sign in to your account or jump straight into a local board. No lengthy setup
                 required.
               </p>
+              <button id="start-guest" class="start-guest" type="button" disabled>
+                Continue without an account <span aria-hidden="true">↗</span>
+              </button>
+              <div class="start-divider" hidden><span>OR</span></div>
               <form id="start-email-form" class="start-email-form" hidden>
                 <label for="start-email">Email address</label>
                 <input
@@ -337,10 +353,6 @@
               <p id="start-feedback" class="start-feedback" role="status" aria-live="polite">
                 Preparing your workspace…
               </p>
-              <div class="start-divider"><span>OR</span></div>
-              <button id="start-guest" class="start-guest" type="button" disabled>
-                Continue without an account <span aria-hidden="true">↗</span>
-              </button>
               <p class="start-privacy">
                 Guest boards are saved in this browser. Account sync is optional and must be enabled
                 after signing in. Local copies remain on this device and are accessible to others
@@ -682,6 +694,11 @@
           >
         </footer>
       </div>
+      <nav class="landing-thumb" aria-label="Primary destinations">
+        <a href="#start-auth">Start</a>
+        <a href="#start-features">Features</a>
+        <a href="/sai/">Benchline</a>
+      </nav>
     </section>
     <header class="workspace-header">
       <div class="board-tab-bar">

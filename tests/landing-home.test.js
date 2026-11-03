@@ -40,6 +40,30 @@ test('marketing home has original visual demonstration, features, practical use 
   assert.match(index, /<a class="landing-nav-cta" href="#start-auth"/);
   assert.match(index, /class="landing-nav-benchline" href="\/sai\/"/);
   assert.match(index, /id="start-benchline"/);
+  assert.match(index, /class="landing-menu"/);
+  assert.match(index, /aria-label="Primary destinations"/);
+  const menu = index.slice(
+    index.indexOf('class="landing-menu"'),
+    index.indexOf('class="landing-thumb"'),
+  );
+  for (const label of [
+    'Start a board',
+    'Features',
+    'How it works',
+    'Use cases',
+    'Planner',
+    'Benchline',
+    'Pulse literature',
+  ]) {
+    assert.ok(menu.includes(label), 'Mobile menu missing ' + label);
+  }
+  const thumb = index.slice(
+    index.indexOf('class="landing-thumb"'),
+    index.indexOf('</nav>', index.indexOf('class="landing-thumb"')),
+  );
+  assert.equal((thumb.match(/<a /g) || []).length, 3);
+  assert.match(css, /\.landing-thumb a \{[\s\S]*min-height: 44px/);
+  assert.match(css, /\.landing-menu summary \{[\s\S]*min-height: 44px/);
   assert.match(index, /class="landing-feature-grid"/);
   assert.match(index, /Scroll across/);
   assert.match(css, /.landing-hero-art/);

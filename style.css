@@ -5262,6 +5262,162 @@ body.is-panning #canvas {
   }
 }
 
+/* Phone wayfinding. One start action stays obvious, every section is two taps away,
+   and the controls are at least 44px so a nearby target is harder to miss. */
+.start-screen .landing-menu,
+.start-screen .landing-thumb {
+  display: none;
+}
+@media (max-width: 820px) {
+  .start-screen {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .start-screen .landing-page {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 16px;
+    scroll-padding-top: 64px;
+  }
+  .start-screen .landing-nav {
+    z-index: 8;
+    min-height: 56px;
+    padding: 6px 16px;
+    gap: 12px;
+  }
+  .start-screen .landing-nav-links,
+  .start-screen .landing-nav-benchline,
+  .start-screen .landing-nav-cta,
+  .start-screen .landing-value-strip,
+  .start-screen .landing-floating-label {
+    display: none;
+  }
+  .start-screen .landing-menu {
+    display: block;
+  }
+  .start-screen .landing-menu summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 72px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: #243f30;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 750;
+    cursor: pointer;
+    list-style: none;
+  }
+  .start-screen .landing-menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .start-screen .landing-menu summary::marker {
+    content: '';
+  }
+  .start-screen .landing-menu-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: grid;
+    padding: 8px;
+    border-bottom: 1px solid #e5ebdf;
+    background: #fff;
+    box-shadow: 0 16px 40px #283b2424;
+  }
+  .start-screen .landing-menu-panel a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    color: #263f32;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .start-screen .landing-menu-panel a:hover,
+  .start-screen .landing-menu-panel a:focus-visible {
+    background: #eef4ea;
+  }
+  .start-screen .landing-thumb {
+    position: static;
+    z-index: 7;
+    display: flex;
+    flex: none;
+    gap: 4px;
+    height: 56px;
+    margin: 0 12px calc(8px + env(safe-area-inset-bottom));
+    padding: 4px;
+    border: 1px solid #e3eadf;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 24px #1c332414;
+  }
+  .start-screen .landing-thumb a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 12px;
+    color: #345540;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .start-screen .landing-thumb a[href='#start-auth'] {
+    background: #ea7956;
+    color: #fff;
+  }
+  .start-screen .landing-hero {
+    padding-top: 8px;
+    padding-bottom: 28px;
+    gap: 20px;
+  }
+  .start-screen .landing-hero-cta {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .start-screen .landing-primary-cta,
+  .start-screen .landing-secondary-cta {
+    width: 100%;
+    min-height: 48px;
+    font-size: 15px;
+  }
+  .start-screen .landing-secondary-cta {
+    background: transparent;
+    color: #345540;
+  }
+  .start-screen .landing-hero-footnote {
+    font-size: 12px;
+  }
+  .start-screen .landing-auth {
+    margin: 0 16px 28px;
+    padding: 22px 16px;
+  }
+  .start-screen .landing-auth .start-guest,
+  .start-screen .landing-auth .start-submit {
+    width: 100%;
+    min-height: 48px;
+  }
+  .start-screen .landing-section,
+  .start-screen .landing-sai-promo {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+  .start-screen .landing-bottom-cta {
+    padding-top: 40px;
+    padding-bottom: 36px;
+  }
+}
+
 /* Selected-connector waypoint editing and advanced editor */
 #connections .connector-waypoint {
   fill: #326fc4;
