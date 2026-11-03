@@ -5777,3 +5777,34 @@ body.is-panning #canvas {
 @media (pointer: coarse) {
   #objects .object.mind-drop-target { outline-width: 4px; }
 }
+
+/* Navigation works with touch instead of requiring a tiny mouse click. */
+#board-minimap { touch-action: none; }
+#board-minimap[hidden] { display: none !important; }
+.spark-frame-jump { display: grid; gap: 7px; max-height: 48vh; overflow: auto; }
+.spark-frame-jump button {
+  border: 1px solid #d6dce9;
+  border-radius: 9px;
+  background: #f7f9fd;
+  color: #23304a;
+  min-height: 46px;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 650;
+}
+.spark-frame-jump button:hover, .spark-frame-jump button:focus-visible {
+  background: #e8edff;
+  border-color: #8095ef;
+}
+.ca-routing-status {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #ccdbef;
+  border-radius: 7px;
+  background: #f4f8ff;
+  color: #36517b;
+}
+@media (max-width:650px), (pointer:coarse) {
+  .spark-frame-jump button { min-height: 50px; }
+  #board-minimap { width: 116px; height: 78px; }
+}
