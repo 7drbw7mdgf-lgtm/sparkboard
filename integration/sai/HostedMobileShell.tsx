@@ -46,7 +46,11 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
 
 const phoneCss = `
 body.benchline-phone .benchline-sidebar{display:none!important}
-body.benchline-phone header{height:48px!important;padding:0 12px!important}
+body.benchline-phone header{height:48px!important;padding:0 10px!important;gap:6px!important}
+body.benchline-phone header>div{gap:5px!important}
+body.benchline-phone #benchline-sparkboard{max-width:86px;margin-right:0!important;font-size:11px!important}
+body.benchline-phone header>div>span[aria-label="Benchline"]{font-size:15px!important}
+body.benchline-phone header details summary{min-height:34px;padding:0 8px;font-size:12px}
 body.benchline-phone header .h-5.w-px{display:none!important}
 body.benchline-phone header .text-xl{font-size:16px!important}
 body.benchline-phone header .relative:has(#global-search-bar):not(.benchline-search-open),
