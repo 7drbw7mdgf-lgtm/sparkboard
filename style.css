@@ -5762,3 +5762,18 @@ body.is-panning #canvas {
     display: none !important;
   }
 }
+
+/* Drag-to-reparent feedback, visible for mouse and touch pointer drags. */
+#objects .object.mind-drop-target,
+#objects .object.selected.mind-drop-target {
+  outline: 3px solid #1b9e70;
+  outline-offset: 7px;
+  box-shadow: 0 0 0 8px #1b9e7026;
+}
+#objects .object.mind-drop-invalid {
+  outline: 3px dashed #cf7c41;
+  outline-offset: 7px;
+}
+@media (pointer: coarse) {
+  #objects .object.mind-drop-target { outline-width: 4px; }
+}
