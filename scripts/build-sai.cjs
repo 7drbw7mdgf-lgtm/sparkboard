@@ -54,6 +54,19 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   if (head !== SAI_COMMIT) throw Error('Sai source revision mismatch.');
 
   const app = path.join(source, 'App.tsx');
+  // Build the hosted planner with a focused homepage and consolidated navigation.
+  // All full views remain available; only the default shell is simplified.
+  for (const [moduleName, hostedModule] of [
+    ['HomeScreen', 'HostedHomeScreen'],
+    ['SideNavbar', 'HostedSidebar'],
+    ['Header', 'HostedHeader'],
+  ]) {
+    replaceRequired(
+      app,
+      "import " + moduleName + " from './components/" + moduleName + "';",
+      "import " + moduleName + " from './" + hostedModule + "';",
+    );
+  }
   replaceRequired(
     app,
     "import AIAssistantPanel from './components/AIAssistantPanel';",
@@ -241,7 +254,10 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>} defaultOpen>',
     '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>}>',
   );
-  for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx']) {
+  for (const name of [
+    'HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx',
+    'HostedHomeScreen.tsx', 'HostedSidebar.tsx', 'HostedHeader.tsx',
+  ]) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));
   }
   const pub = path.join(source, 'public');
