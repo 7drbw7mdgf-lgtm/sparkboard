@@ -49,8 +49,10 @@ body.benchline-phone .benchline-sidebar{display:none!important}
 body.benchline-phone header{height:48px!important;padding:0 12px!important}
 body.benchline-phone header .h-5.w-px{display:none!important}
 body.benchline-phone header .text-xl{font-size:16px!important}
-body.benchline-phone header .relative:has(#global-search-bar),
+body.benchline-phone header .relative:has(#global-search-bar):not(.benchline-search-open),
 body.benchline-phone header [title="User Profile"]{display:none!important}
+body.benchline-phone header .benchline-search-open{display:block!important;position:fixed!important;left:10px;right:10px;top:52px;z-index:85;padding:8px;border:1px solid #d9e0ed;border-radius:12px;background:white;box-shadow:0 8px 25px #16254a26}
+body.benchline-phone header .benchline-search-open input{width:100%!important}
 body.benchline-phone main{padding-top:46px}
 body.benchline-phone .w-\\[480px\\]{width:100%!important;max-width:100%!important;left:0!important}
 body.benchline-phone .min-w-\\[300px\\]{min-width:168px!important}
@@ -77,9 +79,8 @@ body.benchline-phone .gantt-x-scroll{display:none!important}
 const VIEWS: { id: View; label: string }[] = [
   { id: View.HOME, label: 'Home' },
   { id: View.TASKS, label: 'Tasks' },
+  { id: View.GANTT, label: 'Timeline' },
   { id: View.CALENDAR, label: 'Calendar' },
-  { id: View.KANBAN, label: 'Kanban' },
-  { id: View.GANTT, label: 'Gantt' },
 ];
 
 interface HostedMobileShellProps {
@@ -185,6 +186,10 @@ export default function HostedMobileShell({
           </div>
           {menu ? (
             <div className="bpc-menu" role="menu">
+              <button type="button" role="menuitem" onClick={() => {
+                setMenu(false);
+                onViewChange(View.KANBAN);
+              }}>Kanban board</button>
               <button
                 type="button"
                 role="menuitem"
