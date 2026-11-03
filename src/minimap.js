@@ -1,7 +1,8 @@
 import { hiddenMindmapIds } from './mindmap-model.js';
 import { applyView, focusBounds } from './viewport.js';
 import { state } from './state.js';
-import { $, M } from './core.js';
+import { $, M, esc } from './core.js';
+import { modal } from './dialogs.js';
 
 /** A small map of the board. Click a frame to jump to it, or click empty map to pan. */
 export function setupMinimap() {
@@ -99,33 +100,89 @@ export function setupMinimap() {
     );
   }
 
-  function boardPoint(event) {
+  function boardPoint(event, bounds = world) {
     const rect = canvas.getBoundingClientRect();
     const u = (event.clientX - rect.left) / Math.max(1, rect.width);
     const v = (event.clientY - rect.top) / Math.max(1, rect.height);
-    return { x: world.x + u * world.w, y: world.y + v * world.h };
+    return { x: bounds.x + u * bounds.w, y: bounds.y + v * bounds.h };
   }
 
+  const centerOn = (at) => {
+    const board = $('#canvas');
+    state.view.x = board.clientWidth / 2 - at.x * state.view.z;
+    state.view.y = board.clientHeight / 2 - at.y * state.view.z;
+    applyView();
+  };
+
+  function frameAt(at) {
+    return frames
+      .filter((frame) => {
+        const box = M.bounds(frame, state.board.objects);
+        return at.x >= box.x && at.x <= box.x + box.w && at.y >= box.y && at.y <= box.y + box.h;
+      })
+      .sort((a, b) => a.w * a.h - b.w * b.h)[0] || null;
+  }
+
+  let moving = null;
   host.addEventListener('pointerdown', (event) => {
     if (!state.board || event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
     measure();
-    const at = boardPoint(event);
-    const hit = frames
-      .filter((frame) => {
-        const box = M.bounds(frame, state.board.objects);
-        return at.x >= box.x && at.x <= box.x + box.w && at.y >= box.y && at.y <= box.y + box.h;
-      })
-      .sort((a, b) => a.w * a.h - b.w * b.h)[0];
-    if (hit) {
-      focusBounds(M.bounds(hit, state.board.objects));
-      return;
-    }
-    const board = $('#canvas');
-    state.view.x = board.clientWidth / 2 - at.x * state.view.z;
-    state.view.y = board.clientHeight / 2 - at.y * state.view.z;
-    applyView();
+    moving = {
+      id: event.pointerId, x: event.clientX, y: event.clientY,
+      world: { ...world }, moved: false,
+    };
+    host.setPointerCapture(event.pointerId);
+  });
+  host.addEventListener('pointermove', (event) => {
+    if (!moving || moving.id !== event.pointerId) return;
+    event.preventDefault();
+    if (!moving.moved && Math.hypot(event.clientX - moving.x, event.clientY - moving.y) >= 5)
+      moving.moved = true;
+    if (moving.moved) centerOn(boardPoint(event, moving.world));
+  });
+  host.addEventListener('pointerup', (event) => {
+    if (!moving || moving.id !== event.pointerId) return;
+    event.preventDefault();
+    const drag = moving;
+    moving = null;
+    if (host.hasPointerCapture(event.pointerId)) host.releasePointerCapture(event.pointerId);
+    if (drag.moved) return;
+    const at = boardPoint(event, drag.world);
+    const frame = frameAt(at);
+    if (frame) focusBounds(M.bounds(frame, state.board.objects));
+    else centerOn(at);
+  });
+  host.addEventListener('pointercancel', () => { moving = null; });
+
+  function openFrames() {
+    if (!state.board) return;
+    const list = state.board.objects.filter((item) => item.type === 'frame');
+    modal(
+      'Jump to a frame',
+      list.length
+        ? '<div id="spark-frame-jump" class="spark-frame-jump">' +
+          list.map((frame) =>
+            '<button type="button" data-frame-id="' + esc(frame.id) + '">' +
+            esc(frame.text || (frame.swimlane ? 'Swimlane' : 'Untitled frame')) +
+            (frame.collapsed ? ' · folded' : '') + '</button>',
+          ).join('') + '</div>'
+        : '<p>No frames or swimlanes yet. Create one from the Add menu.</p>',
+      'BOARD NAVIGATION',
+    );
+    $('#spark-frame-jump')?.addEventListener('click', (event) => {
+      const id = event.target.closest('[data-frame-id]')?.dataset.frameId;
+      const frame = state.board?.objects.find((item) => item.id === id && item.type === 'frame');
+      if (!frame) return;
+      $('#dialog')?.close();
+      focusBounds(M.bounds(frame, state.board.objects));
+    });
+  }
+  document.addEventListener('sparkboard:frames', openFrames);
+  document.addEventListener('sparkboard:minimap-toggle', () => {
+    host.hidden = !host.hidden;
+    if (!host.hidden) draw();
   });
 
   document.addEventListener('sparkboard:render', draw);
