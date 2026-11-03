@@ -39,6 +39,28 @@ test('Benchline uses a focused home view and consistent simplified navigation', 
   assert.match(mobile, /benchline-search-open/);
 });
 
+test('hosted Kanban and Gantt stay readable and task assignee UI is removed', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const patch = fs.readFileSync('scripts/patch-sai-planner.cjs', 'utf8');
+  const theme = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  assert.match(build, /patchHostedPlanner\(source\)/);
+  assert.match(patch, /KanbanView\.tsx/);
+  assert.match(patch, /KanbanCard\.tsx/);
+  assert.match(patch, /AddTaskModal\.tsx/);
+  assert.match(patch, /TaskDetailPanel\.tsx/);
+  assert.match(patch, /TasksView\.tsx/);
+  assert.match(patch, /TaskSidebar\.tsx/);
+  assert.match(patch, /showTaskList/);
+  assert.match(patch, /fitEntireProject/);
+  assert.match(patch, /assignedTo: \[\]/);
+  assert.match(theme, /benchline-kanban-track/);
+  assert.match(theme, /scroll-snap-type:x mandatory/);
+  assert.match(theme, /benchline-gantt-actions/);
+  assert.match(theme, /benchline-kanban-filters/);
+  // Historical assignee metadata is not erased from persisted user tasks.
+  assert.doesNotMatch(patch, /task\.assignedTo\s*=|delete task\.assignedTo/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
