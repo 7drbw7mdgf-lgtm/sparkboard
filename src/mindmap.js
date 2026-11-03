@@ -301,16 +301,10 @@ function toggleCollapse(id) {
   commit(() => {
     item.mindCollapsed = !item.mindCollapsed;
     if (item.mindCollapsed) {
-      const hidden = new Set();
-      function hide(parent) {
-        for (const child of index.children.get(parent) || []) {
-          if (hidden.has(child.id)) continue;
-          hidden.add(child.id);
-          hide(child.id);
-        }
-      }
-      hide(item.id);
-      for (const descendant of hidden) state.selected.delete(descendant);
+      // Collapsing hides leaves only: parents of other topics remain on the canvas
+      // and must not be stripped from the selection as if they disappeared.
+      for (const descendant of hiddenMindmapIds(state.board.objects))
+        state.selected.delete(descendant);
     }
     // Close the gap a collapsed branch leaves (or make room for an expanded one).
     layoutMindmap(state.board.objects);
