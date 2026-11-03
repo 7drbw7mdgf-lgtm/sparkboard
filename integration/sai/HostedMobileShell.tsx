@@ -44,6 +44,61 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
 .benchline-edit-group>summary+*{padding:2px 8px 10px}
 `;
 
+
+/* Planner views: prioritise legibility over decorative density. */
+.benchline-kanban .benchline-kanban-column{width:clamp(252px,calc((100vw - 280px)/4),345px);height:100%;min-height:0}
+.benchline-kanban-columns{width:max-content;min-width:100%}
+.benchline-kanban-column>div:first-child{flex:none;background:#fff}
+.benchline-kanban-column>div:nth-child(2){overscroll-behavior:contain}
+.benchline-kanban-card{background:#fff!important;border-color:#e3e7ef!important;box-shadow:0 2px 9px #1e304012!important}
+.dark .benchline-kanban-card{background:#252930!important;border-color:#384052!important}
+.benchline-kanban-card:hover{border-color:#a9b8e4!important;box-shadow:0 5px 18px #20354d15!important}
+.benchline-kanban-move{flex-shrink:0;border:0;background:transparent}
+.benchline-kanban-bottom-add{display:none!important}
+.benchline-kanban-hint{display:none}
+.benchline-kanban-filters{position:relative;z-index:30}
+.benchline-kanban-filters>summary{display:flex;align-items:center;justify-content:center;min-height:36px;padding:0 15px;list-style:none;cursor:pointer;border:1px solid #dfe5ef;border-radius:9px;background:#f8f9fb;color:#506079;font:600 12px/1.2 'DM Sans',system-ui,sans-serif}
+.benchline-kanban-filters>summary::after{content:'⌄';margin-left:8px}
+.benchline-kanban-filters>summary::-webkit-details-marker{display:none}
+.benchline-kanban-filters[open]>summary{border-color:#4262ff;color:#4262ff}
+.benchline-kanban-filter-fields{position:absolute;z-index:50;top:calc(100% + 8px);right:0;width:min(250px,85vw);display:grid;gap:10px;border:1px solid #e0e5ee;border-radius:12px;background:#fff;padding:14px;box-shadow:0 12px 30px #17294a26}
+.dark .benchline-kanban-filter-fields{background:#242a35;border-color:#465167}
+.benchline-kanban-filter-fields select{width:100%;min-height:42px}
+.benchline-gantt{--timeline-accent:#4262ff}
+.benchline-gantt-toggle,.benchline-gantt-fit{display:inline-flex;align-items:center;justify-content:center;min-height:34px;border:1px solid #dfe5ef;border-radius:9px;padding:0 11px;background:#fff;color:#3d506b;font:650 12px/1 'DM Sans',system-ui,sans-serif;white-space:nowrap}
+.benchline-gantt-toggle:hover,.benchline-gantt-fit:hover{border-color:#8ba0ee;background:#f3f6ff}
+.benchline-gantt-toggle[aria-pressed=true]{background:#edf1ff;border-color:#9eace7;color:#2b4ad0}
+.benchline-gantt .gantt-timeline{background:#fff!important;scrollbar-width:thin}
+.benchline-gantt .gantt-task-list{background:#fff}
+@media(max-width:800px){
+  .benchline-kanban .benchline-kanban-column{width:280px}
+  .benchline-gantt-actions{gap:5px!important}
+}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){
+  .benchline-kanban>div:first-child{padding:10px 12px!important}
+  .benchline-kanban>div:first-child>div{gap:8px!important}
+  .benchline-kanban>div:first-child h2{font-size:20px}
+  .benchline-kanban .benchline-kanban-hint{display:block;flex:none;margin:6px 14px;color:#6b7787;font:500 11px/1.5 'DM Sans',system-ui,sans-serif}
+  .benchline-kanban-track{padding:8px 12px 16px!important;scroll-snap-type:x mandatory;scroll-padding-inline:12px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+  .benchline-kanban-columns{gap:12px!important;min-width:0!important}
+  .benchline-kanban .benchline-kanban-column{width:calc(100vw - 28px)!important;max-width:none;scroll-snap-align:start;scroll-snap-stop:always}
+  .benchline-kanban .benchline-kanban-column>div:nth-child(2){min-height:0}
+  .benchline-kanban .benchline-kanban-move button{min-height:40px;min-width:40px}
+  .benchline-kanban-filters>summary{min-height:40px}
+  .benchline-kanban .benchline-kanban-filter-fields{left:auto;right:0}
+  .benchline-gantt{min-height:0}
+  .benchline-gantt>div.flex-1>div:first-child{height:auto!important;min-height:60px;flex-wrap:wrap;gap:8px;padding:8px!important;align-content:center}
+  .benchline-gantt>div.flex-1>div:first-child>div:first-child{gap:5px!important}
+  .benchline-gantt-actions{width:100%;flex-wrap:wrap;gap:5px!important}
+  .benchline-gantt-actions>div{gap:5px!important}
+  .benchline-gantt-actions>div>div:first-child{margin-right:2px}
+  .benchline-gantt-actions>div input[type=range],.benchline-gantt-actions>div>.h-5.w-px{display:none}
+  .benchline-gantt-actions button{min-height:35px;min-width:37px}
+  .benchline-gantt .gantt-timeline{min-height:0!important;touch-action:pan-x pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .benchline-gantt .gantt-x-scroll{display:none!important}
+  .benchline-gantt .gantt-task-list{touch-action:pan-y}
+}
+
 const phoneCss = `
 body.benchline-phone .benchline-sidebar{display:none!important}
 body.benchline-phone header{height:48px!important;padding:0 10px!important;gap:6px!important}
