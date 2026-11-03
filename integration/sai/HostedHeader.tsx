@@ -103,7 +103,9 @@ export default function HostedHeader({
               {menuButton('Redo', redo, !canRedo)}
             </div>
             <div className="my-1 border-t border-[#edf0f3] dark:border-gray-800" />
-            {menuButton('Load sample project', onLoad)}
+            {menuButton('Load sample project', () => {
+              if (window.confirm('Replace your current project with the sample project? Download a backup first if you want to keep your work.')) onLoad();
+            })}
           </div>
         </details>
       </div>
