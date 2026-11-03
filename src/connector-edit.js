@@ -3,6 +3,12 @@ import { state } from './state.js';
 import { commit } from './history.js';
 import { modal } from './dialogs.js';
 import { toast } from './notifications.js';
+import {
+  endpointChoice,
+  restoreAutoRouting,
+  setConnectorRouting,
+  setEndpointChoice,
+} from './connector-interaction.js';
 
 const option = (values, active) =>
   values
@@ -13,12 +19,16 @@ const option = (values, active) =>
     .join('');
 const capOptions = ['none', 'arrow', 'filled', 'circle', 'diamond'].map((x) => [x, x]);
 const portOptions = [
-  ['', 'Automatic'],
+  ['', 'Automatic · follows outline'],
   ['n', 'Top'],
   ['e', 'Right'],
   ['s', 'Bottom'],
   ['w', 'Left'],
 ];
+const endpointOptions = (edge, side) =>
+  edge[side + 'Anchor']
+    ? [portOptions[0], ['glued', 'Glued to outline · drag endpoint to move'], ...portOptions.slice(1)]
+    : portOptions;
 
 function liveConnector(id) {
   return state.board?.objects.find((n) => n.id === id && n.type === 'connector');
@@ -52,8 +62,8 @@ export function openConnectorControls(target) {
         ],
         edge.lineStyle || 'solid',
       )}</select></label>
-      <label>Source port<select id="ca-from">${option(portOptions, edge.fromPort || '')}</select></label>
-      <label>Target port<select id="ca-to">${option(portOptions, edge.toPort || '')}</select></label>
+      <label>Source port<select id="ca-from">${option(endpointOptions(edge, 'from'), endpointChoice(edge, 'from'))}</select></label>
+      <label>Target port<select id="ca-to">${option(endpointOptions(edge, 'to'), endpointChoice(edge, 'to'))}</select></label>
       <label>Start arrow<select id="ca-start">${option(capOptions, edge.startArrow || 'none')}</select></label>
       <label>End arrow<select id="ca-end">${option(capOptions, edge.endArrow || 'arrow')}</select></label>
       <label>Thickness<select id="ca-width">${option(
@@ -83,7 +93,7 @@ export function openConnectorControls(target) {
     <button type="button" data-ca-tool="auto">↻ Restore auto-route</button>
     <button type="button" data-ca-tool="reverse">⇄ Reverse direction</button>
     ${edge.relationship ? '<button type="button" data-ca-tool="unpin">Unpin relationship ends</button>' : ''}</div>
-    <small>Drag the blue dots to shape the path. Alt-click a dot to remove it. The connected ends still follow their nodes.</small>
+    <small>Drag an end onto an outline to glue it, or onto an anchor cross to pin it. Drag the line to add a manual bend. Reset bends to restore auto-routing.</small>
   </form>`,
     'ADVANCED CONNECTIONS',
   );
@@ -100,18 +110,9 @@ export function openConnectorControls(target) {
       next.endArrow = $('#ca-end').value;
       next.strokeWidth = Number($('#ca-width').value);
       next.color = $('#ca-color').value;
-      const routingMode = $('#ca-auto').value;
-      if (routingMode !== 'manual') delete next.waypoints;
-      next.avoidObstacles = routingMode !== 'direct';
-      for (const [field, selector] of [
-        ['fromPort', '#ca-from'],
-        ['toPort', '#ca-to'],
-      ]) {
-        const value = $(selector).value;
-        if (value) next[field] = value;
-        else delete next[field];
-        delete next[field.replace('Port', 'Anchor')];
-      }
+      setEndpointChoice(next, 'from', $('#ca-from').value);
+      setEndpointChoice(next, 'to', $('#ca-to').value);
+      setConnectorRouting(next, $('#ca-auto').value, state.board.objects);
     });
     $('#dialog').close();
     toast('Connector updated');
@@ -127,9 +128,9 @@ export function openConnectorControls(target) {
         if (next.waypoints?.length >= 12) return;
         next.waypoints ??= [];
         next.waypoints.push({ x: Math.round(route.labelX), y: Math.round(route.labelY + 55) });
+        next.avoidObstacles = false;
       }
-      if (action === 'clear' || action === 'auto') delete next.waypoints;
-      if (action === 'auto') next.avoidObstacles = true;
+      if (action === 'clear' || action === 'auto') restoreAutoRouting(next);
       if (action === 'unpin' && next.relationship) {
         delete next.fromPort;
         delete next.toPort;
