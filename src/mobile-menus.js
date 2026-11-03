@@ -5,6 +5,8 @@ const tools = [
   { label: 'Erase', action: 'tool', value: 'eraser' },
   { label: 'Find', action: 'header', value: 'search-board' },
   { label: 'Fit to board', action: 'header', value: 'fit' },
+  { label: 'Jump to frame or swimlane', action: 'frames', value: '' },
+  { label: 'Show / hide minimap', action: 'minimap', value: '' },
   { label: 'Undo', action: 'header', value: 'undo' },
   { label: 'Redo', action: 'header', value: 'redo' },
   { label: 'Templates', action: 'header', value: 'templates' },
@@ -34,7 +36,7 @@ const menus = {
     ],
   },
   mindmap: {
-    hint: 'Mind map. Add a root, then branch from a selected topic.',
+    hint: 'Mind map. Drag a topic onto another to reparent, or into space to float. Fold branches to explore.',
     addNote: 'Extra objects. Root, arrange, and convert are on the bar.',
     context: [
       { label: 'Root', action: 'map', value: 'root' },
@@ -49,7 +51,7 @@ const menus = {
     ],
   },
   flowchart: {
-    hint: 'Flowchart. A new step links to the selected step.',
+    hint: 'Flowchart. Drag a blue dot to link or clone. Blue endpoints pin to outline or anchor crosses.',
     addNote: 'Steps are on the bar. These add other objects.',
     context: [
       { label: 'Start', action: 'flow', value: 'start' },
@@ -82,7 +84,7 @@ export function mobileWorkspaceMenus(mode = 'canvas') {
   return {
     hint: menu.hint,
     addNote: menu.addNote,
-    toolsNote: 'Draw, find, and export. New objects stay under Add.',
+    toolsNote: 'Navigate using the minimap and frames, or edit and export. New objects stay under Add.',
     context: menu.context,
     add: menu.add,
     tools,
