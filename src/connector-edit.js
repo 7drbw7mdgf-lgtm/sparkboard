@@ -32,7 +32,8 @@ export function openConnectorControls(target) {
   modal(
     'Edit connector',
     `<form id="connector-advanced" class="connector-advanced">
-    <p>Choose the path and endpoints, then drag blue waypoint handles directly on the canvas.</p>
+    <p>Glue endpoints to shape outlines, pin them to cardinal ports, or keep them automatic. Elbow routes recalculate during dragging, resizing and rotation until you add a manual bend.</p>
+    <p class="ca-routing-status" role="status">${edge.waypoints?.length ? 'Manual route · automatic avoidance is paused' : edge.avoidObstacles === false ? 'Direct route · obstacle avoidance is off' : 'Auto-route · avoids other shapes'}</p>
     <label>Label<input id="ca-label" maxlength="160" value="${esc(edge.text || '')}" placeholder="e.g. Yes, No, next"></label>
     <div class="ca-grid">
       <label>Route<select id="ca-route">${option(
@@ -69,16 +70,19 @@ export function openConnectorControls(target) {
       <label>Line colour<input id="ca-color" type="color" value="${/^#[a-f0-9]{6}$/i.test(edge.color || '') ? edge.color : '#64748b'}"></label>
       <label>Routing<select id="ca-auto">${option(
         [
-          ['auto', 'Avoid shapes'],
-          ['direct', 'Direct / manual'],
+          ['auto', 'Auto · avoid shapes'],
+          ['manual', 'Manual · fixed bends'],
+          ['direct', 'Direct · no obstacle avoidance'],
         ],
-        edge.avoidObstacles === false ? 'direct' : 'auto',
+        edge.waypoints?.length ? 'manual' : edge.avoidObstacles === false ? 'direct' : 'auto',
       )}</select></label>
     </div>
     <button type="submit" class="ca-primary">Apply connector style</button>
     <div class="ca-buttons"><button type="button" data-ca-tool="waypoint">＋ Add bend point</button>
     <button type="button" data-ca-tool="clear">Reset bends</button>
-    <button type="button" data-ca-tool="reverse">⇄ Reverse direction</button></div>
+    <button type="button" data-ca-tool="auto">↻ Restore auto-route</button>
+    <button type="button" data-ca-tool="reverse">⇄ Reverse direction</button>
+    ${edge.relationship ? '<button type="button" data-ca-tool="unpin">Unpin relationship ends</button>' : ''}</div>
     <small>Drag the blue dots to shape the path. Alt-click a dot to remove it. The connected ends still follow their nodes.</small>
   </form>`,
     'ADVANCED CONNECTIONS',
@@ -96,7 +100,9 @@ export function openConnectorControls(target) {
       next.endArrow = $('#ca-end').value;
       next.strokeWidth = Number($('#ca-width').value);
       next.color = $('#ca-color').value;
-      next.avoidObstacles = $('#ca-auto').value === 'auto';
+      const routingMode = $('#ca-auto').value;
+      if (routingMode !== 'manual') delete next.waypoints;
+      next.avoidObstacles = routingMode !== 'direct';
       for (const [field, selector] of [
         ['fromPort', '#ca-from'],
         ['toPort', '#ca-to'],
@@ -122,7 +128,14 @@ export function openConnectorControls(target) {
         next.waypoints ??= [];
         next.waypoints.push({ x: Math.round(route.labelX), y: Math.round(route.labelY + 55) });
       }
-      if (action === 'clear') delete next.waypoints;
+      if (action === 'clear' || action === 'auto') delete next.waypoints;
+      if (action === 'auto') next.avoidObstacles = true;
+      if (action === 'unpin' && next.relationship) {
+        delete next.fromPort;
+        delete next.toPort;
+        delete next.fromAnchor;
+        delete next.toAnchor;
+      }
       if (action === 'reverse') {
         [next.from, next.to] = [next.to, next.from];
         [next.fromPort, next.toPort] = [next.toPort, next.fromPort];
@@ -137,7 +150,11 @@ export function openConnectorControls(target) {
         ? 'Drag the blue bend point on the canvas'
         : action === 'clear'
           ? 'Bend points reset'
-          : 'Connector reversed',
+          : action === 'auto'
+            ? 'Automatic obstacle routing restored'
+            : action === 'unpin'
+              ? 'Relationship ends now slide along topic outlines'
+              : 'Connector reversed',
     );
   });
 }
