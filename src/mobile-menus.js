@@ -84,7 +84,8 @@ export function mobileWorkspaceMenus(mode = 'canvas') {
   return {
     hint: menu.hint,
     addNote: menu.addNote,
-    toolsNote: 'Navigate using the minimap and frames, or edit and export. New objects stay under Add.',
+    toolsNote:
+      'Navigate using the minimap and frames, or edit and export. New objects stay under Add.',
     context: menu.context,
     add: menu.add,
     tools,

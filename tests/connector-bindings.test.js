@@ -186,7 +186,7 @@ test('rerouted wires keep a wide clearance and fillet elbow and curved corners',
     assert.equal(route.rerouted, true, style);
     for (let i = 1; i < route.points.length; i++)
       assert.equal(segmentHitsBox(route.points[i - 1], route.points[i], margin), false, style);
-    if (style === 'straight') assert.equal(route.d.includes('Q'), false);
+    if (style === 'straight' || style === 'elbow') assert.equal(route.d.includes('Q'), false);
     else assert.equal(route.d.includes('Q'), true, style);
   }
 });

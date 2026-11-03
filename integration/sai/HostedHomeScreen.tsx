@@ -24,7 +24,8 @@ const dateLabel = (date: Date | string) => {
     ? 'No date'
     : new Date(timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 };
-const cleanDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+const cleanDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
 export default function HostedHomeScreen({
   projectData,
@@ -47,16 +48,25 @@ export default function HostedHomeScreen({
     return {
       openTasks: open,
       completedCount: projectData.tasks.filter((task) => task.completion === 100).length,
-      dueSoonCount: open.filter((task) => dateValue(task.endDate) >= startOfToday && dateValue(task.endDate) < endOfWeek).length,
+      dueSoonCount: open.filter(
+        (task) => dateValue(task.endDate) >= startOfToday && dateValue(task.endDate) < endOfWeek,
+      ).length,
       overdueCount: open.filter((task) => dateValue(task.endDate) < startOfToday).length,
       nextMeeting: upcoming[0] || null,
     };
   }, [projectData, startOfToday, endOfWeek]);
 
   const markTask = (task: Task) => {
-    onSetProjectData?.((previous) => previous
-      ? { ...previous, tasks: previous.tasks.map((item) => item.id === task.id ? { ...item, completion: 100 } : item) }
-      : previous);
+    onSetProjectData?.((previous) =>
+      previous
+        ? {
+            ...previous,
+            tasks: previous.tasks.map((item) =>
+              item.id === task.id ? { ...item, completion: 100 } : item,
+            ),
+          }
+        : previous,
+    );
   };
 
   return (
@@ -64,39 +74,74 @@ export default function HostedHomeScreen({
       <div className="mx-auto max-w-[1080px] px-5 pb-12 pt-8 md:px-10 md:pt-11">
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[.12em] text-[#697184] dark:text-gray-400">Project workspace</p>
-            <h1 className="text-[28px] font-bold tracking-tight text-[#242934] dark:text-gray-100">Overview</h1>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-[#657082] dark:text-gray-400">What needs doing next. Everything else is one click away.</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[.12em] text-[#697184] dark:text-gray-400">
+              Project workspace
+            </p>
+            <h1 className="text-[28px] font-bold tracking-tight text-[#242934] dark:text-gray-100">
+              Overview
+            </h1>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-[#657082] dark:text-gray-400">
+              What needs doing next. Everything else is one click away.
+            </p>
           </div>
         </div>
 
         <div className="mb-6 grid grid-cols-3 gap-2.5 sm:gap-4" aria-label="Project summary">
           <div className="rounded-xl border border-[#e5e8ee] bg-white p-3.5 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
             <p className="text-xs text-[#697184] dark:text-gray-400">To do</p>
-            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">{openTasks.length}</p>
+            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">
+              {openTasks.length}
+            </p>
           </div>
           <div className="rounded-xl border border-[#e5e8ee] bg-white p-3.5 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
             <p className="text-xs text-[#697184] dark:text-gray-400">Due soon</p>
-            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">{dueSoonCount}</p>
+            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">
+              {dueSoonCount}
+            </p>
           </div>
           <div className="rounded-xl border border-[#e5e8ee] bg-white p-3.5 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
             <p className="text-xs text-[#697184] dark:text-gray-400">Completed</p>
-            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">{completedCount}</p>
+            <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">
+              {completedCount}
+            </p>
           </div>
         </div>
 
         {overdueCount > 0 && (
-          <p role="status" className="mb-5 rounded-lg border border-[#f0dec4] bg-[#fffaf2] px-4 py-3 text-sm text-[#875f24] dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-300">
+          <p
+            role="status"
+            className="mb-5 rounded-lg border border-[#f0dec4] bg-[#fffaf2] px-4 py-3 text-sm text-[#875f24] dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-300"
+          >
             {overdueCount} overdue {overdueCount === 1 ? 'task needs' : 'tasks need'} attention.
-            <button type="button" className="ml-2 font-semibold underline underline-offset-2" onClick={() => onViewChange?.(View.TASKS)}>View tasks</button>
+            <button
+              type="button"
+              className="ml-2 font-semibold underline underline-offset-2"
+              onClick={() => onViewChange?.(View.TASKS)}
+            >
+              View tasks
+            </button>
           </p>
         )}
 
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(260px,1fr)]">
-          <section className="overflow-hidden rounded-xl border border-[#e5e8ee] bg-white dark:border-gray-800 dark:bg-gray-900" aria-labelledby="benchline-next-title">
+          <section
+            className="overflow-hidden rounded-xl border border-[#e5e8ee] bg-white dark:border-gray-800 dark:bg-gray-900"
+            aria-labelledby="benchline-next-title"
+          >
             <div className="flex items-center justify-between gap-3 border-b border-[#edf0f3] px-5 py-4 dark:border-gray-800">
-              <h2 id="benchline-next-title" className="text-base font-semibold text-[#242934] dark:text-white">Next tasks</h2>
-              <button type="button" className="text-sm font-semibold text-[#4262ff] hover:underline" onClick={() => onViewChange?.(View.TASKS)}>All tasks</button>
+              <h2
+                id="benchline-next-title"
+                className="text-base font-semibold text-[#242934] dark:text-white"
+              >
+                Next tasks
+              </h2>
+              <button
+                type="button"
+                className="text-sm font-semibold text-[#4262ff] hover:underline"
+                onClick={() => onViewChange?.(View.TASKS)}
+              >
+                All tasks
+              </button>
             </div>
             {openTasks.length ? (
               <ul className="divide-y divide-[#edf0f3] dark:divide-gray-800">
@@ -111,49 +156,123 @@ export default function HostedHomeScreen({
                         aria-label={'Mark ' + task.name + ' complete'}
                         title="Mark complete"
                       />
-                      <button type="button" onClick={() => onRequestEditTask(task.id)} className="min-w-0 flex-1 text-left">
-                        <span className="block truncate text-sm font-medium text-[#242934] dark:text-white">{task.name}</span>
-                        {task.id.startsWith('sparkboard:') && <span className="mt-0.5 block text-[11px] text-[#6677a9]">From Sparkboard</span>}
+                      <button
+                        type="button"
+                        onClick={() => onRequestEditTask(task.id)}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <span className="block truncate text-sm font-medium text-[#242934] dark:text-white">
+                          {task.name}
+                        </span>
+                        {task.id.startsWith('sparkboard:') && (
+                          <span className="mt-0.5 block text-[11px] text-[#6677a9]">
+                            From Sparkboard
+                          </span>
+                        )}
                       </button>
-                      <span className={overdue ? 'shrink-0 text-xs font-semibold text-[#a66323]' : 'shrink-0 text-xs text-[#697184] dark:text-gray-400'}>{dateLabel(task.endDate)}</span>
+                      <span
+                        className={
+                          overdue
+                            ? 'shrink-0 text-xs font-semibold text-[#a66323]'
+                            : 'shrink-0 text-xs text-[#697184] dark:text-gray-400'
+                        }
+                      >
+                        {dateLabel(task.endDate)}
+                      </span>
                     </li>
                   );
                 })}
               </ul>
             ) : (
               <div className="px-5 py-12 text-center">
-                <p className="text-sm font-medium text-[#242934] dark:text-white">Nothing outstanding.</p>
-                <p className="mt-1 text-xs text-[#697184] dark:text-gray-400">Add a task when you're ready.</p>
+                <p className="text-sm font-medium text-[#242934] dark:text-white">
+                  Nothing outstanding.
+                </p>
+                <p className="mt-1 text-xs text-[#697184] dark:text-gray-400">
+                  Add a task when you're ready.
+                </p>
               </div>
             )}
           </section>
 
           <div className="space-y-5">
-            <section className="rounded-xl border border-[#e5e8ee] bg-white p-5 dark:border-gray-800 dark:bg-gray-900" aria-labelledby="benchline-meeting-title">
+            <section
+              className="rounded-xl border border-[#e5e8ee] bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+              aria-labelledby="benchline-meeting-title"
+            >
               <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 id="benchline-meeting-title" className="text-base font-semibold text-[#242934] dark:text-white">Next meeting</h2>
-                <button type="button" onClick={() => onViewChange?.(View.CALENDAR)} className="text-xs font-semibold text-[#4262ff] hover:underline">Calendar</button>
+                <h2
+                  id="benchline-meeting-title"
+                  className="text-base font-semibold text-[#242934] dark:text-white"
+                >
+                  Next meeting
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => onViewChange?.(View.CALENDAR)}
+                  className="text-xs font-semibold text-[#4262ff] hover:underline"
+                >
+                  Calendar
+                </button>
               </div>
               {nextMeeting ? (
-                <button type="button" onClick={() => onRequestEditMeeting(nextMeeting.id)} className="w-full rounded-lg bg-[#f6f8fc] p-3 text-left hover:bg-[#edf1fb] dark:bg-gray-800">
-                  <span className="block text-sm font-medium text-[#242934] dark:text-white">{nextMeeting.title}</span>
-                  <span className="mt-1 block text-xs text-[#697184] dark:text-gray-400">{dateLabel(nextMeeting.date)} · {nextMeeting.startTime || 'Time not set'}</span>
+                <button
+                  type="button"
+                  onClick={() => onRequestEditMeeting(nextMeeting.id)}
+                  className="w-full rounded-lg bg-[#f6f8fc] p-3 text-left hover:bg-[#edf1fb] dark:bg-gray-800"
+                >
+                  <span className="block text-sm font-medium text-[#242934] dark:text-white">
+                    {nextMeeting.title}
+                  </span>
+                  <span className="mt-1 block text-xs text-[#697184] dark:text-gray-400">
+                    {dateLabel(nextMeeting.date)} · {nextMeeting.startTime || 'Time not set'}
+                  </span>
                 </button>
               ) : (
                 <div>
                   <p className="text-sm text-[#697184] dark:text-gray-400">No upcoming meetings.</p>
-                  <button type="button" onClick={onRequestAddMeeting} className="mt-3 text-sm font-semibold text-[#4262ff] hover:underline">+ Add meeting</button>
+                  <button
+                    type="button"
+                    onClick={onRequestAddMeeting}
+                    className="mt-3 text-sm font-semibold text-[#4262ff] hover:underline"
+                  >
+                    + Add meeting
+                  </button>
                 </div>
               )}
             </section>
 
-            <section className="rounded-xl border border-[#e5e8ee] bg-white p-5 dark:border-gray-800 dark:bg-gray-900" aria-labelledby="benchline-plan-title">
-              <h2 id="benchline-plan-title" className="mb-3 text-base font-semibold text-[#242934] dark:text-white">Project dates</h2>
+            <section
+              className="rounded-xl border border-[#e5e8ee] bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+              aria-labelledby="benchline-plan-title"
+            >
+              <h2
+                id="benchline-plan-title"
+                className="mb-3 text-base font-semibold text-[#242934] dark:text-white"
+              >
+                Project dates
+              </h2>
               <dl className="space-y-3 text-sm">
-                <div className="flex justify-between gap-3"><dt className="text-[#697184] dark:text-gray-400">Start</dt><dd className="font-medium text-[#242934] dark:text-white">{dateLabel(projectData.projectStartDate)}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-[#697184] dark:text-gray-400">Finish</dt><dd className="font-medium text-[#242934] dark:text-white">{dateLabel(projectData.projectEndDate)}</dd></div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#697184] dark:text-gray-400">Start</dt>
+                  <dd className="font-medium text-[#242934] dark:text-white">
+                    {dateLabel(projectData.projectStartDate)}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#697184] dark:text-gray-400">Finish</dt>
+                  <dd className="font-medium text-[#242934] dark:text-white">
+                    {dateLabel(projectData.projectEndDate)}
+                  </dd>
+                </div>
               </dl>
-              <button type="button" onClick={() => onViewChange?.(View.GANTT)} className="mt-5 text-sm font-semibold text-[#4262ff] hover:underline">Open timeline</button>
+              <button
+                type="button"
+                onClick={() => onViewChange?.(View.GANTT)}
+                className="mt-5 text-sm font-semibold text-[#4262ff] hover:underline"
+              >
+                Open timeline
+              </button>
             </section>
           </div>
         </div>

@@ -5775,13 +5775,24 @@ body.is-panning #canvas {
   outline-offset: 7px;
 }
 @media (pointer: coarse) {
-  #objects .object.mind-drop-target { outline-width: 4px; }
+  #objects .object.mind-drop-target {
+    outline-width: 4px;
+  }
 }
 
 /* Navigation works with touch instead of requiring a tiny mouse click. */
-#board-minimap { touch-action: none; }
-#board-minimap[hidden] { display: none !important; }
-.spark-frame-jump { display: grid; gap: 7px; max-height: 48vh; overflow: auto; }
+#board-minimap {
+  touch-action: none;
+}
+#board-minimap[hidden] {
+  display: none !important;
+}
+.spark-frame-jump {
+  display: grid;
+  gap: 7px;
+  max-height: 48vh;
+  overflow: auto;
+}
 .spark-frame-jump button {
   border: 1px solid #d6dce9;
   border-radius: 9px;
@@ -5792,7 +5803,8 @@ body.is-panning #canvas {
   text-align: left;
   font-weight: 650;
 }
-.spark-frame-jump button:hover, .spark-frame-jump button:focus-visible {
+.spark-frame-jump button:hover,
+.spark-frame-jump button:focus-visible {
   background: #e8edff;
   border-color: #8095ef;
 }
@@ -5804,7 +5816,12 @@ body.is-panning #canvas {
   background: #f4f8ff;
   color: #36517b;
 }
-@media (max-width:650px), (pointer:coarse) {
-  .spark-frame-jump button { min-height: 50px; }
-  #board-minimap { width: 116px; height: 78px; }
+@media (max-width: 650px), (pointer: coarse) {
+  .spark-frame-jump button {
+    min-height: 50px;
+  }
+  #board-minimap {
+    width: 116px;
+    height: 78px;
+  }
 }

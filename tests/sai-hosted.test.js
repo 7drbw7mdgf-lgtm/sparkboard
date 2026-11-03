@@ -30,7 +30,10 @@ test('Benchline uses a focused home view and consistent simplified navigation', 
   assert.match(home, /Next tasks/);
   assert.match(home, /Next meeting/);
   assert.match(home, /From Sparkboard/);
-  assert.doesNotMatch(home, /PriorityBreakdownWidget|ProjectHealthWidget|MyTasksWidget|RecentActivityWidget/);
+  assert.doesNotMatch(
+    home,
+    /PriorityBreakdownWidget|ProjectHealthWidget|MyTasksWidget|RecentActivityWidget/,
+  );
   assert.match(sidebar, /More views/);
   assert.match(sidebar, /New task/);
   assert.match(header, /Download project backup/);

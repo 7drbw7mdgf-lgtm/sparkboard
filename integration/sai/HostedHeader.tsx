@@ -21,10 +21,21 @@ interface Props {
 }
 
 export default function HostedHeader({
-  currentView, onLoad, onSave, onTimeframe,
-  undo, redo, canUndo, canRedo, searchQuery,
-  onSearchChange, isSearchPanelOpen, onSearchFocusChange,
-  searchResults, onSearchResultSelect, projectData,
+  currentView,
+  onLoad,
+  onSave,
+  onTimeframe,
+  undo,
+  redo,
+  canUndo,
+  canRedo,
+  searchQuery,
+  onSearchChange,
+  isSearchPanelOpen,
+  onSearchFocusChange,
+  searchResults,
+  onSearchResultSelect,
+  projectData,
 }: Props) {
   const [mobileSearch, setMobileSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -48,23 +59,49 @@ export default function HostedHeader({
     window.requestAnimationFrame(() => searchInput.current?.focus());
   };
   const menuButton = (label: string, action: () => void, disabled = false) => (
-    <button type="button" disabled={disabled}
+    <button
+      type="button"
+      disabled={disabled}
       className="block min-h-10 w-full rounded-lg px-3 text-left text-sm text-[#3e4754] hover:bg-[#f2f5fa] disabled:opacity-35 dark:text-gray-200 dark:hover:bg-gray-800"
-      onClick={() => { projectMenu.current && (projectMenu.current.open = false); action(); }}>
+      onClick={() => {
+        projectMenu.current && (projectMenu.current.open = false);
+        action();
+      }}
+    >
       {label}
     </button>
   );
   return (
     <header className="relative z-30 flex h-[62px] shrink-0 items-center justify-between gap-3 border-b border-[#e5e8ee] bg-white px-5 dark:border-gray-800 dark:bg-gray-900 md:px-7">
       <div className="flex min-w-0 items-center gap-3">
-        <span aria-label="Benchline" className="shrink-0 text-[19px] font-bold tracking-tight text-[#292c31] dark:text-white">
+        <span
+          aria-label="Benchline"
+          className="shrink-0 text-[19px] font-bold tracking-tight text-[#292c31] dark:text-white"
+        >
           benchline<span className="text-[#4262ff]">.</span>
         </span>
-        <span className="hidden truncate border-l border-[#e5e8ee] pl-3 text-sm text-[#697184] dark:border-gray-700 dark:text-gray-400 sm:inline">{currentView === View.HOME ? 'Overview' : currentView === View.GANTT ? 'Timeline' : currentView}</span>
+        <span className="hidden truncate border-l border-[#e5e8ee] pl-3 text-sm text-[#697184] dark:border-gray-700 dark:text-gray-400 sm:inline">
+          {currentView === View.HOME
+            ? 'Overview'
+            : currentView === View.GANTT
+              ? 'Timeline'
+              : currentView}
+        </span>
       </div>
       <div className="flex min-w-0 items-center justify-end gap-3">
-        <button type="button" onClick={focusSearch} className="rounded-lg px-2 py-2 text-lg text-[#596678] hover:bg-[#f3f6fc] dark:text-gray-300 md:hidden" aria-label="Search project" title="Search project">⌕</button>
-        <div ref={searchRef} className={'relative ' + (mobileSearch ? 'benchline-search-open' : '')}>
+        <button
+          type="button"
+          onClick={focusSearch}
+          className="rounded-lg px-2 py-2 text-lg text-[#596678] hover:bg-[#f3f6fc] dark:text-gray-300 md:hidden"
+          aria-label="Search project"
+          title="Search project"
+        >
+          ⌕
+        </button>
+        <div
+          ref={searchRef}
+          className={'relative ' + (mobileSearch ? 'benchline-search-open' : '')}
+        >
           <input
             ref={searchInput}
             id="global-search-bar"
@@ -84,15 +121,22 @@ export default function HostedHeader({
             className="h-9 w-[min(260px,34vw)] rounded-lg border border-[#e5e8ee] bg-[#f8f9fb] px-3 text-sm text-[#292c31] outline-none focus:border-[#4262ff] focus:ring-1 focus:ring-[#4262ff] dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
           {isSearchPanelOpen && projectData && (
-            <SearchResultsPanel results={searchResults} onSelect={(item) => {
-              onSearchResultSelect(item);
-              setMobileSearch(false);
-            }} projectData={projectData} />
+            <SearchResultsPanel
+              results={searchResults}
+              onSelect={(item) => {
+                onSearchResultSelect(item);
+                setMobileSearch(false);
+              }}
+              projectData={projectData}
+            />
           )}
         </div>
         <details ref={projectMenu} className="relative">
           <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-[#e5e8ee] px-3 text-sm font-semibold text-[#465063] hover:bg-[#f5f6f8] dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-            Project <span aria-hidden="true" className="text-xs">⌄</span>
+            Project{' '}
+            <span aria-hidden="true" className="text-xs">
+              ⌄
+            </span>
           </summary>
           <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[218px] rounded-xl border border-[#e5e8ee] bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {menuButton('Download project backup', onSave)}
@@ -104,7 +148,12 @@ export default function HostedHeader({
             </div>
             <div className="my-1 border-t border-[#edf0f3] dark:border-gray-800" />
             {menuButton('Load sample project', () => {
-              if (window.confirm('Replace your current project with the sample project? Download a backup first if you want to keep your work.')) onLoad();
+              if (
+                window.confirm(
+                  'Replace your current project with the sample project? Download a backup first if you want to keep your work.',
+                )
+              )
+                onLoad();
             })}
           </div>
         </details>

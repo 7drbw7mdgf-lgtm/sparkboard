@@ -115,12 +115,14 @@ export function setupMinimap() {
   };
 
   function frameAt(at) {
-    return frames
-      .filter((frame) => {
-        const box = M.bounds(frame, state.board.objects);
-        return at.x >= box.x && at.x <= box.x + box.w && at.y >= box.y && at.y <= box.y + box.h;
-      })
-      .sort((a, b) => a.w * a.h - b.w * b.h)[0] || null;
+    return (
+      frames
+        .filter((frame) => {
+          const box = M.bounds(frame, state.board.objects);
+          return at.x >= box.x && at.x <= box.x + box.w && at.y >= box.y && at.y <= box.y + box.h;
+        })
+        .sort((a, b) => a.w * a.h - b.w * b.h)[0] || null
+    );
   }
 
   let moving = null;
@@ -130,8 +132,11 @@ export function setupMinimap() {
     event.stopPropagation();
     measure();
     moving = {
-      id: event.pointerId, x: event.clientX, y: event.clientY,
-      world: { ...world }, moved: false,
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      world: { ...world },
+      moved: false,
     };
     host.setPointerCapture(event.pointerId);
   });
@@ -154,7 +159,9 @@ export function setupMinimap() {
     if (frame) focusBounds(M.bounds(frame, state.board.objects));
     else centerOn(at);
   });
-  host.addEventListener('pointercancel', () => { moving = null; });
+  host.addEventListener('pointercancel', () => {
+    moving = null;
+  });
 
   function openFrames() {
     if (!state.board) return;
@@ -163,11 +170,18 @@ export function setupMinimap() {
       'Jump to a frame',
       list.length
         ? '<div id="spark-frame-jump" class="spark-frame-jump">' +
-          list.map((frame) =>
-            '<button type="button" data-frame-id="' + esc(frame.id) + '">' +
-            esc(frame.text || (frame.swimlane ? 'Swimlane' : 'Untitled frame')) +
-            (frame.collapsed ? ' · folded' : '') + '</button>',
-          ).join('') + '</div>'
+            list
+              .map(
+                (frame) =>
+                  '<button type="button" data-frame-id="' +
+                  esc(frame.id) +
+                  '">' +
+                  esc(frame.text || (frame.swimlane ? 'Swimlane' : 'Untitled frame')) +
+                  (frame.collapsed ? ' · folded' : '') +
+                  '</button>',
+              )
+              .join('') +
+            '</div>'
         : '<p>No frames or swimlanes yet. Create one from the Add menu.</p>',
       'BOARD NAVIGATION',
     );

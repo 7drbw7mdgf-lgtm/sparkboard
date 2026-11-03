@@ -136,7 +136,7 @@ body.benchline-phone .gantt-x-scroll{display:none!important}
 const VIEWS: { id: View; label: string }[] = [
   { id: View.HOME, label: 'Home' },
   { id: View.TASKS, label: 'Tasks' },
-  { id: View.GANTT, label: 'Timeline' },
+  { id: View.GANTT, label: 'Timeline' /* Gantt */ },
   { id: View.CALENDAR, label: 'Calendar' },
 ];
 
@@ -243,10 +243,16 @@ export default function HostedMobileShell({
           </div>
           {menu ? (
             <div className="bpc-menu" role="menu">
-              <button type="button" role="menuitem" onClick={() => {
-                setMenu(false);
-                onViewChange(View.KANBAN);
-              }}>Kanban board</button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenu(false);
+                  onViewChange(View.KANBAN);
+                }}
+              >
+                Kanban board
+              </button>
               <button
                 type="button"
                 role="menuitem"

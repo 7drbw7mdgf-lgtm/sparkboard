@@ -63,8 +63,8 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   ]) {
     replaceRequired(
       app,
-      "import " + moduleName + " from './components/" + moduleName + "';",
-      "import " + moduleName + " from './" + hostedModule + "';",
+      'import ' + moduleName + " from './components/" + moduleName + "';",
+      'import ' + moduleName + " from './" + hostedModule + "';",
     );
   }
   replaceRequired(
@@ -257,8 +257,12 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   // Keep upstream data structures and Gantt interaction code; apply focused view patches.
   require('./patch-sai-planner.cjs').patchHostedPlanner(source);
   for (const name of [
-    'HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx',
-    'HostedHomeScreen.tsx', 'HostedSidebar.tsx', 'HostedHeader.tsx',
+    'HostedPersistence.ts',
+    'HostedAIPanel.tsx',
+    'HostedMobileShell.tsx',
+    'HostedHomeScreen.tsx',
+    'HostedSidebar.tsx',
+    'HostedHeader.tsx',
   ]) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));
   }

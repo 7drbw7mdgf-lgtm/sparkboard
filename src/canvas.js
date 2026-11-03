@@ -422,22 +422,32 @@ function mindDropHost(objects, moved, release) {
     return p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h;
   };
   const hidden = hiddenMindmapIds(objects);
-  const host = [...index.nodes].reverse().find(
-    (item) => item.id !== moved.id && !hidden.has(item.id) && contains(item, release),
-  ) || null;
+  const host =
+    [...index.nodes]
+      .reverse()
+      .find((item) => item.id !== moved.id && !hidden.has(item.id) && contains(item, release)) ||
+    null;
   return { host, index, contains };
 }
 
 function highlightMindDrop(drag, release) {
-  const moving = drag?.type === 'move' && drag.movingIds?.size === 1
-    && ['mindmap', 'outline'].includes(state.diagramMode);
-  const topic = moving && state.board?.objects.find((item) =>
-    item.id === drag.id && isMindNode(item));
+  const moving =
+    drag?.type === 'move' &&
+    drag.movingIds?.size === 1 &&
+    ['mindmap', 'outline'].includes(state.diagramMode);
+  const topic =
+    moving && state.board?.objects.find((item) => item.id === drag.id && isMindNode(item));
   const target = topic ? mindDropHost(state.board.objects, topic, release).host : null;
   const valid = target && !isMindDescendant(state.board.objects, topic.id, target.id);
   document.querySelectorAll('#objects .object').forEach((element) => {
-    element.classList.toggle('mind-drop-target', Boolean(valid && target.id === element.dataset.id));
-    element.classList.toggle('mind-drop-invalid', Boolean(target && !valid && target.id === element.dataset.id));
+    element.classList.toggle(
+      'mind-drop-target',
+      Boolean(valid && target.id === element.dataset.id),
+    );
+    element.classList.toggle(
+      'mind-drop-invalid',
+      Boolean(target && !valid && target.id === element.dataset.id),
+    );
   });
 }
 
@@ -476,7 +486,8 @@ export function endPointer(e) {
   const d = state.drag;
   state.drag = null;
   state.guides = [];
-  document.querySelectorAll('#objects .mind-drop-target, #objects .mind-drop-invalid')
+  document
+    .querySelectorAll?.('#objects .mind-drop-target, #objects .mind-drop-invalid')
     .forEach((element) => element.classList.remove('mind-drop-target', 'mind-drop-invalid'));
   document.body.classList.remove('is-panning');
   $('#canvas').style.cursor =
