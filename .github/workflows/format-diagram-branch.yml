@@ -1,0 +1,32 @@
+name: Format diagram interaction branch
+
+on:
+  push:
+    branches:
+      - feature/diagram-interactions-parity-20261103
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Format changed sources
+        run: npx prettier --write src/connector-edit.js src/connector-interaction.js src/canvas.js src/mobile-gestures.js tests/mobile-gestures.test.js tests/diagram-interaction-parity.test.js
+      - name: Push format-only correction
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/connector-edit.js src/connector-interaction.js src/canvas.js src/mobile-gestures.js tests/mobile-gestures.test.js tests/diagram-interaction-parity.test.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format diagram interaction changes'
+            git push
+          fi
