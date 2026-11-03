@@ -1,6 +1,6 @@
 import { isNativeControl } from './keyboard.js';
 import { openConnectorControls } from './connector-edit.js';
-import { mindmapShortcut } from './mindmap.js';
+import { foldSelection, mindmapShortcut } from './mindmap.js';
 import { svgIcon } from './icons.js';
 import { endPointer } from './canvas.js';
 import { linkDialog } from './links.js';
@@ -494,6 +494,10 @@ export function setupControls() {
           .then(() => flushSaves())
           .then(() => toast('Saved on this device'))
           .catch((error) => toast(error.message));
+      }
+      if (key === '/' && !e.shiftKey) {
+        e.preventDefault();
+        foldSelection();
       }
       return;
     }

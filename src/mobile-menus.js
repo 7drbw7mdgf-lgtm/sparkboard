@@ -29,6 +29,7 @@ const menus = {
       { label: 'Photo or PDF', action: 'picker', value: 'media' },
       { label: 'Embed', action: 'picker', value: 'embed' },
       { label: 'Web link', action: 'picker', value: 'link' },
+      { label: 'Swimlane', action: 'swimlane', value: 'swimlane' },
       { label: 'Task', action: 'task', value: '' },
     ],
   },
@@ -42,6 +43,7 @@ const menus = {
     ],
     add: [
       { label: 'Shape', action: 'picker', value: 'shapes' },
+      { label: 'Swimlane', action: 'swimlane', value: 'swimlane' },
       { label: 'Branch styles', action: 'map-style', value: '' },
       { label: 'Task', action: 'task', value: '' },
     ],
@@ -59,6 +61,7 @@ const menus = {
     add: [
       { label: 'Shape', action: 'picker', value: 'shapes' },
       { label: 'Sticky note', action: 'tool', value: 'sticky' },
+      { label: 'Swimlane', action: 'swimlane', value: 'swimlane' },
       { label: 'Task', action: 'task', value: '' },
     ],
   },

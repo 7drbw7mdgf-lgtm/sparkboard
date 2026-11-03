@@ -178,7 +178,8 @@ export function layoutMindmap(objects = [], options = {}) {
     const right = kids.filter((child) => sides.get(child.id) !== 'left');
     const span = Math.max(Number(root.h) || 70, stackHeight(left), stackHeight(right));
     const start = Math.max(root.y - (span - root.h) / 2, lastBottom + rootGap);
-    if (!root.locked) root.y = Math.round(start + (span - root.h) / 2);
+    // A floating topic stays where it was dropped. Its children still stack around it.
+    if (!root.locked && !root.mindFloating) root.y = Math.round(start + (span - root.h) / 2);
     const middle = root.y + root.h / 2;
     placeStack(right, root.x + root.w + hgap, middle, 'right');
     placeStack(left, root.x - hgap, middle, 'left');
@@ -307,6 +308,73 @@ export function insertMindSibling(objects, { id, connectorId, siblingId, text })
     }
   orderAfter(objects, topic.id, sibling.id);
   return { topic, asChild: false };
+}
+
+/** True when `id` sits at or below `ancestorId` in the mind-map tree. */
+export function isMindDescendant(objects, ancestorId, id, index = indexMindmap(objects)) {
+  const seen = new Set();
+  let current = id;
+  while (current && !seen.has(current)) {
+    if (current === ancestorId) return true;
+    seen.add(current);
+    current = index.byId.get(current)?.mindParent;
+  }
+  return false;
+}
+
+/**
+ * Move a topic under another branch. The existing branch connector is retargeted.
+ * A topic cannot move under itself or one of its descendants.
+ */
+export function reparentMindTopic(objects, topicId, parentId) {
+  if (!topicId || !parentId || topicId === parentId) return false;
+  const index = indexMindmap(objects);
+  const topic = index.byId.get(topicId);
+  const parent = index.byId.get(parentId);
+  if (!topic || !parent) return false;
+  if (isMindDescendant(objects, topicId, parentId, index)) return false;
+  delete topic.mindFloating;
+  topic.mindParent = parent.id;
+  parent.mindCollapsed = false;
+  const edge = objects.find(
+    (item) => item.type === 'connector' && item.mindBranch && item.to === topicId,
+  );
+  if (edge) {
+    edge.from = parent.id;
+    delete edge.fromPort;
+    delete edge.toPort;
+    delete edge.fromAnchor;
+    delete edge.toAnchor;
+    delete edge.waypoints;
+    delete edge.avoidObstacles;
+  } else {
+    objects.push({
+      id: globalThis.crypto?.randomUUID?.() || `branch-${topicId}`,
+      type: 'connector',
+      from: parent.id,
+      to: topicId,
+      route: 'curved',
+      endArrow: 'none',
+      mindBranch: true,
+      color: '#7a8e81',
+      strokeWidth: 2,
+    });
+  }
+  orderAfter(objects, topicId, null);
+  return true;
+}
+
+/** Drop a topic off its branch. Layout leaves a floating topic where it was released. */
+export function floatMindTopic(objects, topicId) {
+  const topic = objects.find((item) => item.id === topicId && isMindNode(item));
+  if (!topic?.mindParent) return false;
+  topic.mindParent = null;
+  topic.mindFloating = true;
+  const index = objects.findIndex(
+    (item) => item.type === 'connector' && item.mindBranch && item.to === topicId,
+  );
+  if (index >= 0) objects.splice(index, 1);
+  return true;
 }
 
 /** Convert an existing node and its existing connector descendants, without cloning art. */

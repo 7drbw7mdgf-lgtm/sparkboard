@@ -115,7 +115,8 @@ test('the turn handle is a different shape and sits clear of the connection node
   assert.ok(-(top + height) >= portHit + 16);
   assert.ok(-(top + height + stemHeight) >= portHit);
   assert.match(handle, /border-radius:\s*7px/);
-  assert.match(css, /\.object \.port \{[^}]*border-radius:\s*50%/);
+  assert.match(css, /\.object \.port \{[^}]*linear-gradient\(#4262ff/);
+  assert.match(css, /\.object \.port-c \{[^}]*border-radius:\s*50%/);
   assert.match(css, /\.object \.rotate-handle \{\s*top:\s*-92px/);
   assert.doesNotMatch(rendering, /Drag to rotate \(Shift/);
 });

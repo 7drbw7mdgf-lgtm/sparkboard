@@ -1,4 +1,4 @@
-import { $, esc, uid, node } from './core.js';
+import { $, esc, uid, node, M } from './core.js';
 import { state } from './state.js';
 import { commit } from './history.js';
 import { save } from './boards.js';
@@ -414,6 +414,26 @@ export function mindmapShortcut(event) {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault();
     placeSibling(topic.id);
+    return true;
+  }
+  return false;
+}
+
+/** Ctrl+/ or Command+/ folds the selected topic or container. */
+export function foldSelection() {
+  if (!state.board || state.selected.size !== 1) return false;
+  const id = [...state.selected][0];
+  const item = state.board.objects.find((entry) => entry.id === id);
+  if (!item || item.locked) return false;
+  if (isMindNode(item) && (indexMindmap(state.board.objects).children.get(id) || []).length) {
+    toggleCollapse(id);
+    return true;
+  }
+  if (item.type === 'frame') {
+    commit(() => {
+      M.toggleFrameFold(item, state.board.objects);
+      if (item.collapsed) for (const child of item.foldedIds || []) state.selected.delete(child);
+    });
     return true;
   }
   return false;

@@ -1,6 +1,6 @@
 import { toast } from './notifications.js';
 import { selectIds } from './selection.js';
-import { applyView, point, screenPoint } from './viewport.js';
+import { applyView, centerPoint, point, screenPoint } from './viewport.js';
 import { save } from './boards.js';
 import { render, renderFast, renderLines, selectVisual } from './rendering.js';
 import { finishEdit, startEdit } from './editor.js';
@@ -14,7 +14,15 @@ import {
   isCompactEditor,
 } from './mobile-editor-policy.js';
 import { createFlowStep } from './flowchart-model.js';
-import { addMindChild, isMindNode, layoutMindmap } from './mindmap-model.js';
+import {
+  addMindChild,
+  floatMindTopic,
+  indexMindmap,
+  isMindDescendant,
+  isMindNode,
+  layoutMindmap,
+  reparentMindTopic,
+} from './mindmap-model.js';
 
 function roundPt(p) {
   return {
@@ -108,7 +116,14 @@ function dropLinkedNode(d, p) {
       const edge = state.board.objects.find(
         (item) => item.type === 'connector' && item.from === source.id && item.to === created.id,
       );
-      if (edge && d.fromPort) edge.fromPort = d.fromPort;
+      if (edge && ['n', 'e', 's', 'w'].includes(d.fromPort)) {
+        edge.fromPort = d.fromPort;
+        edge.avoidObstacles = false;
+      }
+      if (edge && d.fromPort === 'c') {
+        delete edge.fromPort;
+        delete edge.toPort;
+      }
       if (edge) delete edge.fromAnchor;
     } else {
       created = node(
@@ -123,11 +138,11 @@ function dropLinkedNode(d, p) {
       );
       state.board.objects.push(created);
       const sides = M.facingPorts(source, created);
+      const side = ['n', 'e', 's', 'w'].includes(d.fromPort);
       upsertConnector({
         from: source.id,
         to: created.id,
-        fromPort: d.fromPort || sides.fromPort,
-        toPort: sides.toPort,
+        ...(side ? { fromPort: d.fromPort, toPort: sides.toPort, avoidObstacles: false } : {}),
         ...(d.opts || currentLineOptions('curved')),
       });
     }
@@ -227,12 +242,13 @@ function noteShapeTap(drag, e) {
 }
 
 /** Drop incoming links when the recipient itself is dragged clear of where it was connected. */
-export function detachDraggedRecipients(objects, originals, movingIds) {
+export function detachDraggedRecipients(objects, originals, movingIds, options = {}) {
   const removed = [];
   if (!movingIds?.size) return removed;
   for (let i = objects.length - 1; i >= 0; i--) {
     const edge = objects[i];
     if (edge?.type !== 'connector' || !movingIds.has(edge.to) || movingIds.has(edge.from)) continue;
+    if (options.keep?.(edge)) continue;
     const before = originals.find((item) => item.id === edge.to);
     const after = objects.find((item) => item.id === edge.to);
     if (!before || !after) continue;
@@ -254,6 +270,7 @@ export function applyConnectorEndRelease(objects, connectorId, { side, binding }
     delete connector[side + 'Port'];
     delete connector[side + 'Anchor'];
     if (binding.port) connector[side + 'Port'] = binding.port;
+    else if (binding.anchor) connector[side + 'Anchor'] = binding.anchor;
     return 'snapped';
   }
   // Releasing the handle in empty space must not delete the connector.
@@ -323,9 +340,123 @@ export function addAt(type, p) {
   if ((type === 'sticky' || type === 'text') && !isCompactEditor()) startEdit(n.id);
 }
 
+/** A swimlane is a frame with a header band that folds down to that band. */
+export function addSwimlane() {
+  if (!state.board) return;
+  const center = centerPoint();
+  const n = node(
+    'frame',
+    Math.round(center.x - 240),
+    Math.round(center.y - 180),
+    480,
+    360,
+    'SWIMLANE',
+    'transparent',
+    { swimlane: true },
+  );
+  commit(() => {
+    state.board.objects.push(n);
+    state.selected = new Set([n.id]);
+  });
+  setTool('select');
+  toast('Swimlane added. Fold it from the corner.');
+}
+
+/** Where a click on a blue dot should drop the linked copy. */
+function linkedDropPoint(source, port) {
+  const gap = 36;
+  const w = 200;
+  const h = 100;
+  const cx = source.x + source.w / 2;
+  const cy = source.y + source.h / 2;
+  if (port === 'n') return { x: cx, y: source.y - gap - h / 2 };
+  if (port === 's') return { x: cx, y: source.y + source.h + gap + h / 2 };
+  if (port === 'w') return { x: source.x - gap - w / 2, y: cy };
+  return { x: source.x + source.w + gap + w / 2, y: cy };
+}
+
+/**
+ * A link between two mind-map topics is a relationship curve whose ends slide
+ * until a later drag pins them. A center dot omits ports so the line stays
+ * outside shapes. A side dot is fixed and may cross shapes.
+ */
+function connectionProps(drag, draft) {
+  const opts = { ...(drag.opts || currentLineOptions('curved')) };
+  const fromNode = state.board.objects.find((item) => item.id === drag.from);
+  const toNode = state.board.objects.find((item) => item.id === draft.to);
+  const bothMind = isMindNode(fromNode) && isMindNode(toNode);
+  const samePair = (edge) =>
+    (edge.from === drag.from && edge.to === draft.to) ||
+    (edge.from === draft.to && edge.to === drag.from);
+  if (
+    bothMind &&
+    state.board.objects.some(
+      (item) => item.type === 'connector' && item.mindBranch && samePair(item),
+    )
+  )
+    return null;
+  const base = { from: drag.from, to: draft.to, ...opts };
+  if (bothMind) return { ...base, relationship: true, route: 'curved', endArrow: 'arrow' };
+  if (drag.fromPort === 'c') return base;
+  if (['n', 'e', 's', 'w'].includes(drag.fromPort)) {
+    return {
+      ...base,
+      fromPort: drag.fromPort,
+      toPort: draft.toPort,
+      avoidObstacles: false,
+    };
+  }
+  return {
+    ...base,
+    fromAnchor: drag.fromAnchor,
+    toPort: draft.toPort,
+    toAnchor: draft.toAnchor,
+  };
+}
+
 export function capture(e) {
   if (state.drag) state.drag.pointerId = e.pointerId;
   $('#canvas').setPointerCapture(e.pointerId);
+}
+
+function settleMindDrop(moved, release, travel) {
+  const objects = state.board.objects;
+  const index = indexMindmap(objects);
+  const contains = (item, p) => {
+    const box = M.bounds(item, objects);
+    return p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h;
+  };
+  let host = null;
+  for (const item of [...index.nodes].reverse()) {
+    if (item.id !== moved.id && contains(item, release)) {
+      host = item;
+      break;
+    }
+  }
+  if (host && isMindDescendant(objects, moved.id, host.id, index)) {
+    layoutMindmap(objects);
+    toast('A topic stays above its own branch');
+    return 'cycle';
+  }
+  if (host && host.id !== moved.mindParent && reparentMindTopic(objects, moved.id, host.id)) {
+    layoutMindmap(objects);
+    toast('Topic moved onto that branch');
+    return 'reparented';
+  }
+  const parent = moved.mindParent && index.byId.get(moved.mindParent);
+  const center = { x: moved.x + moved.w / 2, y: moved.y + moved.h / 2 };
+  if (
+    travel >= 48 &&
+    moved.mindParent &&
+    (!parent || !contains(parent, center)) &&
+    floatMindTopic(objects, moved.id)
+  ) {
+    layoutMindmap(objects);
+    toast('Floating topic');
+    return 'floated';
+  }
+  layoutMindmap(objects);
+  return 'laid-out';
 }
 
 export function endPointer(e) {
@@ -346,6 +477,10 @@ export function endPointer(e) {
   if (pointerId !== undefined && $('#canvas').hasPointerCapture(pointerId))
     $('#canvas').releasePointerCapture(pointerId);
   if (d.type === 'pan') return;
+  if (d.type === 'manual-route') {
+    renderLines();
+    return;
+  }
   if (d.type === 'connector-waypoint') {
     if (d.changed) save();
     renderLines();
@@ -384,30 +519,32 @@ export function endPointer(e) {
       return;
     }
     if (draft?.to && draft.to !== d.from) {
+      const props = connectionProps(d, draft);
+      if (!props) {
+        state.connectorStart = null;
+        toast('These topics already share a branch');
+        renderLines();
+        return;
+      }
       let createdId;
       commit(() => {
-        const opts = d.opts || currentLineOptions('curved');
-        createdId = upsertConnector({
-          from: d.from,
-          to: draft.to,
-          fromPort: d.fromPort,
-          toPort: draft.toPort,
-          fromAnchor: d.fromAnchor,
-          toAnchor: draft.toAnchor,
-          ...opts,
-        });
+        createdId = upsertConnector(props);
         state.selected = new Set([createdId]);
       });
       state.connectorStart = null;
       if (d.fromTool) setTool('select');
       selectVisual();
     } else {
-      // A short tap still enters the usual two-click connector flow. Only an
-      // intentional drag into blank space creates an additional shape.
       const release = point(e);
-      const moved =
-        d.downPt && Math.hypot(release.x - d.downPt.x, release.y - d.downPt.y) * state.view.z >= 48;
-      if (moved && dropLinkedNode(d, release)) return;
+      const movedPx =
+        d.downPt &&
+        Math.hypot(release.x - d.downPt.x, release.y - d.downPt.y) * (state.view.z || 1);
+      // A tap on a blue dot duplicates a linked shape. A drag onto empty space drops one there.
+      if ((movedPx || 0) < 16 && !d.fromTool) {
+        const source = state.board.objects.find((item) => item.id === d.from);
+        if (source && dropLinkedNode(d, linkedDropPoint(source, d.fromPort))) return;
+      }
+      if ((movedPx || 0) >= 48 && dropLinkedNode(d, release)) return;
       if (d.fromTool) {
         state.connectorStart = d.from;
         toast('Click another object to connect it');
@@ -483,16 +620,23 @@ export function endPointer(e) {
     selectVisual();
     return;
   }
-  if (d.type === 'move' && d.changed) {
+  if (d.type === 'move' && d.changed && e?.type === 'pointerup') {
     let travel = 0;
-    if (e?.type === 'pointerup' && d.origin) {
+    let settlement = null;
+    if (d.origin) {
       const release = point(e);
       travel = Math.hypot(release.x - d.origin.x, release.y - d.origin.y) * (state.view.z || 1);
+      const moved = state.board.objects.find((item) => item.id === d.id);
+      const mapping = state.diagramMode === 'mindmap' || state.diagramMode === 'outline';
+      if (mapping && isMindNode(moved) && d.movingIds?.size === 1)
+        settlement = settleMindDrop(moved, release, travel);
     }
     // The shape itself has to travel with the pointer. A click outside, or a
     // jump from snapping, does not count as dragging a node away.
     if (travel >= CONNECTOR_DRAG_AWAY) {
-      const removed = detachDraggedRecipients(state.board.objects, d.original, d.movingIds);
+      const removed = detachDraggedRecipients(state.board.objects, d.original, d.movingIds, {
+        keep: (edge) => edge.mindBranch && settlement && settlement !== 'floated',
+      });
       for (const id of removed) state.selected.delete(id);
       if (removed.length)
         toast(removed.length === 1 ? 'Connection removed' : 'Connections removed');
@@ -622,11 +766,27 @@ export function setupCanvas() {
       e.preventDefault();
       return;
     }
+    const foldButton = e.target.closest('[data-frame-fold]');
+    if (state.tool === 'select' && foldButton) {
+      const frame = state.board.objects.find(
+        (item) => item.id === foldButton.dataset.frameFold && item.type === 'frame',
+      );
+      if (frame && !frame.locked) {
+        commit(() => {
+          M.toggleFrameFold(frame, state.board.objects);
+          if (frame.collapsed) for (const id of frame.foldedIds || []) state.selected.delete(id);
+        });
+      }
+      return;
+    }
     const portEl = e.target.closest('.port');
     if (portEl && n && !['path', 'line', 'connector', 'frame'].includes(n.type) && !n.locked) {
-      const fromPort = portEl.dataset.port,
-        startPt = M.portPoint(n, fromPort),
-        opts = currentLineOptions('curved');
+      const fromPort = portEl.dataset.port;
+      const startPt =
+        fromPort === 'c'
+          ? { x: n.x + n.w / 2, y: n.y + n.h / 2, nx: 0, ny: 0 }
+          : M.portPoint(n, fromPort);
+      const opts = currentLineOptions('curved');
       state.connectorDraft = {
         from: n.id,
         fromPort,
@@ -773,6 +933,7 @@ export function setupCanvas() {
         type: 'connect-port',
         from: n.id,
         fromPort: sourceBinding?.port || null,
+        fromAnchor: sourceBinding?.anchor,
         startPt,
         downPt: p,
         opts,
@@ -894,6 +1055,19 @@ export function setupCanvas() {
       capture(e);
       return;
     }
+    if (
+      n.type === 'connector' &&
+      !resizeEl &&
+      !e.target.closest(
+        '[data-connector-end],[data-connector-waypoint],[data-connector-add],.connector-label',
+      )
+    ) {
+      state.selected = new Set([n.id]);
+      selectVisual();
+      state.drag = { type: 'manual-route', id: n.id, origin: p, changed: false };
+      capture(e);
+      return;
+    }
     const movingIds = new Set(state.selected);
     if (!resizeEl) {
       for (const id of [...movingIds]) {
@@ -922,6 +1096,28 @@ export function setupCanvas() {
     if (!state.drag || (state.drag.pointerId !== undefined && e.pointerId !== state.drag.pointerId))
       return;
     const p = point(e);
+    if (state.drag.type === 'manual-route') {
+      const edge = state.board.objects.find(
+        (item) => item.id === state.drag.id && item.type === 'connector',
+      );
+      if (!edge || edge.locked) return;
+      const travel =
+        Math.hypot(p.x - state.drag.origin.x, p.y - state.drag.origin.y) * (state.view.z || 1);
+      if (travel < 8) return;
+      if (!state.drag.changed) {
+        snapshot();
+        edge.avoidObstacles = false;
+        edge.waypoints = [
+          { x: Math.round(state.drag.origin.x), y: Math.round(state.drag.origin.y) },
+        ];
+        state.drag.changed = true;
+        state.drag.type = 'connector-waypoint';
+        state.drag.index = 0;
+      }
+      edge.waypoints[0] = { x: Math.round(p.x), y: Math.round(p.y) };
+      renderLines();
+      return;
+    }
     if (state.drag.type === 'connector-waypoint') {
       const edge = state.board.objects.find(
         (item) => item.id === state.drag.id && item.type === 'connector',
@@ -1027,27 +1223,26 @@ export function setupCanvas() {
       const hit = nearestTargetPort(p, state.drag.from);
       const fromNode = state.board.objects.find((o) => o.id === state.drag.from);
       const opts = state.drag.opts || currentLineOptions('curved');
+      const centerDot = state.drag.fromPort === 'c' || !state.drag.fromPort;
+      const sideDot = ['n', 'e', 's', 'w'].includes(state.drag.fromPort);
       if (hit && fromNode) {
+        const bothMind = isMindNode(fromNode) && isMindNode(hit.node);
         const preview = M.connectorRoute(
           {
             from: state.drag.from,
             to: hit.node.id,
-            fromPort: state.drag.fromPort,
-            toPort: hit.port,
-            fromAnchor: state.drag.fromAnchor,
-            toAnchor: hit.anchor,
-            route: opts.route,
+            ...(centerDot || bothMind ? {} : { fromPort: state.drag.fromPort, toPort: hit.port }),
+            route: bothMind ? 'curved' : opts.route,
+            ...(sideDot && !bothMind ? { avoidObstacles: false } : {}),
           },
           state.board.objects,
         );
         state.connectorDraft = {
           type: 'connector',
           from: state.drag.from,
-          fromPort: state.drag.fromPort,
+          fromPort: centerDot || bothMind ? undefined : state.drag.fromPort,
           to: hit.node.id,
-          toPort: hit.port,
-          fromAnchor: state.drag.fromAnchor,
-          toAnchor: hit.anchor,
+          toPort: centerDot || bothMind ? undefined : hit.port,
           binding: {
             nodeId: hit.node.id,
             port: hit.port,
@@ -1057,6 +1252,7 @@ export function setupCanvas() {
           },
           d: preview.d,
           ...opts,
+          ...(bothMind ? { route: 'curved' } : {}),
         };
       } else {
         const s = state.drag.startPt;

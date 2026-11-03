@@ -73,6 +73,8 @@ export function showHelp() {
       'Undo / Redo': '⌘Z / ⌘⇧Z',
       'Nudge selection': 'Arrows · Shift for 10 px',
       'Find on board': '⌘F',
+      'Fold branch or container': 'Ctrl+/ or ⌘+/',
+      'Mind-map child / sibling': 'Tab / Enter',
       'Delete selected': 'Delete',
       Zoom: 'Pinch or Ctrl + scroll',
     })

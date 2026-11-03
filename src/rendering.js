@@ -71,13 +71,13 @@ export function render() {
   if (!state.board) return;
   disposePDFViewers();
   M.dedupeConnectors(state.board.objects);
-  const hidden = hiddenMindmapIds(state.board.objects);
+  const hidden = concealedIds(state.board.objects);
   $('#objects').replaceChildren();
   for (const n of state.board.objects.filter(
     (n) => !['connector', 'line', 'path'].includes(n.type) && !hidden.has(n.id),
   )) {
     const el = document.createElement('div');
-    el.className = `object ${n.type} ${M.shapes.includes(n.type) ? 'geometric' : ''} ${state.selected.has(n.id) ? 'selected' : ''} ${n.locked ? 'locked' : ''}`;
+    el.className = `object ${n.type} ${M.shapes.includes(n.type) ? 'geometric' : ''} ${state.selected.has(n.id) ? 'selected' : ''} ${n.locked ? 'locked' : ''}${n.swimlane ? ' swimlane' : ''}${n.collapsed ? ' is-collapsed' : ''}`;
     el.dataset.id = n.id;
     el.style.cssText = objectStyle(n);
     el.innerHTML = objectContents(n);
@@ -86,11 +86,18 @@ export function render() {
         const pEl = document.createElement('span');
         pEl.className = `port port-${port}`;
         pEl.dataset.port = port;
-        pEl.title = `Drag to connect (${port.toUpperCase()})`;
+        pEl.title = 'Click to duplicate, drag to connect';
         positionPort(pEl, n, port);
         el.append(pEl);
       }
+      const center = document.createElement('span');
+      center.className = 'port port-c';
+      center.dataset.port = 'c';
+      center.title = 'Click to duplicate. A link from the centre stays outside shapes.';
+      positionPort(center, n, 'c');
+      el.append(center);
     }
+    if (n.type === 'frame') el.append(frameFoldButton(n));
     if (n.locked)
       el.insertAdjacentHTML('beforeend', '<span class="lock-badge" title="Locked">▣</span>');
     $('#objects').append(el);
@@ -149,13 +156,42 @@ export function renderFast() {
 export const PORT_OUTSET = 18;
 
 function positionPort(element, n, port) {
-  const point = M.portPoint({ ...n, rotation: 0 }, port);
-  element.style.left = `${point.x - n.x + point.nx * PORT_OUTSET}px`;
-  element.style.top = `${point.y - n.y + point.ny * PORT_OUTSET}px`;
+  if (port === 'c') {
+    element.style.left = `${n.w / 2}px`;
+    element.style.top = `${n.h / 2}px`;
+  } else {
+    const point = M.portPoint({ ...n, rotation: 0 }, port);
+    element.style.left = `${point.x - n.x + point.nx * PORT_OUTSET}px`;
+    element.style.top = `${point.y - n.y + point.ny * PORT_OUTSET}px`;
+  }
   // Keep the center aligned when the mobile layout enlarges the port.
   element.style.translate = '-50% -50%';
   element.style.right = 'auto';
   element.style.bottom = 'auto';
+}
+
+function frameFoldButton(n) {
+  const button = document.createElement('button');
+  const count = (n.foldedIds || []).length;
+  button.type = 'button';
+  button.className = `frame-fold${n.collapsed ? ' is-collapsed' : ''}`;
+  button.dataset.frameFold = n.id;
+  button.textContent = n.collapsed ? `+${count}` : '−';
+  const label = n.collapsed
+    ? `Expand: show ${count} hidden item${count === 1 ? '' : 's'}`
+    : n.swimlane
+      ? 'Fold this swimlane'
+      : 'Fold this container';
+  button.title = label;
+  button.setAttribute('aria-label', label);
+  button.setAttribute('aria-expanded', String(!n.collapsed));
+  return button;
+}
+
+function concealedIds(objects) {
+  const hidden = hiddenMindmapIds(objects);
+  for (const id of M.foldedObjectIds(objects)) hidden.add(id);
+  return hidden;
 }
 
 export function connectorGeometry(n) {
@@ -166,7 +202,7 @@ export function renderLines() {
   if (!state.board) return;
   $('#connections').style.zIndex = CONNECTION_LAYER;
   M.dedupeConnectors(state.board.objects);
-  const hidden = hiddenMindmapIds(state.board.objects);
+  const hidden = concealedIds(state.board.objects);
   const obstacles = M.obstacleBoxes(state.board.objects.filter((item) => !hidden.has(item.id)));
   const lines = state.board.objects
     .filter(

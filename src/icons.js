@@ -42,6 +42,7 @@ export const icons = {
   heart:
     '<path d="M12 20.5s-7.5-4.8-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 5.5c-1.8 4.2-9.3 9-9.3 9Z"/>',
   frame: '<path d="M4 9V4h5m6 0h5v5M4 15v5h5m6 0h5v-5"/>',
+  swimlane: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11m6-11v11"/>',
   line: '<path d="M4 20 20 4"/><circle cx="4" cy="20" r="2"/><circle cx="20" cy="4" r="2"/>',
   connector: '<path d="M4 19 20 4m-7 0h7v7"/>',
   pen: '<path d="m5 16-1 5 5-1L21 8l-4-4ZM14 7l4 4"/>',

@@ -18,6 +18,8 @@ export function applyView() {
   $('#grid-toggle').setAttribute('aria-label', gridLabel);
   $('#grid-toggle').title = gridLabel + ' · Toggle grid and snapping';
   $('#zoom-level').textContent = Math.round(state.view.z * 100) + '%';
+  if (typeof document.dispatchEvent === 'function')
+    document.dispatchEvent(new Event('sparkboard:view'));
 }
 export function point(e) {
   const r = $('#canvas').getBoundingClientRect();
@@ -78,10 +80,12 @@ export function fit() {
     applyView();
     return;
   }
+  const hidden = hiddenMindmapIds(state.board.objects);
+  const folded = M.foldedObjectIds(state.board.objects);
   focusBounds(
     M.enclosing(
       state.board.objects.filter(
-        (n) => n.type !== 'connector' && !hiddenMindmapIds(state.board.objects).has(n.id),
+        (n) => n.type !== 'connector' && !hidden.has(n.id) && !folded.has(n.id),
       ),
       state.board.objects,
     ),

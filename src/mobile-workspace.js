@@ -4,7 +4,7 @@ import { closeShapes, setTool } from './tools.js';
 import { addFlowStep } from './flowchart.js';
 import { toast } from './notifications.js';
 import { isCompactEditor } from './mobile-editor-policy.js';
-import { addAt } from './canvas.js';
+import { addAt, addSwimlane } from './canvas.js';
 import { centerPoint } from './viewport.js';
 import { setDiagramView } from './mindmap.js';
 import { mobileWorkspaceMenus } from './mobile-menus.js';
@@ -178,6 +178,7 @@ const fanGlyph = {
   sticky: 'sticky',
   text: 'text',
   task: 'check',
+  swimlane: 'swimlane',
   root: 'map',
   layout: 'grid',
   adopt: 'reshape',
@@ -289,7 +290,8 @@ function choose(action, value) {
         new CustomEvent('sparkboard:mind-style', { detail: { id: topic.id } }),
       );
     else toast('Select a mind-map topic first');
-  } else if (action === 'tool') {
+  } else if (action === 'swimlane') addSwimlane();
+  else if (action === 'tool') {
     if (value === 'sticky' || value === 'text') {
       const center = centerPoint();
       addAt(value, {
@@ -429,6 +431,7 @@ export function setupMobileWorkspace() {
   });
   document.addEventListener('sparkboard:selection', syncDock);
   document.addEventListener('sparkboard:tool', syncDock);
+  document.addEventListener('sparkboard:add-swimlane', () => addSwimlane());
   document.addEventListener('sparkboard:mobile-shape', (event) => {
     if (!event.detail?.type) return;
     const center = centerPoint();

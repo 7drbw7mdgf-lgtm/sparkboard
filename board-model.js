@@ -430,16 +430,30 @@ function nearestBinding(objects, p, excludeId, radius = 24, previousId, fromPoin
     const distance = Math.hypot(p.x - edge.x, p.y - edge.y);
     if (!inside && distance > radius * (n.id === previousId ? 1.3 : 1)) continue;
     const snapped = snapPort(n, p, fromPoint, inside);
+    const portDistance = Math.hypot(p.x - snapped.x, p.y - snapped.y);
+    // Near an anchor cross, snap to that port. Elsewhere on the outline, glue to the edge.
+    const glue = !inside && portDistance > 24 && edge.anchor;
     const candidateScore = (inside ? -radius : distance) - (n.id === previousId ? radius * 0.2 : 0);
     if (candidateScore < score) {
       score = candidateScore;
-      best = {
-        node: n,
-        port: snapped.port,
-        anchor: undefined,
-        x: snapped.x,
-        y: snapped.y,
-      };
+      best = glue
+        ? {
+            node: n,
+            port: undefined,
+            anchor: {
+              x: Math.round(edge.anchor.x * 1000) / 1000,
+              y: Math.round(edge.anchor.y * 1000) / 1000,
+            },
+            x: edge.x,
+            y: edge.y,
+          }
+        : {
+            node: n,
+            port: snapped.port,
+            anchor: undefined,
+            x: snapped.x,
+            y: snapped.y,
+          };
     }
   }
   return best;
@@ -906,9 +920,7 @@ function bounds(n, objects = []) {
   };
 }
 
-function frameChildren(objects, frameId) {
-  const frame = objects.find((n) => n.id === frameId && n.type === 'frame');
-  if (!frame) return [];
+function frameMembers(objects, frame) {
   return objects
     .filter((n) => n.id !== frame.id && !['connector', 'frame'].includes(n.type) && !n.locked)
     .filter((n) => {
@@ -918,6 +930,43 @@ function frameChildren(objects, frameId) {
       return cx >= frame.x && cx <= frame.x + frame.w && cy >= frame.y && cy <= frame.y + frame.h;
     })
     .map((n) => n.id);
+}
+
+function frameChildren(objects, frameId) {
+  const frame = objects.find((n) => n.id === frameId && n.type === 'frame');
+  if (!frame) return [];
+  if (frame.collapsed && Array.isArray(frame.foldedIds)) {
+    const live = new Set(
+      objects.filter((n) => !n.locked && !['connector', 'frame'].includes(n.type)).map((n) => n.id),
+    );
+    return frame.foldedIds.filter((id) => id !== frame.id && live.has(id));
+  }
+  return frameMembers(objects, frame);
+}
+
+/** Fold a frame or swimlane. Children are recorded before the frame shrinks, or they would fall outside it. */
+function toggleFrameFold(frame, objects = []) {
+  if (!frame || frame.type !== 'frame') return false;
+  if (frame.collapsed) {
+    frame.collapsed = false;
+    if (Number.isFinite(frame.openH) && frame.openH >= 40) frame.h = frame.openH;
+    frame.foldedIds = [];
+    return true;
+  }
+  frame.foldedIds = frameMembers(objects, frame);
+  frame.openH = frame.h;
+  frame.h = frame.swimlane ? 64 : 52;
+  frame.collapsed = true;
+  return true;
+}
+
+function foldedObjectIds(objects = []) {
+  const hidden = new Set();
+  for (const frame of objects) {
+    if (frame?.type !== 'frame' || !frame.collapsed || !Array.isArray(frame.foldedIds)) continue;
+    for (const id of frame.foldedIds) if (id && id !== frame.id) hidden.add(id);
+  }
+  return hidden;
 }
 
 function resizeBox(
@@ -1352,6 +1401,8 @@ export {
   smoothPath,
   pathHitsPoint,
   frameChildren,
+  toggleFrameFold,
+  foldedObjectIds,
   resizeBox,
   smartGuides,
   clone,

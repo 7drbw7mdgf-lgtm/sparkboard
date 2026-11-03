@@ -120,9 +120,12 @@ export function setupTools() {
   const toolbar = $('#tools');
   toolbar.insertAdjacentHTML(
     'beforeend',
-    '<div class="tool-sep" aria-hidden="true"></div><button type="button" id="tool-dock-toggle" data-label="Move toolbar to bottom" aria-label="Move toolbar to bottom" title="Move toolbar to bottom">⇆</button>',
+    '<div class="tool-sep" aria-hidden="true"></div><button type="button" id="swimlane-tool" data-label="Swimlane" aria-label="Add a swimlane" title="Add a swimlane">' +
+      svgIcon('swimlane') +
+      '</button><div class="tool-sep" aria-hidden="true"></div><button type="button" id="tool-dock-toggle" data-label="Move toolbar to bottom" aria-label="Move toolbar to bottom" title="Move toolbar to bottom">⇆</button>',
   );
   const dockButton = $('#tool-dock-toggle');
+  $('#swimlane-tool').onclick = () => document.dispatchEvent(new Event('sparkboard:add-swimlane'));
   const setDock = (dock) => {
     const bottom = dock === 'bottom';
     toolbar.dataset.dock = bottom ? 'bottom' : 'left';
