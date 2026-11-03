@@ -18,6 +18,27 @@ test('Sai source revision is pinned and build has no credential injection', () =
   assert.match(build, /href="\/\?workspace=1"/);
 });
 
+test('Benchline uses a focused home view and consistent simplified navigation', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const home = fs.readFileSync('integration/sai/HostedHomeScreen.tsx', 'utf8');
+  const sidebar = fs.readFileSync('integration/sai/HostedSidebar.tsx', 'utf8');
+  const header = fs.readFileSync('integration/sai/HostedHeader.tsx', 'utf8');
+  const mobile = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  for (const name of ['HostedHomeScreen', 'HostedSidebar', 'HostedHeader']) {
+    assert.match(build, new RegExp(name));
+  }
+  assert.match(home, /Next tasks/);
+  assert.match(home, /Next meeting/);
+  assert.match(home, /From Sparkboard/);
+  assert.doesNotMatch(home, /PriorityBreakdownWidget|ProjectHealthWidget|MyTasksWidget|RecentActivityWidget/);
+  assert.match(sidebar, /More views/);
+  assert.match(sidebar, /New task/);
+  assert.match(header, /Download project backup/);
+  assert.match(header, /global-search-bar/);
+  assert.match(mobile, /Kanban board/);
+  assert.match(mobile, /benchline-search-open/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
