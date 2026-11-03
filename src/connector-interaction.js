@@ -22,9 +22,7 @@ export function connectionProperties(drag, draft, options = {}, bothMind = false
       relationship: true,
       route: 'curved',
       endArrow: 'arrow',
-      ...(fixed
-        ? { fromPort: drag.fromPort, toPort: draft.toPort, avoidObstacles: false }
-        : {}),
+      ...(fixed ? { fromPort: drag.fromPort, toPort: draft.toPort, avoidObstacles: false } : {}),
     };
   }
   if (drag.fromPort === 'c') return base;
@@ -65,7 +63,8 @@ export function setEndpointChoice(edge, side, choice) {
 
 /** Manual bends suspend avoidance; auto and direct modes clear their bends. */
 export function setConnectorRouting(edge, mode, objects) {
-  if (!['auto', 'direct', 'manual'].includes(mode)) throw new Error('Invalid connector routing mode');
+  if (!['auto', 'direct', 'manual'].includes(mode))
+    throw new Error('Invalid connector routing mode');
   if (mode === 'manual') {
     if (!edge.waypoints?.length) {
       const route = M.connectorRoute(edge, objects);

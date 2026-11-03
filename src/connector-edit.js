@@ -27,7 +27,11 @@ const portOptions = [
 ];
 const endpointOptions = (edge, side) =>
   edge[side + 'Anchor']
-    ? [portOptions[0], ['glued', 'Glued to outline · drag endpoint to move'], ...portOptions.slice(1)]
+    ? [
+        portOptions[0],
+        ['glued', 'Glued to outline · drag endpoint to move'],
+        ...portOptions.slice(1),
+      ]
     : portOptions;
 
 function liveConnector(id) {

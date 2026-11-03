@@ -11,7 +11,13 @@ import {
 } from '../src/connector-interaction.js';
 
 const node = (id, x = 0, y = 0) => ({
-  id, type: 'shape', x, y, w: 100, h: 80, text: id,
+  id,
+  type: 'shape',
+  x,
+  y,
+  w: 100,
+  h: 80,
+  text: id,
 });
 
 test('a centre-dot relationship slides, but side-dot relationships pin ports and may cross shapes', () => {
@@ -71,7 +77,9 @@ test('normal side-dot connections bypass obstacles; centre-dot connections avoid
 
 test('connector styling retains a normalized outline-glue location until explicitly changed', () => {
   const edge = {
-    from: 'a', to: 'b', route: 'elbow',
+    from: 'a',
+    to: 'b',
+    route: 'elbow',
     fromAnchor: { x: 1, y: 0.28 },
     toAnchor: { x: 0, y: 0.62 },
   };
@@ -95,8 +103,13 @@ test('automatic elbow routing recalculates; dragging or selecting manual mode su
   const block = { ...node('block', 210, -30), w: 120, h: 140 };
   const objects = [a, b, block];
   const edge = {
-    type: 'connector', id: 'c', from: 'a', to: 'b', route: 'elbow',
-    fromPort: 'e', toPort: 'w',
+    type: 'connector',
+    id: 'c',
+    from: 'a',
+    to: 'b',
+    route: 'elbow',
+    fromPort: 'e',
+    toPort: 'w',
   };
   assert.equal(M.connectorRoute(edge, objects).rerouted, true);
   setConnectorRouting(edge, 'manual', objects);
