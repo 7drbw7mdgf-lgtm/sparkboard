@@ -254,6 +254,8 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>} defaultOpen>',
     '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>}>',
   );
+  // Keep upstream data structures and Gantt interaction code; apply focused view patches.
+  require('./patch-sai-planner.cjs').patchHostedPlanner(source);
   for (const name of [
     'HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx',
     'HostedHomeScreen.tsx', 'HostedSidebar.tsx', 'HostedHeader.tsx',
