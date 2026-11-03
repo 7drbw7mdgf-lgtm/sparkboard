@@ -17,6 +17,7 @@ import { createFlowStep } from './flowchart-model.js';
 import {
   addMindChild,
   floatMindTopic,
+  hiddenMindmapIds,
   indexMindmap,
   isMindDescendant,
   isMindNode,
@@ -420,8 +421,9 @@ function mindDropHost(objects, moved, release) {
     const box = M.bounds(item, objects);
     return p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h;
   };
+  const hidden = hiddenMindmapIds(objects);
   const host = [...index.nodes].reverse().find(
-    (item) => item.id !== moved.id && contains(item, release),
+    (item) => item.id !== moved.id && !hidden.has(item.id) && contains(item, release),
   ) || null;
   return { host, index, contains };
 }
@@ -493,7 +495,10 @@ export function endPointer(e) {
     return;
   }
   if (d.type === 'connector-waypoint') {
-    if (d.changed) save();
+    if (d.changed) {
+      save();
+      toast('Manual route saved · Reset bends to restore automatic routing');
+    }
     renderLines();
     return;
   }
