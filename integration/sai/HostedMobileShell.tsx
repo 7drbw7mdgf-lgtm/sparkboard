@@ -42,9 +42,6 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
 .benchline-edit-group[open]>summary{background:transparent;border-color:transparent}
 .benchline-edit-group[open]>summary::after{transform:translateY(2px) rotate(225deg)}
 .benchline-edit-group>summary+*{padding:2px 8px 10px}
-`;
-
-
 /* Planner views: prioritise legibility over decorative density. */
 .benchline-kanban .benchline-kanban-column{width:clamp(252px,calc((100vw - 280px)/4),345px);height:100%;min-height:0}
 .benchline-kanban-columns{width:max-content;min-width:100%}
@@ -98,6 +95,7 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
   .benchline-gantt .gantt-x-scroll{display:none!important}
   .benchline-gantt .gantt-task-list{touch-action:pan-y}
 }
+`;
 
 const phoneCss = `
 body.benchline-phone .benchline-sidebar{display:none!important}
