@@ -209,12 +209,12 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     path.join(source, 'components/PillAccordion.tsx'),
     "className={`w-full flex justify-between items-center px-3 py-1.5 rounded-full transition-all duration-300 cursor-pointer text-left ${isVisible ? 'bg-gray-100' : 'hover:bg-gray-100/50'}`}",
-    "className={`benchline-group w-full flex justify-between items-center gap-2 px-3 py-2 rounded-none border border-black/10 transition-colors cursor-pointer text-left ${isVisible ? 'bg-white/70' : 'bg-white/45 hover:bg-white/60'}`}",
+    "className={`benchline-group w-full flex justify-between items-center gap-2 px-3 py-2 rounded-full transition-colors cursor-pointer text-left ${isVisible ? 'bg-white/80' : 'bg-white/55 hover:bg-white/70'}`}",
   );
   replaceRequired(
     path.join(source, 'components/PillAccordion.tsx'),
     '<div className="flex-1 flex items-center gap-2.5 text-sm text-gray-700">',
-    '<span className="inline-block w-3 h-3 border border-[#4262ff] bg-[#4262ff]/20 shrink-0" aria-hidden="true"></span><div className="flex-1 flex items-center gap-2.5 text-sm text-gray-700">',
+    '<span className="inline-block w-2 h-2 rounded-full bg-[#4262ff] shrink-0" aria-hidden="true"></span><div className="flex-1 flex items-center gap-2.5 text-sm text-gray-700">',
   );
   replaceRequired(
     path.join(source, 'components/TaskDetailPanel.tsx'),
@@ -224,12 +224,22 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     path.join(source, 'components/TaskDetailPanel.tsx'),
     '</div>\n                \n                <div className="space-y-1">\n                    <div className="w-full flex items-center group py-2 px-3 -mx-3 rounded-lg">\n                        <div className="w-32 flex-shrink-0 flex items-center gap-3 text-sm font-medium text-gray-500">\n                           <ChartPieIcon className="w-5 h-5"/>',
-    '</div>\n                </details>\n\n                <details className="benchline-edit-group" open>\n                    <summary>Progress</summary>\n                <div className="space-y-1">\n                    <div className="w-full flex items-center group py-2 px-3 -mx-3 rounded-lg">\n                        <div className="w-32 flex-shrink-0 flex items-center gap-3 text-sm font-medium text-gray-500">\n                           <ChartPieIcon className="w-5 h-5"/>',
+    '</div>\n                </details>\n\n                <details className="benchline-edit-group">\n                    <summary>Progress</summary>\n                <div className="space-y-1">\n                    <div className="w-full flex items-center group py-2 px-3 -mx-3 rounded-lg">\n                        <div className="w-32 flex-shrink-0 flex items-center gap-3 text-sm font-medium text-gray-500">\n                           <ChartPieIcon className="w-5 h-5"/>',
   );
   replaceRequired(
     path.join(source, 'components/TaskDetailPanel.tsx'),
     '</div>\n                </div>\n\n                <PillAccordion title="Assignments" defaultOpen>',
-    '</div>\n                </div>\n                </details>\n\n                <PillAccordion title="Assignments" defaultOpen>',
+    '</div>\n                </div>\n                </details>\n\n                <PillAccordion title="Assignments">',
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskDetailPanel.tsx'),
+    '<PillAccordion title={<><DocumentTextIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Notes</span></>} defaultOpen>',
+    '<PillAccordion title={<><DocumentTextIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Notes</span></>}>',
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskDetailPanel.tsx'),
+    '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>} defaultOpen>',
+    '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>}>',
   );
   for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx']) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));

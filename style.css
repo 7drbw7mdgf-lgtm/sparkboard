@@ -3315,10 +3315,10 @@ body.is-panning #canvas {
 
 /* One contextual Format inspector: no repeated colour or selection action toolbars. */
 #inspector {
-  width: 354px;
+  width: 328px;
   max-width: calc(100vw - 35px);
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 28px;
+  padding: 12px;
   background: #fafaf8c7;
   border: 1px solid #ffffffb8;
   box-shadow:
@@ -3328,30 +3328,39 @@ body.is-panning #canvas {
   -webkit-backdrop-filter: blur(28px) saturate(1.4);
 }
 .format-heading {
-  align-items: flex-start;
-  padding: 3px 3px 13px;
+  align-items: center;
+  padding: 2px 4px 8px;
+  margin-bottom: 4px;
+}
+.format-heading .eyebrow,
+.format-subtitle {
+  display: none;
 }
 .format-heading h3 {
-  font-size: 22px;
-  line-height: 1.15;
-  margin: 5px 0;
+  font-size: 16px;
+  line-height: 1;
+  margin: 0;
 }
-.format-subtitle {
-  font-size: 11px;
-  line-height: 1.5;
-  color: #717f6a;
-  margin: 4px 0 0;
+#inspector .panel-heading > button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #ffffffb3;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
 }
 .format-panels {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-bottom: 4px;
+  gap: 6px;
+  padding-bottom: 2px;
 }
 .format-card {
-  background: #ffffff8c;
-  border: 1px solid #ffffffc7;
-  border-radius: 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
   padding: 0;
 }
 #inspector details.format-card > summary {
@@ -3360,13 +3369,25 @@ body.is-panning #canvas {
   gap: 8px;
   list-style: none;
   cursor: pointer;
-  min-height: 40px;
-  padding: 8px 10px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #ffffffb8;
+  border: 1px solid #ffffffd6;
   font:
     750 13px Manrope,
     sans-serif;
   color: #24362c;
   user-select: none;
+}
+#inspector details.format-card[open] {
+  background: #ffffff8c;
+  border: 1px solid #ffffffc7;
+  border-radius: 22px;
+}
+#inspector details.format-card[open] > summary {
+  background: transparent;
+  border-color: transparent;
 }
 #inspector details.format-card > summary::-webkit-details-marker,
 #inspector details.format-card > summary::marker {
@@ -3447,7 +3468,7 @@ body.is-panning #canvas {
   width: 100%;
   min-width: 0;
   height: 36px;
-  border-radius: 4px;
+  border-radius: 999px;
   padding: 0 9px;
   font-size: 12px;
   border: 1px solid #dce5db;
@@ -3472,7 +3493,7 @@ body.is-panning #canvas {
 #inspector button.format-action,
 .format-grid > button {
   border: 1px solid #dce5db;
-  border-radius: 4px;
+  border-radius: 999px;
   background: #fffc;
   color: #374b3b;
   font-size: 11px;
@@ -3518,7 +3539,7 @@ body.is-panning #canvas {
     width: 100%;
     max-width: none;
     max-height: min(68dvh, 620px);
-    border-radius: 8px 8px 0 0;
+    border-radius: 28px;
     padding: 15px 15px calc(17px + env(safe-area-inset-bottom));
     right: 0;
     left: 0;
@@ -3598,7 +3619,7 @@ body.is-panning #canvas {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 28px;
     background: #fafaf8d1;
     backdrop-filter: blur(28px) saturate(1.4);
     -webkit-backdrop-filter: blur(28px) saturate(1.4);
@@ -3625,8 +3646,12 @@ body.is-panning #canvas {
     padding-bottom: 2px;
   }
   #inspector details.format-card {
-    border-radius: 4px;
+    border-radius: 999px;
     padding: 0;
+    background: transparent;
+  }
+  #inspector details.format-card[open] {
+    border-radius: 22px;
     background: #ffffff8c;
   }
   #inspector details.format-card > summary {

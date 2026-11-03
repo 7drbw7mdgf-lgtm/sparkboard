@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   COMPACT_EDITOR_QUERY,
   isCompactEditor,
@@ -106,6 +107,12 @@ test('mobile defaults to Select for one-finger editing; Connector stays availabl
   }
   assert.equal(toolAvailableOnLayout('connector', true), true);
   assert.equal(toolAvailableOnLayout('connector', false), true);
+});
+
+test('Format groups are pills and only the chosen group starts open', () => {
+  const css = fs.readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /#inspector details\.format-card > summary \{[^}]*border-radius: 999px/);
+  assert.match(css, /#inspector \{[^}]*border-radius: 28px/);
 });
 
 test('desktop Format groups collapse, with Appearance open first', () => {

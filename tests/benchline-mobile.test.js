@@ -29,7 +29,11 @@ test('Benchline phone shell is a labelled view bar, not a bottom dock', () => {
   assert.match(shell, /\.gantt-x-scroll\{display:none!important\}/);
   assert.match(shell, /backdrop-filter:blur\(28px\) saturate\(1\.4\)/);
   assert.match(shell, /\.benchline-edit-group\{/);
+  assert.match(shell, /border-radius:999px/);
   assert.match(build, /benchline-group w-full/);
+  assert.match(build, /rounded-full/);
+  assert.match(build, /<summary>Progress<\/summary>/);
+  assert.doesNotMatch(build, /benchline-edit-group" open>\\n\s+<summary>Progress/);
   assert.match(build, /benchline-edit-group/);
   assert.match(build, /<summary>Details<\/summary>/);
   assert.match(build, /Floating Feedback Button/);

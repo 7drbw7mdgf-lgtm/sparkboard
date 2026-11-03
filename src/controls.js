@@ -210,6 +210,13 @@ export function setupControls() {
   };
   const inspector = $('#inspector-body');
   inspector.onclick = (e) => {
+    const summary = e.target.closest('summary');
+    const group = summary?.closest('details.format-card');
+    if (group && !group.open) {
+      for (const other of inspector.querySelectorAll('details.format-card[open]')) {
+        if (other !== group) other.open = false;
+      }
+    }
     const page = e.target.closest('[data-format-page]');
     if (page) {
       showFormatPage(inspector, page.dataset.formatPage);
