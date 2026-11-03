@@ -823,7 +823,8 @@ function connectorRoute(n, objects = [], context) {
 
 /** Elbows get a short fillet; curves get a longer one. Straights stay linear. */
 function routeSmoothing(route) {
-  return route === 'elbow' ? 'elbow' : route === 'curved';
+  // Draw.io-style elbow mode uses sharp orthogonal corners, not rounded fillets.
+  return route === 'curved';
 }
 
 function dedupeConnectors(objects = []) {
@@ -831,7 +832,10 @@ function dedupeConnectors(objects = []) {
   for (let i = objects.length - 1; i >= 0; i--) {
     const n = objects[i];
     if (n?.type !== 'connector') continue;
-    const key = [n.from, n.to].sort().join('::');
+    // A structural mind-map branch and an optional relationship curve between the
+    // same topics are independent edges. Never let deduplication erase either.
+    const role = n.mindBranch ? 'branch' : n.relationship ? 'relationship' : 'connector';
+    const key = role + ':' + [n.from, n.to].sort().join('::');
     if (seenPairs.has(key)) {
       objects.splice(i, 1);
     } else {
