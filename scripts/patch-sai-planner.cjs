@@ -105,13 +105,15 @@ function patchHostedPlanner(root) {
     'className="benchline-kanban-move flex items-center gap-0.5');
   once(root, 'KanbanCard.tsx',
     'task.tags.map((tag, idx)', 'task.tags.slice(0, 2).map((tag, idx)');
-  once(root, 'KanbanCard.tsx',
-    'className="p-1 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500',
-    'className="min-h-8 min-w-8 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500');
-  // One forward/backward button each. Both now large enough to tap.
-  once(root, 'KanbanCard.tsx',
-    'className="p-1 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500',
-    'className="min-h-8 min-w-8 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500');
+  {
+    const file = path.join(root, 'components', 'KanbanCard.tsx');
+    const original = fs.readFileSync(file, 'utf8');
+    const previous = 'className="p-1 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500';
+    if (original.split(previous).length !== 3) throw Error('Expected two Kanban shift arrows');
+    fs.writeFileSync(file, original.split(previous).join(
+      'className="min-h-8 min-w-8 hover:bg-[#f0efeb] dark:hover:bg-gray-700 rounded text-gray-500'
+    ));
+  }
 
   // Gantt sidebar: task dates and priorities remain; avatars are not shown.
   removeUntil(root, 'TaskSidebar.tsx',
@@ -139,9 +141,6 @@ function patchHostedPlanner(root) {
   once(root, 'GanttChart.tsx',
     '            {/* Adjustable Splitter Divider */}\n            <div',
     '            {/* Adjustable Splitter Divider */}\n            {showTaskList && <div');
-  once(root, 'GanttChart.tsx',
-    '            <div className="flex-1 flex flex-col min-w-0 relative">',
-    '            <div className="flex-1 flex flex-col min-w-0 relative">');
   once(root, 'GanttChart.tsx',
     '            </div>\n\n            <div className="flex-1 flex flex-col min-w-0 relative">',
     '            </div>}\n\n            <div className="flex-1 flex flex-col min-w-0 relative">');
