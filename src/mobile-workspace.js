@@ -189,6 +189,8 @@ const fanGlyph = {
   end: 'pill',
   board: 'grid',
   'map-style': 'format',
+  frames: 'frame',
+  minimap: 'grid',
 };
 function fanChoices(section, current) {
   const menus = mobileWorkspaceMenus(current);
@@ -291,6 +293,8 @@ function choose(action, value) {
       );
     else toast('Select a mind-map topic first');
   } else if (action === 'swimlane') addSwimlane();
+  else if (action === 'frames') document.dispatchEvent(new Event('sparkboard:frames'));
+  else if (action === 'minimap') document.dispatchEvent(new Event('sparkboard:minimap-toggle'));
   else if (action === 'tool') {
     if (value === 'sticky' || value === 'text') {
       const center = centerPoint();
