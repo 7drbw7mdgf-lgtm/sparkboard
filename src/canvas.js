@@ -14,6 +14,7 @@ import {
   isCompactEditor,
 } from './mobile-editor-policy.js';
 import { createFlowStep } from './flowchart-model.js';
+import { connectionProperties, connectorPreviewPolicy } from './connector-interaction.js';
 import {
   addMindChild,
   floatMindTopic,
@@ -379,35 +380,17 @@ function linkedDropPoint(source, port) {
   return { x: source.x + source.w + gap + w / 2, y: cy };
 }
 
-/**
- * A link between two mind-map topics is a relationship curve whose ends slide
- * until a later drag pins them. A center dot omits ports so the line stays
- * outside shapes. A side dot is fixed and may cross shapes.
- */
+/** Resolve relationship and connector bindings consistently for web and mobile. */
 function connectionProps(drag, draft) {
-  const opts = { ...(drag.opts || currentLineOptions('curved')) };
   const fromNode = state.board.objects.find((item) => item.id === drag.from);
   const toNode = state.board.objects.find((item) => item.id === draft.to);
   const bothMind = isMindNode(fromNode) && isMindNode(toNode);
-  // Relationship curves are independent of the hierarchy link, even between
-  // a parent and its child; the user can pin either end later.
-  const base = { from: drag.from, to: draft.to, ...opts };
-  if (bothMind) return { ...base, relationship: true, route: 'curved', endArrow: 'arrow' };
-  if (drag.fromPort === 'c') return base;
-  if (['n', 'e', 's', 'w'].includes(drag.fromPort)) {
-    return {
-      ...base,
-      fromPort: drag.fromPort,
-      toPort: draft.toPort,
-      avoidObstacles: false,
-    };
-  }
-  return {
-    ...base,
-    fromAnchor: drag.fromAnchor,
-    toPort: draft.toPort,
-    toAnchor: draft.toAnchor,
-  };
+  return connectionProperties(
+    drag,
+    draft,
+    { ...(drag.opts || currentLineOptions('curved')) },
+    bothMind,
+  );
 }
 
 export function capture(e) {
@@ -1244,26 +1227,26 @@ export function setupCanvas() {
       const hit = nearestTargetPort(p, state.drag.from);
       const fromNode = state.board.objects.find((o) => o.id === state.drag.from);
       const opts = state.drag.opts || currentLineOptions('curved');
-      const centerDot = state.drag.fromPort === 'c' || !state.drag.fromPort;
-      const sideDot = ['n', 'e', 's', 'w'].includes(state.drag.fromPort);
+      const { fixed: sideDot } = connectorPreviewPolicy(state.drag.fromPort);
+      const centerDot = !sideDot;
       if (hit && fromNode) {
         const bothMind = isMindNode(fromNode) && isMindNode(hit.node);
         const preview = M.connectorRoute(
           {
             from: state.drag.from,
             to: hit.node.id,
-            ...(centerDot || bothMind ? {} : { fromPort: state.drag.fromPort, toPort: hit.port }),
+            ...(centerDot ? {} : { fromPort: state.drag.fromPort, toPort: hit.port }),
             route: bothMind ? 'curved' : opts.route,
-            ...(sideDot && !bothMind ? { avoidObstacles: false } : {}),
+            ...(sideDot ? { avoidObstacles: false } : {}),
           },
           state.board.objects,
         );
         state.connectorDraft = {
           type: 'connector',
           from: state.drag.from,
-          fromPort: centerDot || bothMind ? undefined : state.drag.fromPort,
+          fromPort: centerDot ? undefined : state.drag.fromPort,
           to: hit.node.id,
-          toPort: centerDot || bothMind ? undefined : hit.port,
+          toPort: centerDot ? undefined : hit.port,
           binding: {
             nodeId: hit.node.id,
             port: hit.port,
