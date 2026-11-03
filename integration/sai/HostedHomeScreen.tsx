@@ -30,7 +30,6 @@ export default function HostedHomeScreen({
   projectData,
   onRequestEditTask,
   onRequestEditMeeting,
-  onRequestAddTask,
   onRequestAddMeeting,
   onViewChange,
   onSetProjectData,
@@ -69,7 +68,6 @@ export default function HostedHomeScreen({
             <h1 className="text-[28px] font-bold tracking-tight text-[#242934] dark:text-gray-100">Overview</h1>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-[#657082] dark:text-gray-400">What needs doing next. Everything else is one click away.</p>
           </div>
-          <button type="button" onClick={onRequestAddTask} className="min-h-11 rounded-xl bg-[#4262ff] px-5 text-sm font-semibold text-white hover:bg-[#304bdc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4262ff]">+ New task</button>
         </div>
 
         <div className="mb-6 grid grid-cols-3 gap-2.5 sm:gap-4" aria-label="Project summary">
@@ -78,7 +76,7 @@ export default function HostedHomeScreen({
             <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">{openTasks.length}</p>
           </div>
           <div className="rounded-xl border border-[#e5e8ee] bg-white p-3.5 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
-            <p className="text-xs text-[#697184] dark:text-gray-400">Due in 7 days</p>
+            <p className="text-xs text-[#697184] dark:text-gray-400">Due soon</p>
             <p className="mt-1 text-2xl font-semibold text-[#242934] dark:text-white">{dueSoonCount}</p>
           </div>
           <div className="rounded-xl border border-[#e5e8ee] bg-white p-3.5 sm:p-5 dark:border-gray-800 dark:bg-gray-900">
