@@ -3317,10 +3317,15 @@ body.is-panning #canvas {
 #inspector {
   width: 354px;
   max-width: calc(100vw - 35px);
-  border-radius: 18px;
-  padding: 18px;
-  background: #fff;
-  box-shadow: 0 18px 58px #1e331c1b;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fafaf8c7;
+  border: 1px solid #ffffffb8;
+  box-shadow:
+    0 12px 32px #1e331c24,
+    inset 0 1px 0 #ffffffd9;
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
 }
 .format-heading {
   align-items: flex-start;
@@ -3344,10 +3349,55 @@ body.is-panning #canvas {
   padding-bottom: 4px;
 }
 .format-card {
-  background: #fbfcf9;
-  border: 1px solid #e3e9e0;
-  border-radius: 13px;
-  padding: 12px;
+  background: #ffffff8c;
+  border: 1px solid #ffffffc7;
+  border-radius: 4px;
+  padding: 0;
+}
+#inspector details.format-card > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 8px 10px;
+  font:
+    750 13px Manrope,
+    sans-serif;
+  color: #24362c;
+  user-select: none;
+}
+#inspector details.format-card > summary::-webkit-details-marker,
+#inspector details.format-card > summary::marker {
+  display: none;
+  content: '';
+}
+#inspector .format-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: #4262ff;
+}
+#inspector .format-icon svg {
+  display: block;
+}
+#inspector .format-card-title {
+  min-width: 0;
+}
+#inspector .format-chevron {
+  margin-left: auto;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #5c6b60;
+  border-bottom: 1.5px solid #5c6b60;
+  transform: translateY(-2px) rotate(45deg);
+}
+#inspector details[open] > summary .format-chevron {
+  transform: translateY(2px) rotate(225deg);
+}
+#inspector details.format-card > .format-card-content {
+  padding: 0 10px 10px;
 }
 .format-card h4 {
   margin: 0 0 12px;
@@ -3397,7 +3447,7 @@ body.is-panning #canvas {
   width: 100%;
   min-width: 0;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0 9px;
   font-size: 12px;
   border: 1px solid #dce5db;
@@ -3422,8 +3472,8 @@ body.is-panning #canvas {
 #inspector button.format-action,
 .format-grid > button {
   border: 1px solid #dce5db;
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 4px;
+  background: #fffc;
   color: #374b3b;
   font-size: 11px;
   line-height: 1.2;
@@ -3468,7 +3518,7 @@ body.is-panning #canvas {
     width: 100%;
     max-width: none;
     max-height: min(68dvh, 620px);
-    border-radius: 20px 20px 0 0;
+    border-radius: 8px 8px 0 0;
     padding: 15px 15px calc(17px + env(safe-area-inset-bottom));
     right: 0;
     left: 0;
@@ -3548,7 +3598,10 @@ body.is-panning #canvas {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 10px;
-    border-radius: 16px;
+    border-radius: 8px;
+    background: #fafaf8d1;
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
     box-shadow: 0 9px 34px #27341c2c;
     z-index: 23;
   }
@@ -3572,9 +3625,9 @@ body.is-panning #canvas {
     padding-bottom: 2px;
   }
   #inspector details.format-card {
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 0;
-    background: #fbfcf9;
+    background: #ffffff8c;
   }
   #inspector details.format-card > summary {
     display: flex;
@@ -3594,18 +3647,11 @@ body.is-panning #canvas {
   #inspector details.format-card > summary::-webkit-details-marker {
     display: none;
   }
-  #inspector details.format-card > summary > span:first-child {
-    color: #27804d;
-    font-size: 16px;
+  #inspector details.format-card > summary > .format-icon {
+    color: #4262ff;
   }
   #inspector .format-chevron {
     margin-left: auto;
-    font-size: 16px;
-    transition: transform 0.15s ease;
-    color: #6f836e;
-  }
-  #inspector details[open] .format-chevron {
-    transform: rotate(180deg);
   }
   #inspector details.format-card > .format-card-content {
     gap: 9px;

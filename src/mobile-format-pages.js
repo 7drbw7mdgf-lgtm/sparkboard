@@ -1,4 +1,4 @@
-/** Mobile Format navigation is paged, not a stack of expanding accordions. */
+/** Group order for the Format panel. Groups collapse; this order picks the one that starts open. */
 export const FORMAT_PAGE_ORDER = ['Appearance', 'Text', 'Layout', 'Arrange', 'Actions'];
 
 export function resolveFormatPage(pages, preferred = 'Appearance') {

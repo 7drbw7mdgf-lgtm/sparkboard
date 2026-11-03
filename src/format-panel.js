@@ -61,32 +61,42 @@ function choices(label, prop, value, options, disabled) {
       '</select>',
   );
 }
-function section(name, icon, contents, { compact = false } = {}) {
+const formatIcon = (body) =>
+  '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
+  body +
+  '</svg>';
+const FORMAT_ICONS = {
+  Appearance: formatIcon(
+    '<circle cx="8" cy="8" r="2.2" fill="currentColor"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.3 3.3l1.5 1.5M11.2 11.2l1.5 1.5M3.3 12.7l1.5-1.5M11.2 4.8l1.5-1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>',
+  ),
+  Text: formatIcon(
+    '<path d="M3 3.2h10M8 3.2v9.6M5.4 12.8h5.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>',
+  ),
+  Layout: formatIcon(
+    '<rect x="2.2" y="2.2" width="11.6" height="11.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.2 6.2h11.6M6.2 6.2V13.8" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  ),
+  Arrange: formatIcon(
+    '<path d="M2.2 3h7.2v7.2H2.2zM6.6 6.6h7.2v7.2H6.6z" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  ),
+  Actions: formatIcon(
+    '<path d="M8 1.8l1.15 2.5 2.7.4-2 1.9.5 2.7L8 8.1 5.65 9.3l.5-2.7-2-1.9 2.7-.4z" fill="currentColor"/>',
+  ),
+};
+
+function section(name, icon, contents, open) {
   if (!contents) return '';
-  if (compact) {
-    return (
-      '<section class="format-card format-page" role="tabpanel" id="format-panel-' +
-      name +
-      '" aria-labelledby="format-tab-' +
-      name +
-      '" data-format-section="' +
-      name +
-      '">' +
-      '<div class="format-card-content">' +
-      contents +
-      '</div></section>'
-    );
-  }
   return (
-    '<section class="format-card" aria-label="' +
+    '<details class="format-card" data-format-section="' +
     name +
-    '"><h4><span aria-hidden="true">' +
+    '"' +
+    (open ? ' open' : '') +
+    '><summary><span class="format-icon">' +
     icon +
-    '</span>' +
+    '</span><span class="format-card-title">' +
     name +
-    '</h4><div class="format-card-content">' +
+    '</span><span class="format-chevron" aria-hidden="true"></span></summary><div class="format-card-content">' +
     contents +
-    '</div></section>'
+    '</div></details>'
   );
 }
 function action(label, command, disabled = '', css = '') {
@@ -142,10 +152,18 @@ function selectButton(label, attr, value, active, disabled) {
 export function formatPanel(
   ns,
   reshapeId = null,
-  { compact = false, page = 'Appearance', outlineMode = 'points' } = {},
+  { compact = false, page = 'Appearance', openSections = null, outlineMode = 'points' } = {},
 ) {
   if (!ns.length) return '';
-  const panelSection = (name, icon, contents) => section(name, icon, contents, { compact });
+  const open = new Set(
+    openSections || [
+      resolveFormatPage(
+        ['Appearance', 'Text', 'Layout', 'Arrange', 'Actions'],
+        compact ? page : 'Appearance',
+      ),
+    ],
+  );
+  const panelSection = (name, icon, contents) => section(name, icon, contents, open.has(name));
   const n = ns[0],
     multi = ns.length > 1;
   const locked = ns.every((item) => item.locked);
@@ -202,7 +220,11 @@ export function formatPanel(
         'min="0" max="100" step="1" ' + disabled,
       ),
     );
-  appearance = panelSection('Appearance', '◉', '<div class="format-grid">' + appearance + '</div>');
+  appearance = panelSection(
+    'Appearance',
+    FORMAT_ICONS.Appearance,
+    '<div class="format-grid">' + appearance + '</div>',
+  );
 
   let text = '';
   if (canText) {
@@ -258,7 +280,7 @@ export function formatPanel(
       input('text', 'text', n.text || '', 'maxlength="160" placeholder="Add a label" ' + disabled),
     );
   }
-  text = panelSection('Text', 'T', text);
+  text = panelSection('Text', FORMAT_ICONS.Text, text);
 
   let layout = '';
   if (allGeometry && !multi) {
@@ -353,7 +375,7 @@ export function formatPanel(
       layout += action('Reset outline', 'reset-vertices', disabled);
     }
   }
-  layout = panelSection('Layout', '□', layout);
+  layout = panelSection('Layout', FORMAT_ICONS.Layout, layout);
 
   let arrange =
     '<div class="format-grid two">' +
@@ -374,7 +396,7 @@ export function formatPanel(
         selectButton('Space vertically', 'distribute', 'y', false, disabled) +
         '</div>';
   }
-  arrange = panelSection('Arrange', '▤', arrange);
+  arrange = panelSection('Arrange', FORMAT_ICONS.Arrange, arrange);
 
   let behavior =
     '<div class="format-grid two">' +
@@ -385,71 +407,6 @@ export function formatPanel(
     (ns.some((item) => item.group) ? action('Ungroup', 'ungroup', disabled) : '') +
     action('Delete', 'delete', disabled, 'danger') +
     '</div>';
-  behavior = panelSection('Actions', '⚡', behavior);
-
-  if (compact) {
-    const pages = [
-      ['Appearance', appearance],
-      ['Text', text],
-      ['Layout', layout],
-      ['Arrange', arrange],
-      ['Actions', behavior],
-    ].filter(([, markup]) => markup);
-    const names = pages.map(([name]) => name);
-    const current = resolveFormatPage(names, page);
-    const currentIndex = names.indexOf(current);
-    const tabs = pages
-      .map(
-        ([name]) =>
-          '<button type="button" role="tab" id="format-tab-' +
-          name +
-          '" aria-controls="format-panel-' +
-          name +
-          '" aria-selected="' +
-          String(name === current) +
-          '" tabindex="' +
-          (name === current ? '0' : '-1') +
-          '" class="format-page-tab' +
-          (name === current ? ' active' : '') +
-          '" data-format-page="' +
-          name +
-          '">' +
-          name +
-          '</button>',
-      )
-      .join('');
-    const panels = pages
-      .map(([name, markup]) =>
-        name === current
-          ? markup
-          : markup.replace(
-              'class="format-card format-page"',
-              'class="format-card format-page" hidden',
-            ),
-      )
-      .join('');
-    return (
-      '<div class="format-paged">' +
-      '<nav class="format-page-tabs" role="tablist" aria-label="Format pages">' +
-      tabs +
-      '</nav>' +
-      '<div class="format-page-stack">' +
-      panels +
-      '</div>' +
-      '<div class="format-page-footer">' +
-      '<button type="button" data-format-step="-1" aria-label="Previous format page"' +
-      (currentIndex === 0 ? ' disabled' : '') +
-      '>Back</button>' +
-      '<span data-format-counter aria-live="polite">' +
-      (currentIndex + 1) +
-      ' / ' +
-      names.length +
-      '</span>' +
-      '<button type="button" data-format-step="1" aria-label="Next format page"' +
-      (currentIndex >= names.length - 1 ? ' disabled' : '') +
-      '>Next</button>' +
-      '</div></div>'
-    );
-  }
+  behavior = panelSection('Actions', FORMAT_ICONS.Actions, behavior);
   return '<div class="format-panels">' + appearance + text + layout + arrange + behavior + '</div>';
 }

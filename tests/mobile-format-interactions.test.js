@@ -86,22 +86,16 @@ test('a second tap on the same shape opens text, and a single tap does not', () 
   assert.equal(doubleTapOpensText({ previous: first, id: 'shape', at: 1200, x: 80, y: 50 }), false);
 });
 
-test('compact Format presents one accessible page, tabs and Back/Next', () => {
+test('compact Format collapses into one open group at a time', () => {
   const compact = formatPanel([note], null, { compact: true });
-  assert.equal((compact.match(/<section class="format-card format-page"/g) || []).length, 5);
-  assert.equal((compact.match(/data-format-page="/g) || []).length, 5);
-  assert.match(compact, /role="tablist"/);
-  assert.match(compact, /data-format-section="Appearance"/);
-  assert.match(compact, /data-format-section="Text"/);
-  assert.match(compact, /data-format-step="-1" aria-label="Previous format page" disabled/);
-  assert.match(compact, /data-format-step="1"/);
-  assert.doesNotMatch(compact, /<details/);
+  assert.equal((compact.match(/<details class="format-card"/g) || []).length, 5);
+  assert.match(compact, /data-format-section="Appearance" open/);
+  assert.doesNotMatch(compact, /data-format-section="Text" open/);
+  assert.doesNotMatch(compact, /role="tablist"/);
   assert.equal((compact.match(/data-command="duplicate"/g) || []).length, 1);
   const textPage = formatPanel([note], null, { compact: true, page: 'Text' });
-  assert.match(textPage, /data-format-page="Text"/);
-  assert.match(textPage, /data-format-section="Text"/);
-  assert.match(textPage, /format-page" hidden/);
-  assert.match(textPage, /data-format-counter aria-live="polite">2 \/ 5/);
+  assert.match(textPage, /data-format-section="Text" open/);
+  assert.doesNotMatch(textPage, /data-format-section="Appearance" open/);
 });
 
 test('mobile defaults to Select for one-finger editing; Connector stays available', () => {
@@ -114,8 +108,13 @@ test('mobile defaults to Select for one-finger editing; Connector stays availabl
   assert.equal(toolAvailableOnLayout('connector', false), true);
 });
 
-test('desktop Format keeps all controls visible without mobile accordion', () => {
+test('desktop Format groups collapse, with Appearance open first', () => {
   const desktop = formatPanel([note]);
-  assert.equal((desktop.match(/<section class="format-card"/g) || []).length, 5);
-  assert.doesNotMatch(desktop, /<details/);
+  assert.equal((desktop.match(/<details class="format-card"/g) || []).length, 5);
+  assert.match(desktop, /data-format-section="Appearance" open/);
+  assert.doesNotMatch(desktop, /data-format-section="Layout" open/);
+  const kept = formatPanel([note], null, { openSections: ['Text', 'Actions'] });
+  assert.match(kept, /data-format-section="Text" open/);
+  assert.match(kept, /data-format-section="Actions" open/);
+  assert.doesNotMatch(kept, /data-format-section="Appearance" open/);
 });

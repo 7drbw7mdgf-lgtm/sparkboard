@@ -53,7 +53,7 @@ const mobileStyle = `
   #drawing-options:not([hidden]){position:fixed!important;top:calc(62px + env(safe-area-inset-top))!important;bottom:auto!important;left:12px!important;right:auto!important;width:min(244px,calc(100vw - 24px))!important;max-height:160px!important;padding:11px!important;z-index:39;border-radius:12px;box-shadow:0 8px 24px #18274b1a}
   #drawing-options .panel-heading{display:none}
   #drawing-options .inspector-section{padding:0}
-  #inspector:not([hidden]){position:fixed;left:8px!important;right:8px!important;top:auto!important;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(52dvh,460px)!important;z-index:52;border-radius:14px;border:1px solid #e6e8ee;box-shadow:0 10px 32px #18274b24}
+  #inspector:not([hidden]){position:fixed;left:8px!important;right:8px!important;top:auto!important;bottom:calc(var(--mwd-offset, 80px) + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(52dvh,460px)!important;z-index:52;border-radius:8px;border:1px solid #ffffffb8;background:#fafaf8c7;backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);box-shadow:0 12px 32px #1e331c24,inset 0 1px 0 #ffffffd9}
   #inspector .format-heading{padding:4px 4px 8px}
   #mobile-selection-actions:not([hidden]){overflow-x:auto;scrollbar-width:none}
   #mobile-workspace-dock button:focus-visible,#mobile-tool-sheet button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}

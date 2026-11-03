@@ -65,9 +65,15 @@ export function renderInspector() {
   const selection = nodes.map((n) => n.id).join(',');
   const previous = body.dataset.selection === selection && body.dataset.compact === String(compact);
   const page = previous && compact ? body.dataset.activePage : 'Appearance';
+  const openSections = previous
+    ? [...body.querySelectorAll('details.format-card')]
+        .filter((group) => group.open)
+        .map((group) => group.dataset.formatSection)
+    : null;
   body.innerHTML = formatPanel(nodes, state.reshapeId, {
     compact,
     page,
+    openSections,
     outlineMode: state.reshapeMode,
   });
   body.dataset.activePage =

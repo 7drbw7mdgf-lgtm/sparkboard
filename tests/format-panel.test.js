@@ -18,8 +18,10 @@ const note = (id = 'note') => ({
 test('Format has five contextual, non-duplicated groups for a sticky', () => {
   const html = formatPanel([note()]);
   for (const heading of ['Appearance', 'Text', 'Layout', 'Arrange', 'Actions']) {
-    assert.equal(html.split('>' + heading + '</h4>').length - 1, 1, heading);
+    assert.equal(html.split('>' + heading + '</span>').length - 1, 1, heading);
   }
+  assert.match(html, /<svg viewBox="0 0 16 16"/);
+  assert.match(html, /data-format-section="Appearance" open/);
   for (const cmd of ['duplicate', 'delete', 'lock', 'front', 'back']) {
     assert.equal(html.split('data-command="' + cmd + '"').length - 1, 1, cmd);
   }

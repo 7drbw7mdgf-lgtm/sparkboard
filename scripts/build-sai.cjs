@@ -206,6 +206,31 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     'className="flex-shrink-0 flex items-center px-4 border-t border-[#e6e6e2] dark:border-gray-800"',
     'className="gantt-x-scroll flex-shrink-0 flex items-center px-4 border-t border-[#e6e6e2] dark:border-gray-800"',
   );
+  replaceRequired(
+    path.join(source, 'components/PillAccordion.tsx'),
+    "className={`w-full flex justify-between items-center px-3 py-1.5 rounded-full transition-all duration-300 cursor-pointer text-left ${isVisible ? 'bg-gray-100' : 'hover:bg-gray-100/50'}`}",
+    "className={`benchline-group w-full flex justify-between items-center gap-2 px-3 py-2 rounded-none border border-black/10 transition-colors cursor-pointer text-left ${isVisible ? 'bg-white/70' : 'bg-white/45 hover:bg-white/60'}`}",
+  );
+  replaceRequired(
+    path.join(source, 'components/PillAccordion.tsx'),
+    '<div className="flex-1 flex items-center gap-2.5 text-sm text-gray-700">',
+    '<span className="inline-block w-3 h-3 border border-[#4262ff] bg-[#4262ff]/20 shrink-0" aria-hidden="true"></span><div className="flex-1 flex items-center gap-2.5 text-sm text-gray-700">',
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskDetailPanel.tsx'),
+    '<div className="space-y-1">\n                    <MetadataRow icon={<UserCircleIcon className="w-5 h-5"/>} label="Assignees">',
+    '<details className="benchline-edit-group" open>\n                    <summary>Details</summary>\n                <div className="space-y-1">\n                    <MetadataRow icon={<UserCircleIcon className="w-5 h-5"/>} label="Assignees">',
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskDetailPanel.tsx'),
+    '</div>\n                \n                <div className="space-y-1">\n                    <div className="w-full flex items-center group py-2 px-3 -mx-3 rounded-lg">\n                        <div className="w-32 flex-shrink-0 flex items-center gap-3 text-sm font-medium text-gray-500">\n                           <ChartPieIcon className="w-5 h-5"/>',
+    '</div>\n                </details>\n\n                <details className="benchline-edit-group" open>\n                    <summary>Progress</summary>\n                <div className="space-y-1">\n                    <div className="w-full flex items-center group py-2 px-3 -mx-3 rounded-lg">\n                        <div className="w-32 flex-shrink-0 flex items-center gap-3 text-sm font-medium text-gray-500">\n                           <ChartPieIcon className="w-5 h-5"/>',
+  );
+  replaceRequired(
+    path.join(source, 'components/TaskDetailPanel.tsx'),
+    '</div>\n                </div>\n\n                <PillAccordion title="Assignments" defaultOpen>',
+    '</div>\n                </div>\n                </details>\n\n                <PillAccordion title="Assignments" defaultOpen>',
+  );
   for (const name of ['HostedPersistence.ts', 'HostedAIPanel.tsx', 'HostedMobileShell.tsx']) {
     fs.copyFileSync(path.join(root, 'integration/sai', name), path.join(source, name));
   }
