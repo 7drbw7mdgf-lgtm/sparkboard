@@ -58,21 +58,17 @@ test('two-finger twist follows the fingers and wraps past a half turn', () => {
   assert.equal(rotationAfterTwist(-170, -20), 170);
 });
 
-test('a twist turns the shape under the fingers and a pinch still navigates', () => {
+test('a twist requires both fingers on the same shape and a pinch still navigates', () => {
   const shape = { id: 'shape', type: 'diamond', locked: false };
   const locked = { id: 'locked', type: 'circle', locked: true };
   const wire = { id: 'wire', type: 'connector' };
   const objects = [shape, locked, wire];
   const targetFor = (id) => ({ closest: () => ({ dataset: { id } }) });
   assert.equal(twistTarget([targetFor('locked'), targetFor('wire')], objects, new Set()), null);
-  assert.equal(
-    twistTarget([targetFor('wire'), targetFor('shape')], objects, new Set()).id,
-    'shape',
-  );
-  assert.equal(
-    twistTarget([targetFor('shape'), targetFor('locked')], objects, new Set(['locked'])).id,
-    'shape',
-  );
+  assert.equal(twistTarget([targetFor('wire'), targetFor('shape')], objects, new Set()), null);
+  assert.equal(twistTarget([targetFor('shape'), targetFor('locked')], objects, new Set()), null);
+  assert.equal(twistTarget([targetFor('shape'), { closest: () => null }], objects), null);
+  assert.equal(twistTarget([targetFor('shape'), targetFor('shape')], objects).id, 'shape');
   const pinch = {
     targetId: 'shape',
     deltaDegrees: 3,
