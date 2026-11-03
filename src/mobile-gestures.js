@@ -37,11 +37,12 @@ export function objectFromTarget(target, objects) {
   return objects?.find((item) => item.id === id) || null;
 }
 
-/** Prefer the selected object under either finger, otherwise the later finger. */
-export function twistTarget(targets, objects, selectedIds) {
-  const found = targets.map((target) => objectFromTarget(target, objects)).filter(canTurn);
-  if (!found.length) return null;
-  return found.find((item) => selectedIds?.has(item.id)) || found[found.length - 1];
+/** Rotate only when both fingers are on the same editable object.
+ * A finger on empty canvas must never rotate the previously selected shape.
+ */
+export function twistTarget(targets, objects) {
+  const [first, second] = targets.map((target) => objectFromTarget(target, objects));
+  return first && second && first.id === second.id && canTurn(first) ? first : null;
 }
 
 /**
@@ -98,16 +99,10 @@ export function setupMobileGestures() {
         // End any pending one-finger drag before taking ownership of both touches.
         endPointer();
         const active = [...pointers.values()];
-        const under = twistTarget(
+        const target = twistTarget(
           active.map((pointer) => pointer.target),
           state.board?.objects,
-          state.selected,
         );
-        const selectedOnly =
-          !under && state.selected?.size === 1
-            ? state.board?.objects.find((item) => state.selected.has(item.id) && canTurn(item))
-            : null;
-        const target = under || selectedOnly;
         gesture = {
           view: { ...state.view },
           touches: currentTouches(),
