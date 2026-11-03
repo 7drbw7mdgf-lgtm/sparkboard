@@ -64,9 +64,12 @@ function upsertConnector(props) {
   props = { ...props };
   for (const field of ['fromPort', 'toPort', 'fromAnchor', 'toAnchor'])
     if (!props[field]) delete props[field];
+  const role = (o) => (o.mindBranch ? 'branch' : o.relationship ? 'relationship' : 'connector');
+  const incomingRole = role(props);
   const existing = state.board.objects.find(
     (o) =>
       o.type === 'connector' &&
+      role(o) === incomingRole &&
       ((o.from === props.from && o.to === props.to) ||
         (o.from === props.to && o.to === props.from)),
   );
@@ -385,16 +388,8 @@ function connectionProps(drag, draft) {
   const fromNode = state.board.objects.find((item) => item.id === drag.from);
   const toNode = state.board.objects.find((item) => item.id === draft.to);
   const bothMind = isMindNode(fromNode) && isMindNode(toNode);
-  const samePair = (edge) =>
-    (edge.from === drag.from && edge.to === draft.to) ||
-    (edge.from === draft.to && edge.to === drag.from);
-  if (
-    bothMind &&
-    state.board.objects.some(
-      (item) => item.type === 'connector' && item.mindBranch && samePair(item),
-    )
-  )
-    return null;
+  // Relationship curves are independent of the hierarchy link, even between
+  // a parent and its child; the user can pin either end later.
   const base = { from: drag.from, to: draft.to, ...opts };
   if (bothMind) return { ...base, relationship: true, route: 'curved', endArrow: 'arrow' };
   if (drag.fromPort === 'c') return base;
@@ -520,12 +515,6 @@ export function endPointer(e) {
     }
     if (draft?.to && draft.to !== d.from) {
       const props = connectionProps(d, draft);
-      if (!props) {
-        state.connectorStart = null;
-        toast('These topics already share a branch');
-        renderLines();
-        return;
-      }
       let createdId;
       commit(() => {
         createdId = upsertConnector(props);
