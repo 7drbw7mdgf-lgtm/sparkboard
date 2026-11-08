@@ -12,6 +12,24 @@ const WORKSPACE_HREF = '/?workspace=1';
  * amber, red) and point every interactive accent at the same blue.
  */
 const themeCss = `
+/* Sparkboard base typography + UI materials, also used by hosted task panels. */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap');
+html:not(.dark) body,html:not(.dark) #root{font-family:'DM Sans',sans-serif!important;color:#292c31}
+html:not(.dark) h1,html:not(.dark) h2,html:not(.dark) h3,html:not(.dark) .benchline-app-header [aria-label="Benchline"]{font-family:'Manrope',sans-serif}
+html:not(.dark) main{background:#fafaf8}
+html:not(.dark) .benchline-overview>div>div>section,html:not(.dark) .benchline-overview>div>div>div>section{border-color:#e6e6e2}
+html:not(.dark) .benchline-sidebar,html:not(.dark) .benchline-app-header{border-color:#e6e6e2!important}
+html:not(.dark) input:not([type=checkbox]):not([type=radio]),html:not(.dark) textarea,html:not(.dark) select{font-family:'DM Sans',sans-serif}
+html:not(.dark) :is(button,input,textarea,select,[tabindex]):focus-visible{outline:2px solid #4262ff;outline-offset:2px}
+html:not(.dark) input[type=checkbox],html:not(.dark) input[type=radio],html:not(.dark) input[type=range]{accent-color:#4262ff}
+.benchline-top-actions{display:flex;align-items:center;gap:5px}
+.benchline-top-actions button{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;padding:0 9px;border:1px solid #e6e6e2;background:#fff;border-radius:8px;color:#3c4656;font:700 19px/1 'DM Sans',sans-serif}
+.benchline-top-actions button:hover:not(:disabled){background:#f0efeb}
+.benchline-top-actions button:disabled{opacity:.35;cursor:not-allowed}
+.benchline-top-actions .benchline-top-new{font:700 12px/1 'DM Sans',sans-serif;background:#4262ff!important;color:white!important;border-color:#4262ff}
+.benchline-top-actions .benchline-top-new:hover{background:#2f4fe0!important}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){.benchline-top-actions{display:none}}
+
 html:not(.dark) body{background:#fafaf8;color:#292c31}
 html:not(.dark) .text-gray-400{color:#5c6570!important}
 html:not(.dark) .text-gray-500{color:#3f4650!important}
@@ -269,6 +287,10 @@ body.benchline-phone .gantt-x-scroll{display:none!important}
 #benchline-phone-chrome .bpc-menu{position:absolute;top:46px;right:8px;min-width:180px;background:#fff;border:1px solid #e6e6e2;border-radius:10px;box-shadow:0 8px 24px #18274b1f;padding:6px}
 #benchline-phone-chrome .bpc-menu button{display:flex;width:100%;min-height:44px;align-items:center;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#292c31;font:600 15px/1 'DM Sans',system-ui,sans-serif;text-align:left}
 #benchline-phone-chrome .bpc-menu button:active{background:#f0efeb}
+#benchline-phone-chrome .bpc-command-row{display:flex;gap:6px;padding:5px;border-bottom:1px solid #e6e6e2;margin-bottom:5px}
+#benchline-phone-chrome .bpc-command-row button{flex:1;justify-content:center;background:#f3f5ff;color:#304bdc;font-weight:750}
+#benchline-phone-chrome .bpc-command-row button:disabled{opacity:.35;cursor:not-allowed}
+
 #benchline-phone-chrome button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
 `;
 
@@ -285,6 +307,10 @@ interface HostedMobileShellProps {
   onAddTask: () => void;
   onSettings: () => void;
   onHelp: () => void;
+  undo?: () => void;
+  redo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 export default function HostedMobileShell({
@@ -293,6 +319,10 @@ export default function HostedMobileShell({
   onAddTask,
   onSettings,
   onHelp,
+  undo,
+  redo,
+  canUndo = false,
+  canRedo = false,
 }: HostedMobileShellProps) {
   const [compact, setCompact] = useState(
     () => typeof window !== 'undefined' && window.matchMedia(COMPACT_QUERY).matches,
@@ -382,6 +412,11 @@ export default function HostedMobileShell({
           </div>
           {menu ? (
             <div className="bpc-menu" role="menu">
+              <div className="bpc-command-row" aria-label="Project edit commands">
+                <button type="button" role="menuitem" disabled={!canUndo} onClick={() => { setMenu(false); undo?.(); }}>↶ Undo</button>
+                <button type="button" role="menuitem" disabled={!canRedo} onClick={() => { setMenu(false); redo?.(); }}>↷ Redo</button>
+              </div>
+
               <button
                 type="button"
                 role="menuitem"
