@@ -255,6 +255,17 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     '<PillAccordion title={<><SyncArrowsIcon className="w-5 h-5 text-gray-500" /><span className="font-semibold">Calendar Sync & Export</span></>}>',
   );
   // Keep upstream data structures and Gantt interaction code; apply focused view patches.
+  // Expose the same primary edit commands in Benchline's header and compact menu.
+  replaceRequired(
+    app,
+    '<Header currentView={currentView}',
+    '<Header onAddTask={() => setIsAddTaskPanelOpen(true)} onHelp={() => setIsShortcutHelpOpen(true)} onViewChange={setCurrentView} currentView={currentView}',
+  );
+  replaceRequired(
+    app,
+    '<HostedMobileShell currentView={currentView}',
+    '<HostedMobileShell undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} currentView={currentView}',
+  );
   require('./patch-sai-planner.cjs').patchHostedPlanner(source);
   require('./patch-sai-gantt.cjs').patchHostedGantt(source);
   require('./patch-sai-calendar.cjs').patchHostedCalendar(source);
