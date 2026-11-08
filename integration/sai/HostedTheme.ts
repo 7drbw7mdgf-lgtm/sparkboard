@@ -2,7 +2,7 @@
 export const hostedThemeCss = `
 :root{
 --benchline-brand:#4262ff;--benchline-brand-hover:#2f4fe0;--benchline-brand-soft:#e8edff;--benchline-brand-ink:#304bdc;
---benchline-page:#fafaf8;--benchline-surface:#fff;--benchline-subtle:#f5f6f8;--benchline-hover:#f0efeb;
+--benchline-page:#ffffff;--benchline-surface:#fff;--benchline-subtle:#f5f6f8;--benchline-hover:#f0efeb;
 --benchline-border:#e6e6e2;--benchline-ink:#292c31;--benchline-secondary:#5c6570;--benchline-radius:9px
 }
 html.dark,body.dark{
@@ -65,4 +65,110 @@ html:not(.dark) #root .benchline-kanban-column,html:not(.dark) #root .benchline-
 .dark #root .benchline-kanban-edit-action{background:var(--benchline-subtle)!important;color:var(--benchline-ink);border-color:var(--benchline-border)!important}
 .dark #root .benchline-gantt-date-row:first-child,.dark #root .benchline-calendar-day-heading{background:var(--benchline-brand-soft)!important}
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){#root .animate-slide-in-right{border-radius:0!important}}
+
+/* White-first layout matching Sparkboard: white workspace and chrome, subtle borders. */
+html:not(.dark) body,html:not(.dark) #root,html:not(.dark) #root main,
+html:not(.dark) #root .benchline-overview,
+html:not(.dark) #root .benchline-calendar,
+html:not(.dark) #root .benchline-gantt,
+html:not(.dark) #root .benchline-kanban,
+html:not(.dark) #root .benchline-gantt .gantt-timeline,
+html:not(.dark) #root .benchline-gantt .gantt-task-list,
+html:not(.dark) #root .benchline-calendar-overview{
+  background:#fff!important;
+  color:#292c31;
+}
+html:not(.dark) #root .benchline-gantt-date-row,
+html:not(.dark) #root .benchline-calendar-toolbar,
+html:not(.dark) #root .benchline-gantt-toolbar,
+html:not(.dark) #root .benchline-calendar-timegrid,
+html:not(.dark) #root .benchline-calendar-month-view{
+  background:#fff!important;
+}
+html:not(.dark) #root .benchline-gantt-date-row:first-child,
+html:not(.dark) #root .benchline-calendar-day-heading{
+  background:#f8f9fc!important;
+}
+html:not(.dark) #root .benchline-gantt-scale-select,
+html:not(.dark) #root #benchline-calendar-view{
+  background:#fff!important;
+  color:#292c31;
+  border-color:#e6e6e2;
+}
+html:not(.dark) #root .benchline-app-header,
+html:not(.dark) #root .benchline-sidebar,
+html:not(.dark) #root .benchline-calendar-toolbar,
+html:not(.dark) #root .benchline-gantt-toolbar{
+  box-shadow:none;
+  border-color:#e6e6e2!important;
+}
+#root .benchline-gantt-task-wrapper{pointer-events:auto;touch-action:none}
+#root .benchline-gantt-task-bar{
+  touch-action:none!important;
+  cursor:grab;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#root .benchline-gantt-task-bar:active{cursor:grabbing}
+#root .benchline-gantt-resize-handle{touch-action:none!important;cursor:ew-resize}
+#root .benchline-gantt-toolbar{gap:10px;padding:0 12px!important;min-height:52px;height:52px!important}
+#root .benchline-gantt-toolbar-title{color:var(--benchline-ink);font-weight:700;white-space:nowrap}
+#root .benchline-gantt-more,#root .benchline-calendar-more{position:relative;flex:none}
+#root .benchline-gantt-more>summary,#root .benchline-calendar-more>summary{
+  display:flex;align-items:center;justify-content:center;min-height:36px;min-width:38px;
+  border:1px solid var(--benchline-border);border-radius:8px;
+  background:var(--benchline-surface);color:var(--benchline-secondary);
+  cursor:pointer;list-style:none;padding:0 9px;font-weight:700;
+}
+#root .benchline-gantt-more>summary::-webkit-details-marker,
+#root .benchline-calendar-more>summary::-webkit-details-marker{display:none}
+#root .benchline-gantt-more[open]>summary,#root .benchline-calendar-more[open]>summary{
+  color:var(--benchline-brand-ink);border-color:var(--benchline-brand);background:var(--benchline-brand-soft);
+}
+#root .benchline-gantt-more-panel,#root .benchline-calendar-more-panel{
+  position:absolute;z-index:90;top:calc(100% + 8px);right:0;
+  display:flex;flex-direction:column;align-items:stretch;gap:9px;
+  min-width:220px;padding:12px;background:var(--benchline-surface);
+  border:1px solid var(--benchline-border);border-radius:11px;
+  box-shadow:0 14px 32px #17294a26;
+}
+#root .benchline-gantt-more-panel>button,#root .benchline-calendar-more-panel>button{
+  min-height:38px;padding:8px 10px;text-align:left;border:1px solid var(--benchline-border);
+  border-radius:8px;color:var(--benchline-ink);background:var(--benchline-surface);
+}
+#root .benchline-calendar-more-panel>label{
+  display:grid;gap:5px;font-size:12px;color:var(--benchline-secondary);font-weight:650;
+}
+#root .benchline-calendar-more-panel input[type=date]{
+  min-height:38px;padding:7px;border:1px solid var(--benchline-border);
+  border-radius:8px;background:var(--benchline-surface);color:var(--benchline-ink);
+}
+#root .benchline-calendar-more-panel .benchline-calendar-sources>summary{
+  width:100%;min-height:38px;padding:8px 10px;background:var(--benchline-subtle);
+  border:1px solid var(--benchline-border);border-radius:8px;
+}
+#root .benchline-calendar-more-panel .benchline-calendar-source-popover{
+  position:static;box-shadow:none;padding:8px;margin-top:5px;
+}
+#root .benchline-gantt-scale-controls{gap:5px}
+#root .benchline-gantt-scale-label,#root .benchline-gantt-zoom span{display:none}
+#root .benchline-gantt-scale-select{min-width:98px;min-height:36px}
+#root .benchline-gantt-zoom{margin-left:0}
+#root .benchline-gantt-actions{gap:7px!important}
+#root .benchline-calendar-toolbar{min-height:52px;padding:8px 12px}
+#root .benchline-calendar-actions{gap:6px}
+#root .benchline-calendar-actions>label{display:none}
+#root .benchline-calendar-actions>select{min-width:104px}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){
+  #root .benchline-gantt-toolbar{padding:6px 9px!important;min-height:52px}
+  #root .benchline-gantt-toolbar-title{display:none}
+  #root .benchline-gantt-actions{width:100%!important;min-width:0!important;justify-content:flex-end}
+  #root .benchline-gantt-scale-controls{flex:1;min-width:0}
+  #root .benchline-gantt-scale-select{min-width:0;width:100%}
+  #root .benchline-calendar-toolbar{flex-wrap:wrap;gap:7px}
+  #root .benchline-calendar-title-row{flex:1;min-width:0}
+  #root .benchline-calendar-actions{width:auto!important;min-width:0;flex:none;overflow:visible}
+  #root .benchline-calendar-more-panel{right:0;min-width:205px}
+}
+.dark #root .benchline-gantt-more-panel,.dark #root .benchline-calendar-more-panel{background:var(--benchline-surface);border-color:var(--benchline-border)}
 `;
