@@ -170,6 +170,9 @@ function patchHostedCalendar(root) {
 
   // Time headings and event cards gain explicitly addressable styles.
   s = swap(s,
+    '    return (\n        <div className="flex h-full bg-white dark:bg-gray-900">\n            {/* Sidebar */}',
+    '    return (\n        <div className="benchline-calendar flex h-full bg-white dark:bg-gray-900">\n            {/* Sidebar */}');
+  s = swap(s,
     '        <div className="flex flex-col h-full bg-white dark:bg-gray-900 overflow-hidden">\n            {/* Header Row */}',
     '        <div className="benchline-calendar-timegrid flex flex-col h-full bg-white dark:bg-gray-900 overflow-hidden" data-days={numDays}>\n            {/* Header Row */}');
   s = swap(s,
