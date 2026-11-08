@@ -124,7 +124,7 @@ function createTask() {
           220,
           90,
           name,
-          '#d6ecde',
+          '#e8edff',
         );
         item.id = nodeId;
         state.board.objects.push(item);
@@ -136,7 +136,7 @@ function createTask() {
             to: item.id,
             route: 'elbow',
             endArrow: 'arrow',
-            color: '#65937c',
+            color: '#8699e5',
           });
         }
       }
