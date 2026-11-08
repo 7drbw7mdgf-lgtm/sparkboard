@@ -101,8 +101,8 @@ export default function HostedHeader({
         return;
       }
       if (modifier || event.altKey || event.shiftKey) return;
-      if (onViewChange && ['1', '2', '3', '4', '5'].includes(event.key)) {
-        const destinations = [View.HOME, View.TASKS, View.GANTT, View.CALENDAR, View.KANBAN];
+      if (onViewChange && ['1', '2', '3', '4'].includes(event.key)) {
+        const destinations = [View.HOME, View.TASKS, View.GANTT, View.CALENDAR];
         event.preventDefault();
         onViewChange(destinations[Number(event.key) - 1]);
         return;
@@ -153,7 +153,7 @@ export default function HostedHeader({
             ? 'Overview'
             : currentView === View.GANTT
               ? 'Timeline'
-              : currentView}
+              : currentView === View.KANBAN ? 'Tasks' : currentView}
         </span>
       </div>
       <div className="flex min-w-0 items-center justify-end gap-3">
@@ -238,7 +238,7 @@ export default function HostedHeader({
             {menuButton('Change project dates', onTimeframe)}
             {onHelp && menuButton('Keyboard shortcuts', onHelp)}
             <p className="px-3 py-1 text-[11px] leading-relaxed text-[#667085] dark:text-gray-400">
-              N new task · / search · 1–5 views · ⌘/Ctrl+Z undo
+              N new task · / search · 1–4 views · ⌘/Ctrl+Z undo
             </p>
             <div className="my-1 border-t border-[#edf0f3] dark:border-gray-800" />
             <div className="flex gap-1">
