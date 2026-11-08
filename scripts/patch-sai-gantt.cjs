@@ -19,6 +19,12 @@ function swap(text, find, replacement, expected = 1) {
   return text.split(find).join(replacement);
 }
 
+function swapFirst(text, find, replacement) {
+  const at = text.indexOf(find);
+  if (at < 0) throw Error('Gantt first patch missing: ' + find.slice(0, 95));
+  return text.slice(0, at) + replacement + text.slice(at + find.length);
+}
+
 function patchHostedGantt(root) {
   const components = path.join(root, 'components');
   edit(path.join(components, 'ganttLayout.ts'), s =>
@@ -133,7 +139,7 @@ function patchHostedGantt(root) {
     s = swap(s, "document.addEventListener('mouseup', handleMouseUp)", "document.addEventListener('pointerup', handleMouseUp)", 2);
 
     // Pointer cancel must roll back any uncommitted preview, e.g. interrupted touch.
-    s = swap(s,
+    s = swapFirst(s,
       "        document.addEventListener('pointermove', handleMouseMove);\n        document.addEventListener('pointerup', handleMouseUp);\n    };",
       [
         '        const handleCancel = (event: PointerEvent) => {',
