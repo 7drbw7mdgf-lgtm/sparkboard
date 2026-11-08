@@ -308,6 +308,58 @@ body.benchline-phone .gantt-x-scroll{display:none!important}
 
 #benchline-phone-chrome button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
 
+/* Consistent compact hit areas without varying glyph baselines. */
+#benchline-phone-chrome .bpc-row{box-sizing:border-box;align-items:center}
+#benchline-phone-chrome .bpc-view select{height:34px;line-height:1.2}
+#benchline-phone-chrome .bpc-new,
+#benchline-phone-chrome .bpc-menu-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  gap:5px;
+  box-sizing:border-box;
+  height:36px;
+  min-height:36px;
+  line-height:1.2;
+}
+#benchline-phone-chrome .bpc-new{padding:0 10px}
+#benchline-phone-chrome .bpc-menu-btn{width:38px;padding:0}
+#benchline-phone-chrome .benchline-icon{
+  display:block;
+  width:18px;height:18px;flex:none;
+}
+#benchline-phone-chrome .bpc-menu button[role="menuitem"]{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:0 12px;
+  min-height:44px;
+  line-height:1.25;
+}
+#benchline-phone-chrome .bpc-menu button[role="menuitem"] .benchline-icon{flex:0 0 18px}
+#benchline-phone-chrome .bpc-command-row button[role="menuitem"]{
+  justify-content:center;
+  gap:6px;
+}
+body.benchline-phone #root .benchline-calendar-nav>button,
+body.benchline-phone #root .benchline-gantt-more>summary,
+body.benchline-phone #root .benchline-calendar-more>summary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding-block:0!important;
+  box-sizing:border-box;
+  line-height:1;
+}
+body.benchline-phone #root .benchline-calendar-title{
+  margin:0;
+  display:block;
+  line-height:1.25;
+}
+
+
 /* Compact navigation: one view selector instead of four scrolling tabs. */
 body.benchline-phone header.benchline-app-header{height:42px!important;min-height:42px!important}
 body.benchline-phone header.benchline-app-header>div>span[aria-label="Benchline"]{font-size:14px!important}
