@@ -1,5 +1,5 @@
 name: Repair formatting and redeploy Fasthosts
-# Format and validate the swipe-first interactive Sparkboard homepage.
+# Validate the interactive carousel, accessibility, and preserved Benchline disclosures.
 
 on:
   push:
