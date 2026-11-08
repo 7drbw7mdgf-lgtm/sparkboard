@@ -149,7 +149,13 @@ test('Benchline consistently uses Sparkboard visual tokens including installed a
   for (const color of ['#4262ff', '#fafaf8', '#e6e6e2', '#292c31']) {
     assert.ok(theme.includes(color), `Missing shared colour ${color}`);
   }
-  for (const view of ['benchline-overview', 'benchline-kanban', 'benchline-calendar', 'benchline-gantt', 'animate-slide-in-right']) {
+  for (const view of [
+    'benchline-overview',
+    'benchline-kanban',
+    'benchline-calendar',
+    'benchline-gantt',
+    'animate-slide-in-right',
+  ]) {
     assert.ok(theme.includes(view), `Missing shared styling for ${view}`);
   }
   assert.match(shell, /import \{ hostedThemeCss \} from '\.\/HostedTheme'/);

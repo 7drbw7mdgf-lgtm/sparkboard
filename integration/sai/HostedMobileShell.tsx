@@ -427,8 +427,28 @@ export default function HostedMobileShell({
           {menu ? (
             <div className="bpc-menu" role="menu">
               <div className="bpc-command-row" aria-label="Project edit commands">
-                <button type="button" role="menuitem" disabled={!canUndo} onClick={() => { setMenu(false); undo?.(); }}>↶ Undo</button>
-                <button type="button" role="menuitem" disabled={!canRedo} onClick={() => { setMenu(false); redo?.(); }}>↷ Redo</button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={!canUndo}
+                  onClick={() => {
+                    setMenu(false);
+                    undo?.();
+                  }}
+                >
+                  ↶ Undo
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={!canRedo}
+                  onClick={() => {
+                    setMenu(false);
+                    redo?.();
+                  }}
+                >
+                  ↷ Redo
+                </button>
               </div>
 
               <button

@@ -37,9 +37,14 @@ function decorateTasks() {
       const tag = document.createElement('span');
       const handoff = taskHandoffStatus(item.sparkTask.id);
       tag.className =
-        'spark-task-tag' + (handoff === 'queued' ? ' is-pending' : handoff === 'missing' ? ' is-failed' : '');
+        'spark-task-tag' +
+        (handoff === 'queued' ? ' is-pending' : handoff === 'missing' ? ' is-failed' : '');
       tag.textContent =
-        handoff === 'saved' ? '✓ Sent to Benchline' : handoff === 'queued' ? '↗ To Benchline' : '↻ Task not sent';
+        handoff === 'saved'
+          ? '✓ Sent to Benchline'
+          : handoff === 'queued'
+            ? '↗ To Benchline'
+            : '↻ Task not sent';
       tag.title =
         handoff === 'saved'
           ? 'Sent to Benchline on this browser profile. Later edits and deletion are not synchronised.'
@@ -186,7 +191,10 @@ export function setupTaskWorkspace() {
   window.addEventListener('storage', (event) => {
     if (event.key === TASK_BRIDGE_RECEIPT_KEY) decorateTasks();
   });
-  window.addEventListener('focus', () => { retryBoardTasks(); decorateTasks(); });
+  window.addEventListener('focus', () => {
+    retryBoardTasks();
+    decorateTasks();
+  });
   // A board may open after initialisation. Render is dispatched when the board is mounted.
   document.addEventListener('sparkboard:render', retryBoardTasks);
   decorateTasks();

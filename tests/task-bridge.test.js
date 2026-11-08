@@ -87,4 +87,3 @@ test('Sparkboard shows queued versus saved status and never resends acknowledged
   assert.equal(publishTask(task, store), true);
   assert.deepEqual(readTaskQueue(store), []);
 });
-

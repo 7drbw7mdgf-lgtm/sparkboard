@@ -147,8 +147,11 @@ export function saveHostedProject(data: ProjectData): void {
       let previous: string[] = [];
       try {
         const parsed = JSON.parse(localStorage.getItem(TASK_BRIDGE_RECEIPT_KEY) || '[]');
-        if (Array.isArray(parsed)) previous = parsed.filter((id): id is string => typeof id === 'string');
-      } catch { /* invalid local receipts can be replaced */ }
+        if (Array.isArray(parsed))
+          previous = parsed.filter((id): id is string => typeof id === 'string');
+      } catch {
+        /* invalid local receipts can be replaced */
+      }
       const receiptIds = [...new Set([...previous, ...imported])].slice(-5000);
       localStorage.setItem(TASK_BRIDGE_RECEIPT_KEY, JSON.stringify(receiptIds));
     }

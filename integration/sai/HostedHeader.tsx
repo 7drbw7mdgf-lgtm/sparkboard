@@ -65,7 +65,8 @@ export default function HostedHeader({
     const handleShortcuts = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing) return;
       const target = event.target;
-      const typing = target instanceof HTMLElement &&
+      const typing =
+        target instanceof HTMLElement &&
         (target.matches('input, textarea, select, [contenteditable="true"]') ||
           !!target.closest('[contenteditable="true"]'));
       const modalOpen = !!document.querySelector('dialog[open], [role="dialog"]');
@@ -156,9 +157,34 @@ export default function HostedHeader({
       </div>
       <div className="flex min-w-0 items-center justify-end gap-3">
         <div className="benchline-top-actions" role="group" aria-label="Project editing">
-          <button type="button" onClick={undo} disabled={!canUndo} title="Undo (⌘/Ctrl+Z)" aria-label="Undo change">↶</button>
-          <button type="button" onClick={redo} disabled={!canRedo} title="Redo (⌘/Ctrl+Shift+Z)" aria-label="Redo change">↷</button>
-          {onAddTask && <button type="button" className="benchline-top-new" onClick={onAddTask} title="New task (N)">+ Task</button>}
+          <button
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo (⌘/Ctrl+Z)"
+            aria-label="Undo change"
+          >
+            ↶
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo (⌘/Ctrl+Shift+Z)"
+            aria-label="Redo change"
+          >
+            ↷
+          </button>
+          {onAddTask && (
+            <button
+              type="button"
+              className="benchline-top-new"
+              onClick={onAddTask}
+              title="New task (N)"
+            >
+              + Task
+            </button>
+          )}
         </div>
         <button
           type="button"

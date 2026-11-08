@@ -5827,26 +5827,86 @@ body.is-panning #canvas {
 }
 
 /* Distinct mindmap creation buttons and connector ports are deliberately separated. */
-#objects .mm-daughter,#objects .mm-sibling{outline-offset:3px}
-#objects .mm-daughter:focus-visible,#objects .mm-sibling:focus-visible{outline:2px solid #4262ff}
-#objects .object.selected>.mm-daughter,#objects .object.selected>.mm-sibling{pointer-events:auto}
-#objects .object.selected>.port{z-index:5}
-#objects .object.selected>.mm-daughter,#objects .object.selected>.mm-sibling{z-index:10}
-@media(pointer:coarse){
-  #objects .mm-daughter,#objects .mm-sibling{min-width:34px;min-height:34px}
+#objects .mm-daughter,
+#objects .mm-sibling {
+  outline-offset: 3px;
+}
+#objects .mm-daughter:focus-visible,
+#objects .mm-sibling:focus-visible {
+  outline: 2px solid #4262ff;
+}
+#objects .object.selected > .mm-daughter,
+#objects .object.selected > .mm-sibling {
+  pointer-events: auto;
+}
+#objects .object.selected > .port {
+  z-index: 5;
+}
+#objects .object.selected > .mm-daughter,
+#objects .object.selected > .mm-sibling {
+  z-index: 10;
+}
+@media (pointer: coarse) {
+  #objects .mm-daughter,
+  #objects .mm-sibling {
+    min-width: 34px;
+    min-height: 34px;
+  }
 }
 /* Precise orthogonal-route editing inherits Sparkboard field and action styles. */
-.connector-advanced .ca-bend-editor{margin:0;padding:12px;border:1px solid #e6e6e2;border-radius:10px;min-width:0;background:#fafaf8}
-.connector-advanced .ca-bend-editor legend{padding:0 6px;color:#292c31;font:750 13px/1.2 Manrope,sans-serif}
-.connector-advanced .ca-bend-editor:disabled{opacity:.52}
-.connector-advanced .ca-bend-editor .ca-buttons button{min-width:80px;min-height:40px}
-.connector-advanced .ca-primary{background:#4262ff;color:#fff}
-.connector-advanced .ca-primary:hover{background:#2f4fe0}
-.connector-advanced :is(input,select){border-color:#e6e6e2;color:#292c31}
-.connector-advanced :is(input,select):focus-visible{outline:2px solid #4262ff;outline-offset:2px}
-.connector-advanced .ca-buttons button{border-color:#e6e6e2;background:#f5f6f8;color:#36415a}
-.connector-advanced .ca-buttons button:hover{background:#e8edff;border-color:#96a9fd;color:#304bdc}
-@media(max-width:650px),(max-height:500px) and (pointer:coarse){
-  .connector-advanced .ca-bend-editor .ca-grid{grid-template-columns:1fr 1fr}
-  .connector-advanced .ca-bend-editor .ca-buttons button{min-height:44px;flex:1 1 120px}
+.connector-advanced .ca-bend-editor {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e6e6e2;
+  border-radius: 10px;
+  min-width: 0;
+  background: #fafaf8;
+}
+.connector-advanced .ca-bend-editor legend {
+  padding: 0 6px;
+  color: #292c31;
+  font:
+    750 13px/1.2 Manrope,
+    sans-serif;
+}
+.connector-advanced .ca-bend-editor:disabled {
+  opacity: 0.52;
+}
+.connector-advanced .ca-bend-editor .ca-buttons button {
+  min-width: 80px;
+  min-height: 40px;
+}
+.connector-advanced .ca-primary {
+  background: #4262ff;
+  color: #fff;
+}
+.connector-advanced .ca-primary:hover {
+  background: #2f4fe0;
+}
+.connector-advanced :is(input, select) {
+  border-color: #e6e6e2;
+  color: #292c31;
+}
+.connector-advanced :is(input, select):focus-visible {
+  outline: 2px solid #4262ff;
+  outline-offset: 2px;
+}
+.connector-advanced .ca-buttons button {
+  border-color: #e6e6e2;
+  background: #f5f6f8;
+  color: #36415a;
+}
+.connector-advanced .ca-buttons button:hover {
+  background: #e8edff;
+  border-color: #96a9fd;
+  color: #304bdc;
+}
+@media (max-width: 650px), (max-height: 500px) and (pointer: coarse) {
+  .connector-advanced .ca-bend-editor .ca-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .connector-advanced .ca-bend-editor .ca-buttons button {
+    min-height: 44px;
+    flex: 1 1 120px;
+  }
 }

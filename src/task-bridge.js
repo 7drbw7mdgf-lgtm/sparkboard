@@ -21,7 +21,6 @@ export function taskHandoffStatus(id, storage) {
   return readTaskQueue(storage).some((task) => task.id === id) ? 'queued' : 'missing';
 }
 
-
 function notifyOpenPlanner() {
   try {
     const channel = new BroadcastChannel(TASK_BRIDGE_CHANNEL);

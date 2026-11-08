@@ -167,7 +167,8 @@ export function openConnectorControls(target) {
   // Route and pattern editing remain available for non-elbow connectors.
   element.addEventListener('change', (event) => {
     if (event.target.id === 'ca-route')
-      $('#ca-bend-editor').disabled = event.target.value !== 'elbow' || !liveConnector(id)?.waypoints?.length;
+      $('#ca-bend-editor').disabled =
+        event.target.value !== 'elbow' || !liveConnector(id)?.waypoints?.length;
   });
   element.addEventListener('click', (event) => {
     const action = event.target.closest('[data-ca-tool]')?.dataset.caTool;
@@ -187,11 +188,18 @@ export function openConnectorControls(target) {
         const selected = Number($('#ca-bend-index').value);
         const step = Number($('#ca-bend-step').value) || 10;
         if (action === 'straighten') {
-          if (points.length && points.every((point) => Number.isFinite(point.x) && Number.isFinite(point.y))) {
+          if (
+            points.length &&
+            points.every((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+          ) {
             const start = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects).start;
             const end = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects).end;
             const horizontal = Math.abs(end.x - start.x) >= Math.abs(end.y - start.y);
-            next.waypoints = points.map((point) => horizontal ? { x: point.x, y: Math.round(start.y) } : { x: Math.round(start.x), y: point.y });
+            next.waypoints = points.map((point) =>
+              horizontal
+                ? { x: point.x, y: Math.round(start.y) }
+                : { x: Math.round(start.x), y: point.y },
+            );
             next.avoidObstacles = false;
           }
         } else if (Number.isInteger(selected) && selected >= 0 && points[selected]) {
@@ -200,7 +208,12 @@ export function openConnectorControls(target) {
           else if (action === 'set') {
             const x = Number($('#ca-bend-x').value);
             const y = Number($('#ca-bend-y').value);
-            if ($('#ca-bend-x').value !== '' && $('#ca-bend-y').value !== '' && Number.isFinite(x) && Number.isFinite(y)) {
+            if (
+              $('#ca-bend-x').value !== '' &&
+              $('#ca-bend-y').value !== '' &&
+              Number.isFinite(x) &&
+              Number.isFinite(y)
+            ) {
               points[selected] = { x: Math.round(x), y: Math.round(y) };
             }
           } else {
@@ -214,9 +227,10 @@ export function openConnectorControls(target) {
       if (action === 'elbow-h' || action === 'elbow-v') {
         const automatic = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects);
         if (automatic.start && automatic.end) {
-          const p = action === 'elbow-h'
-            ? { x: Math.round(automatic.end.x), y: Math.round(automatic.start.y) }
-            : { x: Math.round(automatic.start.x), y: Math.round(automatic.end.y) };
+          const p =
+            action === 'elbow-h'
+              ? { x: Math.round(automatic.end.x), y: Math.round(automatic.start.y) }
+              : { x: Math.round(automatic.start.x), y: Math.round(automatic.end.y) };
           next.route = 'elbow';
           next.waypoints = [p];
           next.avoidObstacles = false;
@@ -239,20 +253,47 @@ export function openConnectorControls(target) {
     });
     // Keep precision controls open for repeated nudges and manual point editing.
     // "Apply connector style" still closes the dialog as before.
-    if (['waypoint', 'left', 'right', 'up', 'down', 'set', 'remove', 'straighten', 'elbow-h', 'elbow-v', 'clear', 'auto'].includes(action)) {
+    if (
+      [
+        'waypoint',
+        'left',
+        'right',
+        'up',
+        'down',
+        'set',
+        'remove',
+        'straighten',
+        'elbow-h',
+        'elbow-v',
+        'clear',
+        'auto',
+      ].includes(action)
+    ) {
       const current = liveConnector(id);
       const points = current?.waypoints || [];
       const preferredIndex = Number(bendSelector.value);
       bendSelector.innerHTML = points.length
-        ? points.map((_, index) => '<option value="' + index + '">Bend ' + (index + 1) + '</option>').join('')
+        ? points
+            .map((_, index) => '<option value="' + index + '">Bend ' + (index + 1) + '</option>')
+            .join('')
         : '<option value="">No manual bends yet</option>';
-      bendSelector.value = points.length ? String(Math.min(Math.max(preferredIndex, 0), points.length - 1)) : '';
+      bendSelector.value = points.length
+        ? String(Math.min(Math.max(preferredIndex, 0), points.length - 1))
+        : '';
       $('#ca-route').value = current?.route || 'elbow';
-      $('#ca-auto').value = points.length ? 'manual' : current?.avoidObstacles === false ? 'direct' : 'auto';
+      $('#ca-auto').value = points.length
+        ? 'manual'
+        : current?.avoidObstacles === false
+          ? 'direct'
+          : 'auto';
       $('#ca-bend-editor').disabled = !points.length || current?.route !== 'elbow';
       refreshBendPosition();
       element.querySelector('.ca-routing-status').textContent = points.length
-        ? 'Manual route · ' + points.length + ' bend' + (points.length === 1 ? '' : 's') + ' · automatic avoidance paused'
+        ? 'Manual route · ' +
+          points.length +
+          ' bend' +
+          (points.length === 1 ? '' : 's') +
+          ' · automatic avoidance paused'
         : 'Auto-routing ready · add a bend to edit manually';
       return;
     }
@@ -262,15 +303,15 @@ export function openConnectorControls(target) {
         ? 'Drag the blue bend point on the canvas'
         : ['left', 'right', 'up', 'down', 'set', 'remove', 'straighten'].includes(action)
           ? 'Elbow bend adjusted'
-        : action === 'elbow-h' || action === 'elbow-v'
-          ? 'Elbow orientation updated; drag the blue bend for fine adjustment'
-        : action === 'clear'
-          ? 'Bend points reset'
-          : action === 'auto'
-            ? 'Automatic obstacle routing restored'
-            : action === 'unpin'
-              ? 'Relationship ends now slide along topic outlines'
-              : 'Connector reversed',
+          : action === 'elbow-h' || action === 'elbow-v'
+            ? 'Elbow orientation updated; drag the blue bend for fine adjustment'
+            : action === 'clear'
+              ? 'Bend points reset'
+              : action === 'auto'
+                ? 'Automatic obstacle routing restored'
+                : action === 'unpin'
+                  ? 'Relationship ends now slide along topic outlines'
+                  : 'Connector reversed',
     );
   });
 }
