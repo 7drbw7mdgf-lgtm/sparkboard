@@ -8,7 +8,7 @@ interface ViewControlsProps {
     onZoomChange: (zoom: number) => void;
 }
 
-export const MIN_ZOOM = 2;
+export const MIN_ZOOM = 0.25;
 export const MAX_ZOOM = 100;
 
 const SCALES: { value: GanttViewMode; label: string }[] = [
@@ -25,7 +25,7 @@ const ViewControls: React.FC<ViewControlsProps> = ({
     zoom,
     onZoomChange,
 }) => {
-    const step = zoom < 10 ? 2 : zoom < 25 ? 5 : 10;
+    const step = zoom < 1 ? 0.25 : zoom < 4 ? 0.5 : zoom < 10 ? 2 : zoom < 25 ? 5 : 10;
     return (
         <div className="benchline-gantt-scale-controls">
             <label htmlFor="benchline-gantt-scale" className="benchline-gantt-scale-label">
