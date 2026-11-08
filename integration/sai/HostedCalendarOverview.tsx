@@ -10,7 +10,6 @@ interface HostedCalendarOverviewProps {
     visibleCalendars: { tasks: boolean; meetings: boolean; google: boolean; outlook: boolean };
 }
 
-const monthDate = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 const sameMonth = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 
 export default function HostedCalendarOverview({
