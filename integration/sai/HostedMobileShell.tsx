@@ -540,13 +540,13 @@ export default function HostedMobileShell({
               <span className="bpc-view-label">View</span>
               <select
                 aria-label="Planner view"
-                value={currentView}
+                value={currentView === View.KANBAN ? View.TASKS : currentView}
                 onChange={(event) => {
                   setMenu(false);
                   onViewChange(event.target.value as View);
                 }}
               >
-                {[...VIEWS, { id: View.KANBAN, label: 'Kanban' }].map((view) => (
+                {VIEWS.map((view) => (
                   <option key={view.id} value={view.id}>
                     {view.label}
                   </option>
@@ -600,16 +600,6 @@ export default function HostedMobileShell({
                 </button>
               </div>
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenu(false);
-                  onViewChange(View.KANBAN);
-                }}
-              >
-                <HostedIcon name="kanban" size={17} /> Kanban board
-              </button>
               <button
                 type="button"
                 role="menuitem"
