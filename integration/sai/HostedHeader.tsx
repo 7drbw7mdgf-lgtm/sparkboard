@@ -18,6 +18,9 @@ interface Props {
   searchResults: SearchResult[];
   onSearchResultSelect: (item: SearchResult) => void;
   projectData: ProjectData | null;
+  onAddTask?: () => void;
+  onHelp?: () => void;
+  onViewChange?: (view: View) => void;
 }
 
 export default function HostedHeader({
@@ -36,6 +39,9 @@ export default function HostedHeader({
   searchResults,
   onSearchResultSelect,
   projectData,
+  onAddTask,
+  onHelp,
+  onViewChange,
 }: Props) {
   const [mobileSearch, setMobileSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -53,6 +59,50 @@ export default function HostedHeader({
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
   }, [onSearchFocusChange]);
+
+  // Sparkboard-like commands. Never steal shortcuts while editing text or using a dialog.
+  useEffect(() => {
+    const handleShortcuts = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing) return;
+      const target = event.target;
+      const typing = target instanceof HTMLElement &&
+        (target.matches('input, textarea, select, [contenteditable="true"]') ||
+          !!target.closest('[contenteditable="true"]'));
+      const modalOpen = !!document.querySelector('dialog[open], [role="dialog"]');
+      if (typing || modalOpen) return;
+      const modifier = event.metaKey || event.ctrlKey;
+      if (modifier && event.key.toLowerCase() === 'z') {
+        if (event.shiftKey) {
+          if (!canRedo) return;
+          redo();
+        } else {
+          if (!canUndo) return;
+          undo();
+        }
+        event.preventDefault();
+        return;
+      }
+      if (modifier && event.key.toLowerCase() === 'y') {
+        if (!canRedo) return;
+        event.preventDefault();
+        redo();
+        return;
+      }
+      if (modifier || event.altKey || event.shiftKey) return;
+      if (event.key.toLowerCase() === 'n' && onAddTask) {
+        event.preventDefault();
+        onAddTask();
+      } else if (event.key === '/' && searchInput.current) {
+        event.preventDefault();
+        focusSearch();
+      } else if (event.key === '?' && onHelp) {
+        event.preventDefault();
+        onHelp();
+      }
+    };
+    document.addEventListener('keydown', handleShortcuts);
+    return () => document.removeEventListener('keydown', handleShortcuts);
+  }, [canUndo, canRedo, undo, redo, onAddTask, onHelp]);
 
   const focusSearch = () => {
     setMobileSearch(true);
@@ -89,6 +139,11 @@ export default function HostedHeader({
         </span>
       </div>
       <div className="flex min-w-0 items-center justify-end gap-3">
+        <div className="benchline-top-actions" role="group" aria-label="Project editing">
+          <button type="button" onClick={undo} disabled={!canUndo} title="Undo (⌘/Ctrl+Z)" aria-label="Undo change">↶</button>
+          <button type="button" onClick={redo} disabled={!canRedo} title="Redo (⌘/Ctrl+Shift+Z)" aria-label="Redo change">↷</button>
+          {onAddTask && <button type="button" className="benchline-top-new" onClick={onAddTask} title="New task (N)">+ Task</button>}
+        </div>
         <button
           type="button"
           onClick={focusSearch}
@@ -141,6 +196,7 @@ export default function HostedHeader({
           <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[218px] rounded-xl border border-[#e5e8ee] bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {menuButton('Download project backup', onSave)}
             {menuButton('Change project dates', onTimeframe)}
+            {onHelp && menuButton('Keyboard shortcuts', onHelp)}
             <div className="my-1 border-t border-[#edf0f3] dark:border-gray-800" />
             <div className="flex gap-1">
               {menuButton('Undo', undo, !canUndo)}
