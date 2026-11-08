@@ -10,9 +10,11 @@ test('mindmap child and sibling actions no longer overlap connector ports', () =
   assert.match(source, /sibling\.style\.left = '26%'/);
   assert.match(source, /sibling\.style\.top = 'calc\(100% \+ 56px\)'/);
   assert.match(source, /data\.mmAddChild|dataset\.mmAddChild/);
-  assert.match(css, /\.object\.selected>\.mm-daughter.*z-index:10/);
-  assert.match(css, /\.object\.selected>\.port.*z-index:5/);
-  assert.match(css, /\.mm-daughter,\#objects \.mm-sibling\{min-width:34px/);
+  assert.match(css, /#objects\s+\.object\.selected\s*>\s*\.mm-daughter/);
+  assert.match(css, /z-index:\s*10\s*;/);
+  assert.match(css, /#objects\s+\.object\.selected\s*>\s*\.port/);
+  assert.match(css, /z-index:\s*5\s*;/);
+  assert.match(css, /#objects\s+\.mm-daughter,\s*#objects\s+\.mm-sibling\s*\{\s*min-width:\s*34px/);
 });
 
 test('elbow connector has horizontal/vertical orientation and multiple fine adjustment actions', () => {
@@ -30,5 +32,5 @@ test('elbow connector has horizontal/vertical orientation and multiple fine adju
   assert.match(source, /bendSelector\.addEventListener\('change'/);
   assert.match(source, /stay|Keep precision controls open/);
   assert.match(css, /\.connector-advanced \.ca-bend-editor/);
-  assert.match(css, /\.connector-advanced \.ca-primary\{background:#4262ff/);
+  assert.match(css, /\.connector-advanced\s+\.ca-primary\s*\{\s*background:\s*#4262ff/);
 });
