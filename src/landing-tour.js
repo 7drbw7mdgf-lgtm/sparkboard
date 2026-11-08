@@ -97,7 +97,7 @@ if (tour) {
     branch.className = 'tour-tree-node is-new';
     branch.textContent = 'New branch ' + (branchList.children.length - 1);
     branchList.append(branch);
-    branch.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    branchList.scrollTop = branchList.scrollHeight;
   });
   resetBranches.addEventListener('click', resetTree);
   resetTree();
