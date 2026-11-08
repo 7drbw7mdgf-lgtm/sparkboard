@@ -137,6 +137,103 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
   .benchline-gantt-actions button{min-height:40px!important}
   .benchline-gantt-date-row{font-size:12px}
 }
+
+/* Same Sparkboard colour system: violet-blue actions, warm white canvases, neutral outlines. */
+:root{--benchline-primary:#4262ff;--benchline-primary-hover:#304bdc;--benchline-primary-tint:#e8edff;--benchline-canvas:#fafaf8;--benchline-ink:#292c31;--benchline-border:#e6e6e2}
+body:not(.dark),html:not(.dark) body{background:var(--benchline-canvas);color:var(--benchline-ink)}
+html:not(.dark) .benchline-sidebar{background:#fff!important;border-color:var(--benchline-border)}
+html:not(.dark) .benchline-calendar,html:not(.dark) .benchline-gantt,html:not(.dark) .benchline-kanban{background:var(--benchline-canvas)}
+html:not(.dark) .benchline-calendar button:focus-visible,html:not(.dark) .benchline-calendar input:focus-visible,html:not(.dark) .benchline-calendar select:focus-visible{outline:2px solid var(--benchline-primary);outline-offset:2px}
+/* The calendar has one accessible date jump and source menu in its toolbar.
+   Hide its former 256px sidebar and duplicate mini-calendar. */
+.benchline-calendar>div:first-child{display:none!important}
+.benchline-calendar>div:nth-child(2){min-width:0}
+.benchline-calendar-toolbar{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px;min-height:66px;padding:10px 16px;border-bottom:1px solid var(--benchline-border);background:#fff;color:var(--benchline-ink)}
+.benchline-calendar-title-row{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.benchline-calendar-title{font:750 18px/1.25 'Manrope','DM Sans',system-ui,sans-serif;white-space:normal;color:#292c31;min-width:0}
+.benchline-calendar-nav{display:flex;gap:3px;align-items:center;flex:none;border:1px solid #e5e8ef;background:#f8f9fb;padding:2px;border-radius:10px}
+.benchline-calendar-nav button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;min-width:34px;border:0;border-radius:8px;color:#3d4b63;cursor:pointer}
+.benchline-calendar-nav button:hover{background:#e8edff;color:#304bdc}
+.benchline-calendar-nav button.benchline-calendar-today{padding:0 10px;color:#4262ff;font:700 12px/1 'DM Sans',system-ui,sans-serif}
+.benchline-calendar-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.benchline-calendar-actions>label{font:650 12px/1 'DM Sans',system-ui,sans-serif;color:#536078}
+.benchline-calendar-actions>select,.benchline-calendar-actions>input[type=date],.benchline-calendar-settings,.benchline-calendar-sources>summary{min-height:36px;border:1px solid #dfe5ef;border-radius:9px;background:#fff;padding:6px 10px;color:#334666;font:650 12px/1.2 'DM Sans',system-ui,sans-serif}
+.benchline-calendar-actions>select{min-width:105px;background:#eff2ff;color:#273faa;border-color:#c7d1ff;cursor:pointer}
+.benchline-calendar-actions>input[type=date]{max-width:147px;cursor:pointer}
+.benchline-calendar-actions button,.benchline-calendar-actions summary{cursor:pointer}
+.benchline-calendar-settings{white-space:nowrap}
+.benchline-calendar-settings:hover,.benchline-calendar-sources>summary:hover{border-color:#8296fa;background:#f5f6ff}
+.benchline-calendar-sources{position:relative;z-index:50}
+.benchline-calendar-sources>summary{list-style:none;display:flex;align-items:center;min-height:36px}
+.benchline-calendar-sources>summary::-webkit-details-marker{display:none}
+.benchline-calendar-sources>summary::after{content:'⌄';margin-left:7px;color:#4262ff}
+.benchline-calendar-source-popover{position:absolute;top:calc(100% + 7px);right:0;z-index:60;display:grid;gap:6px;min-width:170px;padding:10px;border:1px solid #dfe5ef;border-radius:11px;background:#fff;box-shadow:0 12px 24px #1b2d4528}
+.benchline-calendar-source-option{display:flex;gap:10px;align-items:center;min-height:36px;padding:3px 7px;border-radius:7px;color:#3b4557;font:650 12px/1.2 'DM Sans',system-ui,sans-serif;cursor:pointer}
+.benchline-calendar-source-option:hover{background:#f1f3ff}
+.benchline-calendar-source-option input{accent-color:#4262ff;width:16px;height:16px}
+.benchline-calendar-sync-message{font-size:11px;color:#4c5c72}
+.benchline-calendar-month-view>div:first-child{background:#eef2ff;border-color:#dce3ff}
+.benchline-calendar-month-view>div:first-child>div{color:#3d4e72}
+.benchline-calendar-month-view .bg-red-500{background:#4262ff!important}
+.benchline-calendar-timegrid>div:first-child{background:#eef2ff}
+.benchline-calendar-day-heading{background:#eef2ff;color:#435574}
+.benchline-calendar-day-heading .text-red-500,.benchline-calendar-timegrid .bg-red-500{color:#4262ff!important}
+.benchline-calendar-day-heading .bg-red-500{background:#4262ff!important;color:#fff!important}
+.benchline-calendar-timed-event{border-left-color:var(--benchline-primary);transition:box-shadow .12s}
+.benchline-calendar-timed-event:hover{box-shadow:0 4px 12px #4262ff29}
+.benchline-calendar-week-scroll{height:100%;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.benchline-calendar-week-scroll>.benchline-calendar-timegrid{min-height:0}
+.benchline-calendar-overview{height:100%;overflow:auto;background:#fafaf8;padding:18px;overscroll-behavior:contain}
+.benchline-calendar-overview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-width:1440px;margin:auto}
+.benchline-calendar-overview-quarter .benchline-calendar-overview-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.benchline-calendar-month-panel{min-width:0;border:1px solid #e0e4ec;border-radius:12px;background:#fff;padding:13px;box-shadow:0 2px 12px #2337550a}
+.benchline-calendar-month-title{display:flex;gap:6px;justify-content:space-between;align-items:baseline;width:100%;min-height:32px;background:transparent;border:0;text-align:left;color:#253b65;font:750 14px/1.2 'Manrope',system-ui,sans-serif;cursor:pointer}
+.benchline-calendar-month-title:hover{color:#4262ff}
+.benchline-calendar-month-year{font:650 11px/1 system-ui,sans-serif;color:#6b7790}
+.benchline-calendar-month-labels,.benchline-calendar-month-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.benchline-calendar-month-labels{margin:8px 0 4px;color:#66748b;font:700 10px/1.5 system-ui,sans-serif}
+.benchline-calendar-month-day{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:30px;border:0;border-radius:7px;background:transparent;color:#39465a;font:650 11px/1.1 system-ui,sans-serif;cursor:pointer}
+.benchline-calendar-month-day:hover{background:#e8edff;color:#304bdc}
+.benchline-calendar-month-day.is-today{background:#4262ff;color:white}
+.benchline-calendar-day-dots{display:flex;gap:2px;height:4px;margin-top:2px}
+.benchline-calendar-day-dots i{width:4px;height:4px;border-radius:50%;display:block}
+.benchline-calendar-dot-task{background:#4262ff}
+.benchline-calendar-dot-meeting{background:#25a69a}
+.benchline-calendar-month-day.is-today .benchline-calendar-day-dots i{background:#fff}
+.benchline-calendar-month-summary{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:11px;padding-top:9px;border-top:1px solid #edf0f5;color:#67748a;font:600 11px/1.3 system-ui,sans-serif}
+.dark .benchline-calendar-toolbar,.dark .benchline-calendar-month-panel,.dark .benchline-calendar-source-popover{background:#242a34;border-color:#414957;color:#e6edff}
+.dark .benchline-calendar-title,.dark .benchline-calendar-month-title{color:#e6edff}
+.dark .benchline-calendar-actions>select,.dark .benchline-calendar-actions>input[type=date],.dark .benchline-calendar-settings,.dark .benchline-calendar-sources>summary{background:#303849;color:#ecf0ff;border-color:#536079}
+.dark .benchline-calendar-nav{background:#303849;border-color:#536079}
+.dark .benchline-calendar-overview{background:#1c2027}
+.dark .benchline-calendar-month-day{color:#cbd6eb}
+.dark .benchline-calendar-day-heading,.dark .benchline-calendar-timegrid>div:first-child{background:#303a56}
+@media(max-width:1050px){
+ .benchline-calendar-toolbar{flex-wrap:wrap}
+ .benchline-calendar-actions{width:100%;justify-content:flex-start;flex-wrap:wrap}
+ .benchline-calendar-overview-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:650px),(max-height:500px) and (pointer:coarse){
+ .benchline-calendar-toolbar{min-height:0;align-items:stretch;padding:8px 10px;gap:8px}
+ .benchline-calendar-title-row{width:100%;justify-content:space-between;gap:8px}
+ .benchline-calendar-title{font-size:15px}
+ .benchline-calendar-nav button{min-width:40px;min-height:38px}
+ .benchline-calendar-actions{gap:6px;flex-wrap:nowrap;min-width:0;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+ .benchline-calendar-actions::-webkit-scrollbar{display:none}
+ .benchline-calendar-actions>label,.benchline-calendar-jump-label{display:none}
+ .benchline-calendar-actions>select,.benchline-calendar-actions>input[type=date],.benchline-calendar-settings,.benchline-calendar-sources>summary{min-height:40px;flex:none}
+ .benchline-calendar-actions>select{min-width:102px}
+ .benchline-calendar-actions>input[type=date]{max-width:133px}
+ .benchline-calendar-week-scroll>.benchline-calendar-timegrid[data-days="7"]{min-width:785px}
+ .benchline-calendar-week-scroll>.benchline-calendar-timegrid[data-days="3"]{min-width:450px}
+ .benchline-calendar-month-view{overflow-y:auto}
+ .benchline-calendar-month-view>div:nth-child(2){min-height:680px;grid-auto-rows:minmax(90px,1fr);flex:none}
+ .benchline-calendar-month-view>div:nth-child(2)>div{min-height:90px}
+ .benchline-calendar-overview{padding:10px}
+ .benchline-calendar-overview-grid,.benchline-calendar-overview-quarter .benchline-calendar-overview-grid{grid-template-columns:repeat(1,minmax(0,1fr));gap:10px}
+ .benchline-calendar-month-day{min-height:37px;font-size:12px}
+ .benchline-calendar-month-panel{padding:12px}
+}
 `;
 
 const phoneCss = `
