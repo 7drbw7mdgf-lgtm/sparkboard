@@ -5,6 +5,22 @@
  */
 export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
 export const TASK_BRIDGE_CHANNEL = 'sparkboard.sai.tasks';
+export const TASK_BRIDGE_RECEIPT_KEY = 'sparkboard.sai.task-receipts.v1';
+
+export function readTaskReceipts(storage) {
+  try {
+    const target = storage ?? globalThis.localStorage;
+    const value = JSON.parse(target.getItem(TASK_BRIDGE_RECEIPT_KEY) || '[]');
+    return new Set(Array.isArray(value) ? value.filter((id) => typeof id === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+export function taskHandoffStatus(id, storage) {
+  if (readTaskReceipts(storage).has(id)) return 'saved';
+  return readTaskQueue(storage).some((task) => task.id === id) ? 'queued' : 'missing';
+}
+
 
 function notifyOpenPlanner() {
   try {
@@ -33,6 +49,8 @@ export function publishTask(task, storage) {
     throw Error('A task requires an ID and title.');
   try {
     const target = storage ?? globalThis.localStorage;
+    // If the planner has acknowledged the ID, do not re-create a deliberately deleted task.
+    if (readTaskReceipts(target).has(task.id)) return true;
     const queued = readTaskQueue(target);
     if (!queued.some((item) => item.id === task.id)) {
       queued.push({
