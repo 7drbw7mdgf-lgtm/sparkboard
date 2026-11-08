@@ -158,7 +158,7 @@ function patchHostedGantt(root) {
         "        document.addEventListener('pointercancel', handleCancel);",
         '    };',
       ].join('\n'), 1);
-    s = swap(s,
+    s = swapFirst(s,
       "            document.body.style.cursor = '';\n            document.body.style.userSelect = '';\n            setInteraction(null);",
       "            document.body.style.cursor = '';\n            document.body.style.userSelect = '';\n            document.removeEventListener('pointercancel', handleCancel);\n            setInteraction(null);", 1);
     // Progress editing is pointer-capable too.
