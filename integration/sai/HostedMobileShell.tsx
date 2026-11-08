@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from './types';
 import { hostedThemeCss } from './HostedTheme';
+import HostedIcon from './HostedIcon';
 
 /** Same compact rule as the Sparkboard phone editor. */
 const COMPACT_QUERY = '(max-width: 650px), (max-height: 500px) and (pointer: coarse)';
@@ -508,7 +509,7 @@ export default function HostedMobileShell({
                 onAddTask();
               }}
             >
-              New
+              <HostedIcon name="plus" size={17} /> New
             </button>
             <button
               type="button"
@@ -517,7 +518,7 @@ export default function HostedMobileShell({
               aria-expanded={menu}
               onClick={() => setMenu((open) => !open)}
             >
-              ···
+              <HostedIcon name="menu" />
             </button>
           </div>
           {menu ? (
@@ -532,7 +533,7 @@ export default function HostedMobileShell({
                     undo?.();
                   }}
                 >
-                  ↶ Undo
+                  <HostedIcon name="undo" size={17} /> Undo
                 </button>
                 <button
                   type="button"
@@ -543,7 +544,7 @@ export default function HostedMobileShell({
                     redo?.();
                   }}
                 >
-                  ↷ Redo
+                  <HostedIcon name="redo" size={17} /> Redo
                 </button>
               </div>
 
@@ -555,7 +556,7 @@ export default function HostedMobileShell({
                   onViewChange(View.KANBAN);
                 }}
               >
-                Kanban board
+                <HostedIcon name="kanban" size={17} /> Kanban board
               </button>
               <button
                 type="button"
@@ -565,7 +566,7 @@ export default function HostedMobileShell({
                   onSettings();
                 }}
               >
-                Settings
+                <HostedIcon name="settings" size={17} /> Settings
               </button>
               <button
                 type="button"
@@ -575,7 +576,7 @@ export default function HostedMobileShell({
                   onHelp();
                 }}
               >
-                Help
+                <HostedIcon name="help" size={17} /> Help
               </button>
             </div>
           ) : null}
