@@ -1,5 +1,5 @@
 name: Repair formatting and redeploy Fasthosts
-# Format and validate the shared Benchline icon alignment update before deploying.
+# Validate nested Tasks navigation and restore usable Gantt timeline controls.
 
 on:
   push:
@@ -46,6 +46,7 @@ jobs:
             integration/sai/HostedSidebar.tsx \
             integration/sai/HostedTheme.ts \
             tests/benchline-icon-alignment.test.js \
+            tests/benchline-mobile.test.js \
             integration/sai/HostedMobileShell.tsx \
             integration/sai/HostedPersistence.ts \
             src/connector-edit.js \
@@ -85,6 +86,7 @@ jobs:
               integration/sai/HostedSidebar.tsx \
               integration/sai/HostedTheme.ts \
               tests/benchline-icon-alignment.test.js \
+              tests/benchline-mobile.test.js \
               integration/sai/HostedMobileShell.tsx \
               integration/sai/HostedPersistence.ts \
               src/connector-edit.js \
