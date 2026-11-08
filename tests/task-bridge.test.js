@@ -5,6 +5,9 @@ import {
   readTaskQueue,
   TASK_BRIDGE_CHANNEL,
   TASK_BRIDGE_KEY,
+  TASK_BRIDGE_RECEIPT_KEY,
+  readTaskReceipts,
+  taskHandoffStatus,
 } from '../src/task-bridge.js';
 
 const storage = () => {
@@ -70,3 +73,18 @@ test('invalid tasks do not enter queue and failed storage is reported', () => {
     false,
   );
 });
+
+test('Sparkboard shows queued versus saved status and never resends acknowledged tasks', () => {
+  const store = storage();
+  const task = { id: 'sent-1', name: 'Analyse results', priority: 'Medium' };
+  assert.equal(taskHandoffStatus(task.id, store), 'missing');
+  assert.equal(publishTask(task, store), true);
+  assert.equal(taskHandoffStatus(task.id, store), 'queued');
+  store.setItem(TASK_BRIDGE_RECEIPT_KEY, JSON.stringify([task.id]));
+  assert.ok(readTaskReceipts(store).has(task.id));
+  assert.equal(taskHandoffStatus(task.id, store), 'saved');
+  store.setItem(TASK_BRIDGE_KEY, '[]');
+  assert.equal(publishTask(task, store), true);
+  assert.deepEqual(readTaskQueue(store), []);
+});
+
