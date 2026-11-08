@@ -116,6 +116,30 @@ test('Benchline Calendar matches Sparkboard styling and has usable period dropdo
   assert.doesNotMatch(adapter, /delete meeting\.date|delete task\.startDate/);
 });
 
+test('Benchline exposes Sparkboard-style direct task commands on desktop and mobile', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const header = fs.readFileSync('integration/sai/HostedHeader.tsx', 'utf8');
+  const mobile = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  const edit = fs.readFileSync('scripts/patch-sai-controls.cjs', 'utf8');
+  const handoff = fs.readFileSync('integration/sai/HostedPersistence.ts', 'utf8');
+  assert.match(build, /patchHostedControls\(source\)/);
+  assert.match(build, /onAddTask=\{/);
+  assert.match(build, /canUndo=\{canUndo\}/);
+  assert.match(header, /benchline-top-actions/);
+  assert.match(header, /handleShortcuts/);
+  assert.match(header, /destinations\[Number\(event\.key\) - 1\]/);
+  assert.match(header, /onHelp/);
+  assert.match(header, /onAddTask/);
+  assert.match(mobile, /bpc-command-row/);
+  assert.match(mobile, /benchline-task-row-actions/);
+  assert.match(mobile, /benchline-kanban-edit-action/);
+  assert.match(edit, /Reopen task/);
+  assert.match(edit, /Edit task/);
+  assert.match(edit, /KanbanCard\.tsx/);
+  assert.match(handoff, /TASK_BRIDGE_RECEIPT_KEY/);
+  assert.match(handoff, /imported\.size/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
