@@ -60,7 +60,10 @@ export default function HostedSidebar({
         <details className="group mt-3 border-t border-[#edf0f3] pt-2 dark:border-gray-800">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm font-medium text-[#657082] hover:bg-[#f5f6f8] dark:text-gray-400 dark:hover:bg-gray-800">
             <span>More views</span>
-            <HostedIcon name="chevron-down" className="transition-transform group-open:rotate-180" />
+            <HostedIcon
+              name="chevron-down"
+              className="transition-transform group-open:rotate-180"
+            />
           </summary>
           <button
             type="button"

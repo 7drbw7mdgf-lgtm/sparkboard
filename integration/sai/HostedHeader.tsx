@@ -231,8 +231,7 @@ export default function HostedHeader({
         </div>
         <details ref={projectMenu} className="relative">
           <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-[#e5e8ee] px-3 text-sm font-semibold text-[#465063] hover:bg-[#f5f6f8] dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-            Project{' '}
-            <HostedIcon name="chevron-down" size={16} />
+            Project <HostedIcon name="chevron-down" size={16} />
           </summary>
           <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[218px] rounded-xl border border-[#e5e8ee] bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {menuButton('Download project backup', onSave)}
