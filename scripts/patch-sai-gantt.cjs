@@ -229,6 +229,18 @@ function patchHostedGantt(root) {
         '                    }',
         "                    if (e.key === 'Enter' || e.key === ' ') {",
       ].join('\n'));
+    // Listen at window level so a task stays movable even if the pointer
+    // leaves the timeline or React replaces the previewed row during a drag.
+    // Do not capture a soon-to-be-rerendered DOM node.
+    const barDragStart = s.indexOf('    const handleMouseDown = (e: React.PointerEvent, type: Interaction) => {');
+    const barDragEnd = s.indexOf('    const handleCompletionMouseDown = (e: React.PointerEvent) => {', barDragStart);
+    if (barDragStart < 0 || barDragEnd < 0) throw Error('Gantt bar pointer drag anchors changed');
+    let barDrag = s.slice(barDragStart, barDragEnd);
+    barDrag = swap(barDrag,
+      '        try { e.currentTarget.setPointerCapture(pointerId); } catch { /* detached node */ }\\n',
+      '');
+    barDrag = barDrag.replace(/document\\.(addEventListener|removeEventListener)\\('pointer(move|up|cancel)'/g, 'window.$1(\\'pointer$2\\'');
+    s = s.slice(0, barDragStart) + barDrag + s.slice(barDragEnd);
     return s;
   });
 
@@ -259,6 +271,29 @@ function patchHostedGantt(root) {
     s = swap(s,
       '<div className="benchline-gantt-actions flex items-center gap-2.5">\n',
       '<div className="benchline-gantt-actions flex items-center gap-2.5">\n' + control + '\n');
+    // A compact top row: primary time scale and zoom remain visible.
+    // Jump-to-today and task editing live in one secondary menu.
+    const toolbarStart = s.indexOf('                 <div className="flex-shrink-0 flex items-center justify-between border-b');
+    const toolbarEnd = s.indexOf('                {dependencyLink && (', toolbarStart);
+    if (toolbarStart < 0 || toolbarEnd < 0) throw Error('Gantt toolbar anchors changed');
+    const compactToolbar = [
+      '                 <div className="benchline-gantt-toolbar flex-shrink-0 flex items-center justify-between border-b border-[#e6e6e2] bg-white">',
+      '                    <span className="benchline-gantt-toolbar-title text-sm">Timeline</span>',
+      '                    <div className="benchline-gantt-actions flex items-center gap-2.5">',
+      control,
+      '                        <button type="button" onClick={onRequestAddTask} className="benchline-gantt-fit" title="Add a task">＋ Task</button>',
+      '                        <details className="benchline-gantt-more">',
+      '                            <summary aria-label="More Gantt options" title="More Gantt options">⋯</summary>',
+      '                            <div className="benchline-gantt-more-panel">',
+      '                                <button type="button" onClick={handleScrollToToday}>Jump to today</button>',
+      '                                {selectedTaskId && <button type="button" onClick={() => setShowDetails(true)}>Edit selected task</button>}',
+      '                            </div>',
+      '                        </details>',
+      '                    </div>',
+      '                 </div>',
+      '',
+    ].join('\\n');
+    s = s.slice(0, toolbarStart) + compactToolbar + s.slice(toolbarEnd);
     return s;
   });
 }
