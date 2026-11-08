@@ -146,7 +146,7 @@ test('Benchline consistently uses Sparkboard visual tokens including installed a
   const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
   const manifest = JSON.parse(fs.readFileSync('integration/sai/manifest.webmanifest', 'utf8'));
   const icon = fs.readFileSync('integration/sai/icon.svg', 'utf8');
-  for (const color of ['#4262ff', '#fafaf8', '#e6e6e2', '#292c31']) {
+  for (const color of ['#4262ff', '#ffffff', '#e6e6e2', '#292c31']) {
     assert.ok(theme.includes(color), `Missing shared colour ${color}`);
   }
   for (const view of [
@@ -163,9 +163,28 @@ test('Benchline consistently uses Sparkboard visual tokens including installed a
   assert.match(build, /'HostedTheme\.ts'/);
   assert.match(build, /theme-color.*#4262ff/);
   assert.equal(manifest.theme_color, '#4262ff');
-  assert.equal(manifest.background_color, '#fafaf8');
+  assert.equal(manifest.background_color, '#ffffff');
   assert.match(icon, /#4262ff/);
   assert.doesNotMatch(icon, /#243f30|#ef754e/);
+});
+
+test('Benchline uses a white workspace, movable Gantt bars and compact planner menus', () => {
+  const theme = fs.readFileSync('integration/sai/HostedTheme.ts', 'utf8');
+  const gantt = fs.readFileSync('scripts/patch-sai-gantt.cjs', 'utf8');
+  const calendar = fs.readFileSync('scripts/patch-sai-calendar.cjs', 'utf8');
+  assert.match(theme, /--benchline-page:#ffffff/);
+  assert.match(theme, /benchline-gantt-toolbar/);
+  assert.match(theme, /benchline-gantt-task-bar/);
+  assert.match(theme, /benchline-calendar-more-panel/);
+  assert.match(theme, /touch-action:none!important/);
+  assert.match(gantt, /barDragStart/);
+  assert.match(gantt, /window\.addEventListener/);
+  assert.match(gantt, /benchline-gantt-more/);
+  assert.match(gantt, /Jump to today/);
+  assert.match(calendar, /benchline-calendar-more/);
+  assert.match(calendar, /More calendar options/);
+  assert.match(calendar, /Calendar settings/);
+  assert.match(calendar, /Jump to date/);
 });
 
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
