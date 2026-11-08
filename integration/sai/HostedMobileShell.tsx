@@ -140,7 +140,7 @@ html:not(.dark) .text-gray-600{color:#292c31!important}
 
 /* Same Sparkboard colour system: violet-blue actions, warm white canvases, neutral outlines. */
 :root{--benchline-primary:#4262ff;--benchline-primary-hover:#304bdc;--benchline-primary-tint:#e8edff;--benchline-canvas:#fafaf8;--benchline-ink:#292c31;--benchline-border:#e6e6e2}
-body:not(.dark),html:not(.dark) body{background:var(--benchline-canvas);color:var(--benchline-ink)}
+html:not(.dark) body{background:var(--benchline-canvas);color:var(--benchline-ink)}
 html:not(.dark) .benchline-sidebar{background:#fff!important;border-color:var(--benchline-border)}
 html:not(.dark) .benchline-calendar,html:not(.dark) .benchline-gantt,html:not(.dark) .benchline-kanban{background:var(--benchline-canvas)}
 html:not(.dark) .benchline-calendar button:focus-visible,html:not(.dark) .benchline-calendar input:focus-visible,html:not(.dark) .benchline-calendar select:focus-visible{outline:2px solid var(--benchline-primary);outline-offset:2px}
