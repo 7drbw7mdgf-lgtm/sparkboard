@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View } from './types';
+import { hostedThemeCss } from './HostedTheme';
 
 /** Same compact rule as the Sparkboard phone editor. */
 const COMPACT_QUERY = '(max-width: 650px), (max-height: 500px) and (pointer: coarse)';
@@ -384,7 +385,7 @@ export default function HostedMobileShell({
 
   return (
     <>
-      <style>{themeCss + (compact ? phoneCss : '')}</style>
+      <style>{themeCss + hostedThemeCss + (compact ? phoneCss : '')}</style>
       {compact ? (
         <div id="benchline-phone-chrome">
           <div className="bpc-row">
