@@ -5,10 +5,10 @@ import fs from 'node:fs';
 test('mindmap child and sibling actions no longer overlap connector ports', () => {
   const source = fs.readFileSync('src/mindmap.js', 'utf8');
   const css = fs.readFileSync('style.css', 'utf8');
-  assert.match(source, /daughter\.style\.left = left \? '-48px' : 'calc\(100% \+ 48px\)'/);
-  assert.match(source, /daughter\.style\.top = '26%'/);
-  assert.match(source, /sibling\.style\.left = '30%'/);
-  assert.match(source, /sibling\.style\.top = 'calc\(100% \+ 47px\)'/);
+  assert.match(source, /daughter\.style\.left = left \? '-62px' : 'calc\(100% \+ 62px\)'/);
+  assert.match(source, /daughter\.style\.top = '20%'/);
+  assert.match(source, /sibling\.style\.left = '26%'/);
+  assert.match(source, /sibling\.style\.top = 'calc\(100% \+ 56px\)'/);
   assert.match(source, /data\.mmAddChild|dataset\.mmAddChild/);
   assert.match(css, /\.object\.selected>\.mm-daughter.*z-index:10/);
   assert.match(css, /\.object\.selected>\.port.*z-index:5/);
