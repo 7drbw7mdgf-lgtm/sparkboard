@@ -421,4 +421,47 @@ body.benchline-phone.dark #root .benchline-mobile-task-progress{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+/* Tasks owns the List/Kanban layout choice, not the global navigation. */
+#root .benchline-tasks-subview{
+  display:flex;align-items:center;gap:14px;flex:none;min-height:48px;
+  padding:6px 18px;border-bottom:1px solid var(--benchline-border);
+  background:var(--benchline-surface);color:var(--benchline-ink);
+}
+#root .benchline-tasks-subview-label{
+  font:700 13px/1.25 Manrope,'DM Sans',sans-serif;
+}
+#root .benchline-tasks-subview-options{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px;border:1px solid var(--benchline-border);
+  border-radius:9px;background:var(--benchline-subtle);
+}
+#root .benchline-tasks-subview-options button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:34px;padding:0 13px;border-radius:7px;
+  color:var(--benchline-secondary);background:transparent;
+  border:1px solid transparent;font:650 12px/1.2 'DM Sans',sans-serif;
+  white-space:nowrap;cursor:pointer;
+}
+#root .benchline-tasks-subview-options button[aria-pressed=true]{
+  background:var(--benchline-surface);border-color:var(--benchline-border);
+  color:var(--benchline-brand-ink);box-shadow:0 1px 3px #14264912;
+}
+#root .benchline-tasks-subview-options button:hover:not([aria-pressed=true]){
+  background:var(--benchline-hover);color:var(--benchline-ink);
+}
+#root .benchline-tasks-workspace{min-height:0;min-width:0}
+body.benchline-phone #root .benchline-tasks-subview{
+  min-height:43px;margin-top:42px;padding:4px 9px;gap:10px;
+}
+body.benchline-phone #root .benchline-tasks-subview-label{display:none}
+body.benchline-phone #root .benchline-tasks-subview-options{
+  width:100%;padding:2px;gap:3px;
+}
+body.benchline-phone #root .benchline-tasks-subview-options button{
+  flex:1;min-width:0;min-height:34px;
+}
+body.benchline-phone #root main.benchline-tasks-workspace{
+  padding-top:0!important;
+}
 `;
