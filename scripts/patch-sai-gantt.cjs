@@ -27,10 +27,10 @@ function swapFirst(text, find, replacement) {
 
 function patchHostedGantt(root) {
   const components = path.join(root, 'components');
-  edit(path.join(components, 'ganttLayout.ts'), s =>
-    swap(s, "export type GanttViewMode = 'day' | 'week' | 'month';",
-      "export type GanttViewMode = 'day' | 'week' | 'month' | 'quarter' | 'year';")
-  );
+  edit(path.join(components, 'ganttLayout.ts'), s => {
+    s = swap(s, "export type GanttViewMode = 'day' | 'week' | 'month';", "export type GanttViewMode = 'day' | 'week' | 'month' | 'quarter' | 'year';");
+    return swap(s, 'export const HEADER_HEIGHT = 56;', 'export const HEADER_HEIGHT = 64;');
+  });
   edit(path.join(root, 'App.tsx'), s => {
     s = swap(s,
       "    const [ganttViewMode, setGanttViewMode] = useState<'day' | 'week' | 'month'>('day');",
@@ -250,6 +250,15 @@ function patchHostedGantt(root) {
       '            {selectedTaskId && showDetails && (\n                <div className="absolute top-0');
     s = swap(s, 'onClose={() => setSelectedTaskId(null)}',
       'onClose={() => { setShowDetails(false); setSelectedTaskId(null); }}');
+    // Keep the time-scale dropdown first, so it stays in view on small screens.
+    const controlStart = s.indexOf('                        <ViewControls \n');
+    const controlEnd = s.indexOf('                        />', controlStart);
+    if (controlStart < 0 || controlEnd < 0) throw Error('Gantt time-scale control missing');
+    const control = s.slice(controlStart, controlEnd + '                        />'.length);
+    s = s.slice(0, controlStart) + s.slice(controlEnd + '                        />'.length);
+    s = swap(s,
+      '<div className="benchline-gantt-actions flex items-center gap-2.5">\n',
+      '<div className="benchline-gantt-actions flex items-center gap-2.5">\n' + control + '\n');
     return s;
   });
 }
