@@ -87,6 +87,35 @@ test('Benchline Gantt uses selectable calendar scales and touch-friendly date ed
   assert.match(styles, /touch-action:none/);
 });
 
+test('Benchline Calendar matches Sparkboard styling and has usable period dropdown', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const adapter = fs.readFileSync('scripts/patch-sai-calendar.cjs', 'utf8');
+  const overview = fs.readFileSync('integration/sai/HostedCalendarOverview.tsx', 'utf8');
+  const mobile = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  const header = fs.readFileSync('integration/sai/HostedHeader.tsx', 'utf8');
+
+  assert.match(build, /patchHostedCalendar\(source\)/);
+  for (const view of ['day', '3day', 'week', 'month', 'quarter', 'year']) {
+    assert.ok(adapter.includes(`<option value="${view}">`), `Missing calendar view ${view}`);
+  }
+  assert.match(adapter, /benchline-calendar-view/);
+  assert.match(adapter, /benchline-calendar-jump/);
+  assert.match(adapter, /benchline-calendar-source-option/);
+  assert.match(adapter, /benchline-calendar-week-scroll/);
+  assert.match(adapter, /benchline-calendar-view'/);
+  assert.match(adapter, /Monday first/);
+  assert.match(overview, /onChooseMonth/);
+  assert.match(overview, /onChooseDay/);
+  assert.match(overview, /monthData/);
+  assert.match(overview, /from '\.\.\/types'/);
+  assert.match(mobile, /--benchline-primary:#4262ff/);
+  assert.match(mobile, /benchline-calendar-month-panel/);
+  assert.match(mobile, /benchline-calendar-week-scroll/);
+  assert.match(header, /benchline-app-header/);
+  assert.match(mobile, /header\.benchline-app-header/);
+  assert.doesNotMatch(adapter, /delete meeting\.date|delete task\.startDate/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
