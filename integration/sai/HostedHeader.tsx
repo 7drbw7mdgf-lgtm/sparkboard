@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, SearchResult, ProjectData } from './types';
 import SearchResultsPanel from './components/SearchResultsPanel';
+import HostedIcon from './HostedIcon';
 
 interface Props {
   currentView: View;
@@ -164,7 +165,7 @@ export default function HostedHeader({
             title="Undo (⌘/Ctrl+Z)"
             aria-label="Undo change"
           >
-            ↶
+            <HostedIcon name="undo" />
           </button>
           <button
             type="button"
@@ -173,7 +174,7 @@ export default function HostedHeader({
             title="Redo (⌘/Ctrl+Shift+Z)"
             aria-label="Redo change"
           >
-            ↷
+            <HostedIcon name="redo" />
           </button>
           {onAddTask && (
             <button
@@ -182,7 +183,7 @@ export default function HostedHeader({
               onClick={onAddTask}
               title="New task (N)"
             >
-              + Task
+              <HostedIcon name="plus" /> Task
             </button>
           )}
         </div>
@@ -193,7 +194,7 @@ export default function HostedHeader({
           aria-label="Search project"
           title="Search project"
         >
-          ⌕
+          <HostedIcon name="search" />
         </button>
         <div
           ref={searchRef}
@@ -231,9 +232,7 @@ export default function HostedHeader({
         <details ref={projectMenu} className="relative">
           <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-[#e5e8ee] px-3 text-sm font-semibold text-[#465063] hover:bg-[#f5f6f8] dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
             Project{' '}
-            <span aria-hidden="true" className="text-xs">
-              ⌄
-            </span>
+            <HostedIcon name="chevron-down" size={16} />
           </summary>
           <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[218px] rounded-xl border border-[#e5e8ee] bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {menuButton('Download project backup', onSave)}
