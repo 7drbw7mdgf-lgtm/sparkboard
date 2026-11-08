@@ -271,6 +271,13 @@ function patchHostedGantt(root) {
     s = swap(s,
       '<div className="benchline-gantt-actions flex items-center gap-2.5">\n',
       '<div className="benchline-gantt-actions flex items-center gap-2.5">\n' + control + '\n');
+    // The previous Fit implementation rounded to zero for long projects.
+    // Preserve usable bar hit targets even when the full project spans years.
+    s = swap(s,
+      'Math.round(((viewport.clientWidth - 12) / days) * 100) / 100',
+      'Math.max(4, Math.round(((viewport.clientWidth - 12) / days) * 100) / 100)');
+    // Clear drag previews on pointer cancellation, but keep pan available
+    // on empty timeline space and avoid capturing the scroll container.
     // A compact top row: primary time scale and zoom remain visible.
     // Jump-to-today and task editing live in one secondary menu.
     const toolbarStart = s.indexOf('                 <div className="flex-shrink-0 flex items-center justify-between border-b');
@@ -285,6 +292,8 @@ function patchHostedGantt(root) {
       '                        <details className="benchline-gantt-more">',
       '                            <summary aria-label="More Gantt options" title="More Gantt options">⋯</summary>',
       '                            <div className="benchline-gantt-more-panel">',
+      '                                <button type="button" onClick={() => setShowTaskList(value => !value)} aria-pressed={showTaskList}>{showTaskList ? "Hide task list" : "Show task list"}</button>',
+      '                                <button type="button" onClick={fitEntireProject}>Fit timeline</button>',
       '                                <button type="button" onClick={handleScrollToToday}>Jump to today</button>',
       '                                <div className="benchline-gantt-mobile-zoom" role="group" aria-label="Timeline zoom">',
       '                                    <span>Zoom</span>',
