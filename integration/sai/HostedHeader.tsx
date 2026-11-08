@@ -72,7 +72,7 @@ export default function HostedHeader({
     </button>
   );
   return (
-    <header className="relative z-30 flex h-[62px] shrink-0 items-center justify-between gap-3 border-b border-[#e5e8ee] bg-white px-5 dark:border-gray-800 dark:bg-gray-900 md:px-7">
+    <header className="benchline-app-header relative z-30 flex h-[62px] shrink-0 items-center justify-between gap-3 border-b border-[#e5e8ee] bg-white px-5 dark:border-gray-800 dark:bg-gray-900 md:px-7">
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-label="Benchline"
