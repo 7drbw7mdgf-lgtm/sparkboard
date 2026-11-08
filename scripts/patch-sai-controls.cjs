@@ -65,10 +65,10 @@ function patchHostedControls(root) {
     '                            })}',
     '                        </div>',
     '                    </section>',
-  ].join('\\n');
+  ].join('\n');
   s = swap(s,
     '                        <table className="min-w-full text-left border-separate border-spacing-0">',
-    mobileCards + '\\n                        <table className="benchline-desktop-task-table min-w-full text-left border-separate border-spacing-0">');
+    mobileCards + '\n                        <table className="benchline-desktop-task-table min-w-full text-left border-separate border-spacing-0">');
   s = swap(s,
     '                 <header className="flex-shrink-0 h-12 flex justify-end items-center px-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">',
     '                 <header className="benchline-tasks-desktop-toolbar flex-shrink-0 h-12 flex justify-end items-center px-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">');
