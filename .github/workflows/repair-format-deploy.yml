@@ -1,5 +1,5 @@
 name: Repair formatting and redeploy Fasthosts
-# Validate the interactive carousel, accessibility, and preserved Benchline disclosures.
+# Retry after making carousel integration tests robust to Prettier line wrapping.
 
 on:
   push:
