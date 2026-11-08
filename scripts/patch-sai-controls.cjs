@@ -21,5 +21,17 @@ function patchHostedControls(root) {
       '                                                </td>',
     ].join('\n'));
   fs.writeFileSync(file, s);
+
+  // Keep touch interactions consistent with Sparkboard: explicit actions,
+  // rather than requiring a precise click on the card title.
+  const kanbanFile = path.join(root, 'components', 'KanbanCard.tsx');
+  let card = fs.readFileSync(kanbanFile, 'utf8');
+  card = swap(card,
+    '            {/* Tags (if any) */}',
+    [
+      '            <button type="button" className="benchline-kanban-edit-action" aria-label={"Edit " + task.name} onClick={(event) => { event.stopPropagation(); onEdit(task.id); }}>Edit task</button>',
+      '            {/* Tags (if any) */}',
+    ].join('\n'));
+  fs.writeFileSync(kanbanFile, card);
 }
 module.exports = { patchHostedControls };
