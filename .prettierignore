@@ -11,3 +11,5 @@ src/vendor/
 # Its output is typechecked by the downstream Sai build.
 scripts/patch-sai-gantt.cjs
 integration/sai/HostedViewControls.tsx
+scripts/patch-sai-calendar.cjs
+integration/sai/HostedCalendarOverview.tsx
