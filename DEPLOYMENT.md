@@ -42,3 +42,5 @@ The final HTTPS check requires the expected commit marker and matching SHA-256 h
 Revert a faulty commit on `main` to publish a newly tested file set. Existing saved boards remain in browser storage; deployment does not delete them or hosting certificate verification files. Backups and immutable releases consume hosting space until intentionally removed.
 
 Social-login providers are configured separately in Supabase and `src/auth-config.js`. Deployment does not create provider credentials, enable paused providers, or sync users' local boards. DNS and email records are unchanged by this workflow.
+
+<!-- Production deployment requested for the November 2026 Sparkboard and Benchline release. -->
