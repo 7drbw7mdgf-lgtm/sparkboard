@@ -168,6 +168,14 @@ function patchHostedCalendar(root) {
     '                            numDays={7}\n                            onRequestEditTask={props.onRequestEditTask}\n                            onRequestEditMeeting={props.onRequestEditMeeting}\n                            visibleCalendars={visibleCalendars}\n                        />\n                    )}',
     '                            numDays={7}\n                            onRequestEditTask={props.onRequestEditTask}\n                            onRequestEditMeeting={props.onRequestEditMeeting}\n                            visibleCalendars={visibleCalendars}\n                        /></div>\n                    )}');
 
+  // Keep Month, Week and Quarter/Year mini calendars aligned Monday-first.
+  s = swap(s,
+    'const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 is Sunday',
+    'const firstDayOfMonth = (new Date(year, month, 1).getDay() + 6) % 7; // Monday first');
+  s = swap(s,
+    "const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];",
+    "const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];");
+
   // Time headings and event cards gain explicitly addressable styles.
   s = swap(s,
     '    return (\n        <div className="flex h-full bg-white dark:bg-gray-900">\n            {/* Sidebar */}',
