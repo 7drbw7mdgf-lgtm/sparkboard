@@ -39,10 +39,10 @@ function decorateTasks() {
       tag.className =
         'spark-task-tag' + (handoff === 'queued' ? ' is-pending' : handoff === 'missing' ? ' is-failed' : '');
       tag.textContent =
-        handoff === 'saved' ? '✓ In Benchline' : handoff === 'queued' ? '↗ To Benchline' : '↻ Task not sent';
+        handoff === 'saved' ? '✓ Sent to Benchline' : handoff === 'queued' ? '↗ To Benchline' : '↻ Task not sent';
       tag.title =
         handoff === 'saved'
-          ? 'Saved in Benchline on this browser profile'
+          ? 'Sent to Benchline on this browser profile. Later edits and deletion are not synchronised.'
           : handoff === 'queued'
             ? 'Queued for Benchline. Open Benchline in this browser to import.'
             : 'Stored on this board. Open task creation or revisit this board to retry.';
