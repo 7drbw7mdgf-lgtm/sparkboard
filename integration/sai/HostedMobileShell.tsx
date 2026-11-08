@@ -238,17 +238,17 @@ html:not(.dark) .benchline-calendar button:focus-visible,html:not(.dark) .benchl
 
 const phoneCss = `
 body.benchline-phone .benchline-sidebar{display:none!important}
-body.benchline-phone header{height:48px!important;padding:0 10px!important;gap:6px!important}
-body.benchline-phone header>div{gap:5px!important}
+body.benchline-phone header.benchline-app-header{height:48px!important;padding:0 10px!important;gap:6px!important}
+body.benchline-phone header.benchline-app-header>div{gap:5px!important}
 body.benchline-phone #benchline-sparkboard{max-width:86px;margin-right:0!important;font-size:11px!important}
-body.benchline-phone header>div>span[aria-label="Benchline"]{font-size:15px!important}
-body.benchline-phone header details summary{min-height:34px;padding:0 8px;font-size:12px}
-body.benchline-phone header .h-5.w-px{display:none!important}
-body.benchline-phone header .text-xl{font-size:16px!important}
-body.benchline-phone header .relative:has(#global-search-bar):not(.benchline-search-open),
-body.benchline-phone header [title="User Profile"]{display:none!important}
-body.benchline-phone header .benchline-search-open{display:block!important;position:fixed!important;left:10px;right:10px;top:52px;z-index:85;padding:8px;border:1px solid #d9e0ed;border-radius:12px;background:white;box-shadow:0 8px 25px #16254a26}
-body.benchline-phone header .benchline-search-open input{width:100%!important}
+body.benchline-phone header.benchline-app-header>div>span[aria-label="Benchline"]{font-size:15px!important}
+body.benchline-phone header.benchline-app-header details summary{min-height:34px;padding:0 8px;font-size:12px}
+body.benchline-phone header.benchline-app-header .h-5.w-px{display:none!important}
+body.benchline-phone header.benchline-app-header .text-xl{font-size:16px!important}
+body.benchline-phone header.benchline-app-header .relative:has(#global-search-bar):not(.benchline-search-open),
+body.benchline-phone header.benchline-app-header [title="User Profile"]{display:none!important}
+body.benchline-phone header.benchline-app-header .benchline-search-open{display:block!important;position:fixed!important;left:10px;right:10px;top:52px;z-index:85;padding:8px;border:1px solid #d9e0ed;border-radius:12px;background:white;box-shadow:0 8px 25px #16254a26}
+body.benchline-phone header.benchline-app-header .benchline-search-open input{width:100%!important}
 body.benchline-phone main{padding-top:46px}
 body.benchline-phone .w-\\[480px\\]{width:100%!important;max-width:100%!important;left:0!important}
 body.benchline-phone .min-w-\\[300px\\]{min-width:168px!important}
@@ -315,7 +315,7 @@ export default function HostedMobileShell({
 
   useEffect(() => {
     const link = document.getElementById('benchline-sparkboard');
-    const header = document.querySelector('header');
+    const header = document.querySelector('header.benchline-app-header');
     if (!link) return;
     link.setAttribute('href', WORKSPACE_HREF);
     if (header && link.parentElement !== header) header.prepend(link);
