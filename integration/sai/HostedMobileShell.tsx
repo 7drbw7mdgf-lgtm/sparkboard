@@ -33,6 +33,11 @@ html:not(.dark) input[type=checkbox],html:not(.dark) input[type=radio],html:not(
 .benchline-task-row-actions{display:flex;align-items:center;gap:5px;justify-content:flex-end}
 .benchline-task-row-actions button{min-width:36px;min-height:36px;border:1px solid #e6e6e2;border-radius:8px;background:white;color:#45546c;font:700 12px/1 'DM Sans',sans-serif;padding:0 9px}
 .benchline-task-row-actions button:hover{background:#e8edff;border-color:#a5b4fc;color:#304bdc}
+.benchline-kanban-edit-action{min-height:35px;margin:0 0 8px;padding:0 10px;border:1px solid #dfe4ef;border-radius:8px;background:#f5f7ff;color:#3555d8;font:700 12px/1 'DM Sans',sans-serif}
+.benchline-kanban-edit-action:hover{background:#e8edff;border-color:#a5b4fc}
+.dark .benchline-kanban-edit-action{background:#2b344d;color:#ccd6ff;border-color:#566286}
+@media(pointer:coarse){.benchline-kanban-edit-action{min-height:42px}}
+
 .dark .benchline-task-row-actions button{background:#293344;border-color:#4b5566;color:#dee7ff}
 @media(pointer:coarse){.benchline-task-row-actions button{min-width:44px;min-height:44px}}
 
