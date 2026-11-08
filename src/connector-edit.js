@@ -237,6 +237,25 @@ export function openConnectorControls(target) {
         if (next.waypoints) next.waypoints.reverse();
       }
     });
+    // Keep precision controls open for repeated nudges and manual point editing.
+    // "Apply connector style" still closes the dialog as before.
+    if (['waypoint', 'left', 'right', 'up', 'down', 'set', 'remove', 'straighten', 'elbow-h', 'elbow-v', 'clear', 'auto'].includes(action)) {
+      const current = liveConnector(id);
+      const points = current?.waypoints || [];
+      const preferredIndex = Number(bendSelector.value);
+      bendSelector.innerHTML = points.length
+        ? points.map((_, index) => '<option value="' + index + '">Bend ' + (index + 1) + '</option>').join('')
+        : '<option value="">No manual bends yet</option>';
+      bendSelector.value = points.length ? String(Math.min(Math.max(preferredIndex, 0), points.length - 1)) : '';
+      $('#ca-route').value = current?.route || 'elbow';
+      $('#ca-auto').value = points.length ? 'manual' : current?.avoidObstacles === false ? 'direct' : 'auto';
+      $('#ca-bend-editor').disabled = !points.length || current?.route !== 'elbow';
+      refreshBendPosition();
+      element.querySelector('.ca-routing-status').textContent = points.length
+        ? 'Manual route · ' + points.length + ' bend' + (points.length === 1 ? '' : 's') + ' · automatic avoidance paused'
+        : 'Auto-routing ready · add a bend to edit manually';
+      return;
+    }
     $('#dialog').close();
     toast(
       action === 'waypoint'
