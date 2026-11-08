@@ -237,9 +237,9 @@ function patchHostedGantt(root) {
     if (barDragStart < 0 || barDragEnd < 0) throw Error('Gantt bar pointer drag anchors changed');
     let barDrag = s.slice(barDragStart, barDragEnd);
     barDrag = swap(barDrag,
-      '        try { e.currentTarget.setPointerCapture(pointerId); } catch { /* detached node */ }\\n',
+      '        try { e.currentTarget.setPointerCapture(pointerId); } catch { /* detached node */ }\n',
       '');
-    barDrag = barDrag.replace(/document\\.(addEventListener|removeEventListener)\\('pointer(move|up|cancel)'/g, 'window.$1(\\'pointer$2\\'');
+    barDrag = barDrag.replaceAll("document.addEventListener('pointer", "window.addEventListener('pointer").replaceAll("document.removeEventListener('pointer", "window.removeEventListener('pointer");
     s = s.slice(0, barDragStart) + barDrag + s.slice(barDragEnd);
     return s;
   });
@@ -292,7 +292,7 @@ function patchHostedGantt(root) {
       '                    </div>',
       '                 </div>',
       '',
-    ].join('\\n');
+    ].join('\n');
     s = s.slice(0, toolbarStart) + compactToolbar + s.slice(toolbarEnd);
     return s;
   });
