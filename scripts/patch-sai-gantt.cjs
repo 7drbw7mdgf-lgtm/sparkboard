@@ -112,7 +112,6 @@ function patchHostedGantt(root) {
       [
         '        const pointerId = e.pointerId;',
         '        try { e.currentTarget.setPointerCapture(pointerId); } catch { /* detached node */ }',
-        '        onSelectTask(task.id);',
         '        const startX = e.clientX;',
       ].join('\n'));
     s = swap(s,
@@ -194,6 +193,18 @@ function patchHostedGantt(root) {
     s = swap(s,
       "className=\"absolute right-0 top-0 h-full w-2.5 cursor-ew-resize hover:bg-black/10 rounded-r-xl opacity-0 group-hover/bar:opacity-100 transition-opacity\"",
       "className=\"benchline-gantt-resize-handle benchline-gantt-resize-right absolute right-0 top-0 h-full w-3.5 cursor-ew-resize hover:bg-black/10 rounded-r-xl opacity-30 group-hover/bar:opacity-100 transition-opacity\"");
+    s = swap(s,
+      '            if (!didDragRef.current) return;',
+      '            if (!didDragRef.current) { onSelectTask(task.id); return; }');
+    s = swap(s,
+      '            if (changed) onDragCommit(task.id, latest.startDate, latest.endDate);',
+      '            if (changed) { onDragCommit(task.id, latest.startDate, latest.endDate); onSelectTask(task.id); }');
+    s = swap(s,
+      "                tabIndex={0}\n                aria-label={",
+      "                tabIndex={0}\n                title={isLinking ? 'Choose this task as a dependency' : 'Drag to move dates; drag bar ends to resize. Double-click to edit. Arrow keys move by one day.'}\n                aria-label={");
+    s = swap(s,
+      "{!isLinking && interaction !== 'drag' && !isChangingCompletion && (",
+      "{!isLinking && barWidth >= 22 && interaction !== 'drag' && !isChangingCompletion && (");
     // Date editing works without precision dragging: arrows nudge a whole task by a day.
     s = swap(s,
       "                    if (e.key === 'Enter' || e.key === ' ') {",
@@ -222,6 +233,9 @@ function patchHostedGantt(root) {
   });
 
   edit(path.join(components, 'GanttChart.tsx'), s => {
+    s = swap(s,
+      'Math.floor((viewport.clientWidth - 12) / days)',
+      'Math.round(((viewport.clientWidth - 12) / days) * 100) / 100');
     s = swap(s, 'const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);',
       'const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);\n    const [showDetails, setShowDetails] = useState(false);');
     s = swap(s, '                        <ViewControls \n',
