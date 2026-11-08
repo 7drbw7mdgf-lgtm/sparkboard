@@ -247,8 +247,8 @@ function drawFoldToggles() {
       daughter.title = 'Add child topic (separate from the connector port)';
       daughter.setAttribute('aria-label', 'Add a daughter topic');
       const left = !isRoot && sides.get(topic.id) === 'left';
-      daughter.style.left = left ? '-48px' : 'calc(100% + 48px)';
-      daughter.style.top = '26%';
+      daughter.style.left = left ? '-62px' : 'calc(100% + 62px)';
+      daughter.style.top = '20%';
       el.append(daughter);
       if (!isRoot) {
         const sibling = document.createElement('button');
@@ -258,8 +258,8 @@ function drawFoldToggles() {
         sibling.textContent = '+';
         sibling.title = 'Add a sibling below';
         sibling.setAttribute('aria-label', 'Add a sibling topic');
-        sibling.style.left = '30%';
-        sibling.style.top = 'calc(100% + 47px)';
+        sibling.style.left = '26%';
+        sibling.style.top = 'calc(100% + 56px)';
         el.append(sibling);
       }
     }
