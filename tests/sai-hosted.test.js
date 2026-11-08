@@ -64,6 +64,29 @@ test('hosted Kanban and Gantt stay readable and task assignee UI is removed', ()
   assert.doesNotMatch(patch, /task\.assignedTo\s*=|delete task\.assignedTo/);
 });
 
+test('Benchline Gantt uses selectable calendar scales and touch-friendly date editing', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const patch = fs.readFileSync('scripts/patch-sai-gantt.cjs', 'utf8');
+  const controls = fs.readFileSync('integration/sai/HostedViewControls.tsx', 'utf8');
+  const styles = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  assert.match(build, /patchHostedGantt\(source\)/);
+  for (const scale of ['day', 'week', 'month', 'quarter', 'year']) {
+    assert.ok(controls.includes(`value: '${scale}'`), `Missing scale ${scale}`);
+  }
+  assert.match(controls, /<select/);
+  assert.match(controls, /Time scale/);
+  assert.match(controls, /Zoom timeline in/);
+  assert.match(controls, /MIN_ZOOM = 0\.25/);
+  assert.match(patch, /ganttViewMode === 'year'/);
+  assert.match(patch, /ganttViewMode === 'quarter'/);
+  assert.match(patch, /React\.PointerEvent/);
+  assert.match(patch, /pointercancel/);
+  assert.match(patch, /ArrowRight/);
+  assert.match(patch, /showDetails/);
+  assert.match(styles, /benchline-gantt-date-row/);
+  assert.match(styles, /touch-action:none/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
