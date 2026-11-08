@@ -56,9 +56,9 @@ const style = `
 #mindmap-outline .mmw-empty{padding:15px;font-size:13px;color:#7c887f}
 body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{display:none}
 #objects .mm-fold,#objects .mm-daughter,#objects .mm-sibling{position:absolute;z-index:6;display:flex;width:max-content;white-space:nowrap;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;border:1.5px solid #7a8e81;background:#fff;color:#3d5446;font:700 12px/1 Manrope,sans-serif;cursor:pointer;translate:-50% -50%;box-shadow:0 2px 6px #2c3a3022;opacity:0;transition:opacity .12s,transform .12s;touch-action:manipulation}
-#objects .mm-daughter,#objects .mm-sibling{width:18px;height:18px;min-width:18px;padding:0;border-radius:50%;border-color:#4262ff;color:#4262ff;font-size:14px;line-height:1}
+#objects .mm-daughter,#objects .mm-sibling{width:26px;height:26px;min-width:26px;padding:0;border-radius:50%;border-color:#4262ff;color:#4262ff;font-size:16px;line-height:1;background:#fff;z-index:10;box-shadow:0 2px 9px #21385430}
 #objects .object:hover>.mm-fold,#objects .object.selected>.mm-fold,#objects .mm-fold.is-collapsed,#objects .mm-fold:focus-visible,#objects .object:hover>.mm-daughter,#objects .object.selected>.mm-daughter,#objects .mm-daughter:focus-visible,#objects .object:hover>.mm-sibling,#objects .object.selected>.mm-sibling,#objects .mm-sibling:focus-visible{opacity:1}
-#objects .mm-fold:hover,#objects .mm-daughter:hover,#objects .mm-sibling:hover{transform:scale(1.12);border-color:#326956}
+#objects .mm-fold:hover,#objects .mm-daughter:hover,#objects .mm-sibling:hover{transform:scale(1.12);border-color:#2f4fe0;color:#2f4fe0}
 #objects .mm-master{position:absolute;right:7px;top:-25px;z-index:7;min-height:26px;padding:3px 8px;border:1px solid #a7b5a8;border-radius:14px;background:#fff;color:#325b49;font:700 11px Manrope,sans-serif;box-shadow:0 2px 7px #24403018;touch-action:manipulation}
 #objects .mm-master:hover{background:#e9f2ec}
 #mind-master-form{display:grid;gap:13px}
@@ -68,7 +68,7 @@ body.workspace-empty #mindmap-toolbar,body.workspace-empty #mindmap-panel{displa
 #mind-master-form .master-submit{padding:12px;border-radius:10px;color:#fff;background:#286a51;font-weight:700}
 @media(max-width:650px){#objects .mm-master{min-height:34px;top:-36px;padding:6px 10px}}
 #objects .mm-fold.is-collapsed{background:#326956;border-color:#326956;color:#fff}
-@media(hover:none){#objects .mm-fold.is-collapsed{opacity:1}#objects .object.selected>.mm-daughter,#objects .object.selected>.mm-sibling,#objects .object.selected>.mm-fold{opacity:1;min-width:28px;height:28px}}
+@media(hover:none){#objects .mm-fold.is-collapsed{opacity:1}#objects .object.selected>.mm-daughter,#objects .object.selected>.mm-sibling,#objects .object.selected>.mm-fold{opacity:1;min-width:34px;height:34px}}
 @media(max-width:1180px){
  #mindmap-toolbar{top:74px;left:18px;right:18px;transform:none;max-width:none;width:auto;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
  .board-badge{top:132px}
@@ -244,11 +244,11 @@ function drawFoldToggles() {
       daughter.className = 'mm-daughter';
       daughter.dataset.mmAddChild = topic.id;
       daughter.textContent = '+';
-      daughter.title = 'Add a daughter topic';
+      daughter.title = 'Add child topic (separate from the connector port)';
       daughter.setAttribute('aria-label', 'Add a daughter topic');
       const left = !isRoot && sides.get(topic.id) === 'left';
-      daughter.style.left = left ? '-30px' : 'calc(100% + 30px)';
-      daughter.style.top = '50%';
+      daughter.style.left = left ? '-48px' : 'calc(100% + 48px)';
+      daughter.style.top = '26%';
       el.append(daughter);
       if (!isRoot) {
         const sibling = document.createElement('button');
@@ -258,8 +258,8 @@ function drawFoldToggles() {
         sibling.textContent = '+';
         sibling.title = 'Add a sibling below';
         sibling.setAttribute('aria-label', 'Add a sibling topic');
-        sibling.style.left = '50%';
-        sibling.style.top = 'calc(100% + 30px)';
+        sibling.style.left = '30%';
+        sibling.style.top = 'calc(100% + 47px)';
         el.append(sibling);
       }
     }
