@@ -17,34 +17,50 @@ if (tour) {
     dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === active)));
     previous.disabled = active === 0;
     next.disabled = active === slides.length - 1;
-    counter.textContent = (active + 1) + ' / ' + slides.length;
-    if (scroll) rail.scrollTo({
-      left: slides[active].offsetLeft - slides[0].offsetLeft,
-      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-    });
+    counter.textContent = active + 1 + ' / ' + slides.length;
+    if (scroll)
+      rail.scrollTo({
+        left: slides[active].offsetLeft - slides[0].offsetLeft,
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      });
   }
 
-  [...tabs, ...dots].forEach((button) => button.addEventListener('click', () => {
-    setActive(Number(button.dataset.slide));
-  }));
+  [...tabs, ...dots].forEach((button) =>
+    button.addEventListener('click', () => {
+      setActive(Number(button.dataset.slide));
+    }),
+  );
   previous.addEventListener('click', () => setActive(active - 1));
   next.addEventListener('click', () => setActive(active + 1));
-  rail.addEventListener('scroll', () => {
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
-      let closest = 0;
-      let distance = Infinity;
-      slides.forEach((slide, i) => {
-        const d = Math.abs(slide.offsetLeft - slides[0].offsetLeft - rail.scrollLeft);
-        if (d < distance) { distance = d; closest = i; }
+  rail.addEventListener(
+    'scroll',
+    () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        let closest = 0;
+        let distance = Infinity;
+        slides.forEach((slide, i) => {
+          const d = Math.abs(slide.offsetLeft - slides[0].offsetLeft - rail.scrollLeft);
+          if (d < distance) {
+            distance = d;
+            closest = i;
+          }
+        });
+        if (closest !== active) setActive(closest, false);
       });
-      if (closest !== active) setActive(closest, false);
-    });
-  }, { passive: true });
+    },
+    { passive: true },
+  );
   rail.addEventListener('keydown', (event) => {
     if (event.target !== rail) return;
-    if (event.key === 'ArrowRight') { event.preventDefault(); setActive(active + 1); }
-    if (event.key === 'ArrowLeft') { event.preventDefault(); setActive(active - 1); }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      setActive(active + 1);
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      setActive(active - 1);
+    }
   });
   setActive(0, false);
 
@@ -61,8 +77,15 @@ if (tour) {
   sticky.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 && event.pointerType === 'mouse') return;
     const rect = board.getBoundingClientRect();
-    stickyDrag = { id: event.pointerId, startX: event.clientX, startY: event.clientY,
-      left: sticky.offsetLeft, top: sticky.offsetTop, width: rect.width, height: rect.height };
+    stickyDrag = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      left: sticky.offsetLeft,
+      top: sticky.offsetTop,
+      width: rect.width,
+      height: rect.height,
+    };
     sticky.setPointerCapture(event.pointerId);
     event.preventDefault();
   });
@@ -72,10 +95,15 @@ if (tour) {
     const maxY = Math.max(0, board.clientHeight - sticky.offsetHeight);
     const x = Math.max(0, Math.min(maxX, stickyDrag.left + event.clientX - stickyDrag.startX));
     const y = Math.max(0, Math.min(maxY, stickyDrag.top + event.clientY - stickyDrag.startY));
-    placeSticky(100 * x / Math.max(1, board.clientWidth), 100 * y / Math.max(1, board.clientHeight));
+    placeSticky(
+      (100 * x) / Math.max(1, board.clientWidth),
+      (100 * y) / Math.max(1, board.clientHeight),
+    );
   });
   for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-    sticky.addEventListener(name, () => { stickyDrag = null; });
+    sticky.addEventListener(name, () => {
+      stickyDrag = null;
+    });
   }
   stickyReset.addEventListener('click', () => placeSticky(stickyInitial.left, stickyInitial.top));
 
@@ -128,13 +156,17 @@ if (tour) {
       const track = bar.parentElement;
       const max = Math.max(0, track.clientWidth - bar.offsetWidth);
       const left = Math.max(0, Math.min(max, drag.start + event.clientX - drag.x));
-      bar.style.left = (left / Math.max(1, track.clientWidth) * 100) + '%';
+      bar.style.left = (left / Math.max(1, track.clientWidth)) * 100 + '%';
     });
     for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-      bar.addEventListener(name, () => { drag = null; });
+      bar.addEventListener(name, () => {
+        drag = null;
+      });
     }
   }
   tour.querySelector('[data-demo-plan-reset]').addEventListener('click', () => {
-    bars.forEach((bar, i) => { bar.style.left = [12, 34, 18][i] + '%'; });
+    bars.forEach((bar, i) => {
+      bar.style.left = [12, 34, 18][i] + '%';
+    });
   });
 }

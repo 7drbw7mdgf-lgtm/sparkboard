@@ -8,13 +8,30 @@ const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
 const canvas = readFileSync(new URL('../src/canvas.js', import.meta.url), 'utf8');
 
 test('swipe-first homepage has working previews and preserves access to the real editor', () => {
-  for (const heading of ['Make room for', 'Less reading. More doing.', 'Move your ideas around.', 'Watch a thought branch out.', 'Make the connections clear.', 'Give your ideas a timeline.']) {
+  for (const heading of [
+    'Make room for',
+    'Less reading. More doing.',
+    'Move your ideas around.',
+    'Watch a thought branch out.',
+    'Make the connections clear.',
+    'Give your ideas a timeline.',
+  ]) {
     assert.ok(index.includes(heading), 'Missing homepage content ' + heading);
   }
   for (const id of [
-    'landing-top', 'start-features', 'start-steps', 'start-uses', 'start-benchline',
-    'start-auth', 'start-email-form', 'start-email', 'start-email-submit',
-    'start-providers', 'start-guest', 'start-unavailable', 'start-feedback',
+    'landing-top',
+    'start-features',
+    'start-steps',
+    'start-uses',
+    'start-benchline',
+    'start-auth',
+    'start-email-form',
+    'start-email',
+    'start-email-submit',
+    'start-providers',
+    'start-guest',
+    'start-unavailable',
+    'start-feedback',
   ]) {
     assert.equal((index.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, 'ID ' + id);
   }
