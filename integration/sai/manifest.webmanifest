@@ -5,8 +5,8 @@
   "start_url": "/sai/",
   "scope": "/sai/",
   "display": "standalone",
-  "background_color": "#f9faf7",
-  "theme_color": "#243f30",
+  "background_color": "#fafaf8",
+  "theme_color": "#4262ff",
   "icons": [
     {
       "src": "icon.svg",
