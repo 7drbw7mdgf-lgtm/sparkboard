@@ -251,4 +251,174 @@ html:not(.dark) #root .benchline-gantt-toolbar{
   line-height:1.2;
 }
 #root .benchline-overview :is(h1,h2,p){margin-block-start:0}
+
+/* Mobile task cards keep dates, status, metadata and actions together. */
+#root .benchline-mobile-tasks{display:none}
+body.benchline-phone #root .benchline-tasks-desktop-toolbar,
+body.benchline-phone #root .benchline-desktop-task-table{display:none!important}
+body.benchline-phone #root .benchline-mobile-tasks{
+  display:block;min-width:0;width:100%;
+  padding:12px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+  background:#fff;
+}
+body.benchline-phone #root .benchline-mobile-tasks-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin:0 0 12px;
+}
+body.benchline-phone #root .benchline-mobile-tasks-heading h2{
+  display:flex;align-items:baseline;gap:8px;
+  font:750 18px/1.25 Manrope,'DM Sans',sans-serif;
+  color:var(--benchline-ink);margin:0;
+}
+body.benchline-phone #root .benchline-mobile-tasks-heading h2 span{
+  color:var(--benchline-secondary);font-size:12px;font-weight:600;
+}
+body.benchline-phone #root .benchline-mobile-tasks-heading label{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:12px;color:var(--benchline-secondary);font-weight:650;
+}
+body.benchline-phone #root .benchline-mobile-tasks-heading select{
+  height:36px;min-width:98px;max-width:132px;padding:0 8px;
+  border:1px solid var(--benchline-border);border-radius:9px;
+  background:var(--benchline-surface);color:var(--benchline-ink);
+  font-size:13px;font-weight:650;
+}
+body.benchline-phone #root .benchline-mobile-task-grid{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:12px;
+}
+body.benchline-phone #root .benchline-mobile-task-card{
+  display:flex;flex-direction:column;gap:12px;
+  min-width:0;width:100%;padding:15px;
+  background:var(--benchline-surface);
+  border:1px solid var(--benchline-border);border-radius:14px;
+  box-shadow:0 2px 7px #18274b0a;
+  color:var(--benchline-ink);
+  overflow-wrap:anywhere;
+}
+body.benchline-phone #root .benchline-mobile-task-head{
+  display:flex;align-items:flex-start;gap:9px;min-width:0;
+}
+body.benchline-phone #root .benchline-mobile-task-accent{
+  flex:none;width:4px;min-height:34px;align-self:stretch;
+  border-radius:6px;background:var(--benchline-task-accent,#4262ff);
+}
+body.benchline-phone #root .benchline-mobile-task-heading{flex:1;min-width:0}
+body.benchline-phone #root .benchline-mobile-task-heading h3{
+  margin:0;color:var(--benchline-ink);
+  font:700 15px/1.4 Manrope,'DM Sans',sans-serif;
+  white-space:normal;overflow-wrap:anywhere;
+}
+body.benchline-phone #root .benchline-mobile-task-heading>span{
+  display:block;margin-top:3px;color:var(--benchline-secondary);
+  font-size:12px;line-height:1.35;
+}
+body.benchline-phone #root .benchline-mobile-task-status{
+  display:inline-flex;align-items:center;justify-content:center;
+  max-width:105px;min-height:25px;flex:none;
+  padding:4px 7px;background:#edf1ff;color:#3452cd;
+  border-radius:7px;font-size:10px;font-weight:750;
+  line-height:1.2;text-align:center;
+}
+body.benchline-phone #root .benchline-mobile-task-status.is-complete{
+  background:#e8f6ed;color:#237544;
+}
+body.benchline-phone #root .benchline-mobile-task-details,
+body.benchline-phone #root .benchline-mobile-task-extras{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px 12px;margin:0;
+}
+body.benchline-phone #root .benchline-mobile-task-details>div,
+body.benchline-phone #root .benchline-mobile-task-extras>div{
+  min-width:0;display:grid;gap:3px;
+}
+body.benchline-phone #root .benchline-mobile-task-details dt,
+body.benchline-phone #root .benchline-mobile-task-extras dt{
+  font-size:11px;color:var(--benchline-secondary);
+  font-weight:600;line-height:1.2;
+}
+body.benchline-phone #root .benchline-mobile-task-details dd,
+body.benchline-phone #root .benchline-mobile-task-extras dd{
+  font-size:13px;font-weight:650;line-height:1.4;
+  margin:0;color:var(--benchline-ink);overflow-wrap:anywhere;
+}
+body.benchline-phone #root .benchline-mobile-task-progress{
+  height:5px;width:100%;overflow:hidden;
+  background:#e9edf3;border-radius:100px;
+}
+body.benchline-phone #root .benchline-mobile-task-progress>span{
+  display:block;height:100%;background:var(--benchline-task-accent,#4262ff);
+  border-radius:100px;max-width:100%;
+}
+body.benchline-phone #root .benchline-mobile-task-notes{
+  white-space:pre-wrap;line-height:1.55;font-size:12px;
+  color:var(--benchline-secondary);margin:0;
+}
+body.benchline-phone #root .benchline-mobile-task-tags{
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+body.benchline-phone #root .benchline-mobile-task-tags>span{
+  background:#f2f4f8;color:#4a5870;
+  padding:4px 8px;border-radius:6px;font-size:11px;
+}
+body.benchline-phone #root .benchline-mobile-task-extras{
+  border-top:1px solid var(--benchline-border);padding-top:10px;
+}
+body.benchline-phone #root .benchline-mobile-task-assignments{
+  border-top:1px solid var(--benchline-border);padding-top:8px;
+}
+body.benchline-phone #root .benchline-mobile-task-assignments summary{
+  cursor:pointer;list-style:revert;font-weight:650;font-size:12px;
+  color:var(--benchline-secondary);
+}
+body.benchline-phone #root .benchline-mobile-task-assignments ul{
+  padding:8px 0 0 14px;margin:0;display:grid;gap:7px;
+}
+body.benchline-phone #root .benchline-mobile-task-assignments li{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:10px;font-size:12px;line-height:1.4;
+}
+body.benchline-phone #root .benchline-mobile-task-assignments li>span:first-child{
+  min-width:0;flex:1;
+}
+body.benchline-phone #root .benchline-mobile-task-assignments li>span:last-child{
+  flex:none;color:var(--benchline-secondary);
+}
+body.benchline-phone #root .benchline-mobile-task-actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+  border-top:1px solid var(--benchline-border);
+  padding-top:12px;
+}
+body.benchline-phone #root .benchline-mobile-task-actions button{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:0;min-height:42px;padding:8px 10px;
+  border-radius:9px;border:1px solid var(--benchline-border);
+  font:700 12px/1.25 'DM Sans',sans-serif;text-align:center;
+}
+body.benchline-phone #root .benchline-mobile-task-edit{
+  background:#4262ff;color:#fff;border-color:#4262ff!important;
+}
+body.benchline-phone #root .benchline-mobile-task-complete{
+  background:var(--benchline-surface);color:var(--benchline-ink);
+}
+.dark body.benchline-phone #root .benchline-mobile-tasks,
+body.benchline-phone.dark #root .benchline-mobile-tasks{
+  background:var(--benchline-page);
+}
+body.benchline-phone.dark #root .benchline-mobile-task-status:not(.is-complete){
+  background:#303f68;color:#d4dfff;
+}
+body.benchline-phone.dark #root .benchline-mobile-task-status.is-complete{
+  background:#234635;color:#c6f5d8;
+}
+body.benchline-phone.dark #root .benchline-mobile-task-tags>span{
+  background:var(--benchline-subtle);color:var(--benchline-ink);
+}
+body.benchline-phone.dark #root .benchline-mobile-task-progress{
+  background:var(--benchline-subtle);
+}
+@media(min-width:651px) and (max-height:500px) and (pointer:coarse){
+  body.benchline-phone #root .benchline-mobile-task-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
 `;
