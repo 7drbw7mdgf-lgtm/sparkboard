@@ -42,10 +42,10 @@ export default function HostedSidebar({
               key={item.id}
               type="button"
               onClick={() => onViewChange(item.id)}
-              aria-current={currentView === item.id ? 'page' : undefined}
+              aria-current={currentView === item.id || (item.id === View.TASKS && currentView === View.KANBAN) ? 'page' : undefined}
               className={
                 'flex min-h-[42px] w-full items-center gap-3 rounded-lg px-3 text-left text-sm transition-colors ' +
-                (currentView === item.id
+                (currentView === item.id || (item.id === View.TASKS && currentView === View.KANBAN)
                   ? 'bg-[#edf1ff] font-semibold text-[#3352df] dark:bg-blue-950/40 dark:text-blue-300'
                   : 'font-medium text-[#5c6570] hover:bg-[#f5f6f8] hover:text-[#252b37] dark:text-gray-300 dark:hover:bg-gray-800')
               }
@@ -57,28 +57,7 @@ export default function HostedSidebar({
             </button>
           ))}
         </div>
-        <details className="group mt-3 border-t border-[#edf0f3] pt-2 dark:border-gray-800">
-          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm font-medium text-[#657082] hover:bg-[#f5f6f8] dark:text-gray-400 dark:hover:bg-gray-800">
-            <span>More views</span>
-            <HostedIcon
-              name="chevron-down"
-              className="transition-transform group-open:rotate-180"
-            />
-          </summary>
-          <button
-            type="button"
-            onClick={() => onViewChange(View.KANBAN)}
-            aria-current={currentView === View.KANBAN ? 'page' : undefined}
-            className={
-              'mt-1 w-full rounded-lg px-3 py-2 text-left text-sm ' +
-              (currentView === View.KANBAN
-                ? 'bg-[#edf1ff] font-semibold text-[#3352df]'
-                : 'text-[#657082] hover:bg-[#f5f6f8] dark:text-gray-400 dark:hover:bg-gray-800')
-            }
-          >
-            <HostedIcon name="kanban" /> Kanban board
-          </button>
-        </details>
+
       </div>
       <div className="space-y-2">
         <button
