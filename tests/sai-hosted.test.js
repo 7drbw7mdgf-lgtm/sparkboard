@@ -140,6 +140,28 @@ test('Benchline exposes Sparkboard-style direct task commands on desktop and mob
   assert.match(handoff, /imported\.size/);
 });
 
+test('Benchline consistently uses Sparkboard visual tokens including installed app', () => {
+  const theme = fs.readFileSync('integration/sai/HostedTheme.ts', 'utf8');
+  const shell = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const manifest = JSON.parse(fs.readFileSync('integration/sai/manifest.webmanifest', 'utf8'));
+  const icon = fs.readFileSync('integration/sai/icon.svg', 'utf8');
+  for (const color of ['#4262ff', '#fafaf8', '#e6e6e2', '#292c31']) {
+    assert.ok(theme.includes(color), `Missing shared colour ${color}`);
+  }
+  for (const view of ['benchline-overview', 'benchline-kanban', 'benchline-calendar', 'benchline-gantt', 'animate-slide-in-right']) {
+    assert.ok(theme.includes(view), `Missing shared styling for ${view}`);
+  }
+  assert.match(shell, /import \{ hostedThemeCss \} from '\.\/HostedTheme'/);
+  assert.match(shell, /themeCss \+ hostedThemeCss/);
+  assert.match(build, /'HostedTheme\.ts'/);
+  assert.match(build, /theme-color.*#4262ff/);
+  assert.equal(manifest.theme_color, '#4262ff');
+  assert.equal(manifest.background_color, '#fafaf8');
+  assert.match(icon, /#4262ff/);
+  assert.doesNotMatch(icon, /#243f30|#ef754e/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
