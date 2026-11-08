@@ -112,6 +112,8 @@ export function openConnectorControls(target) {
     <button type="submit" class="ca-primary">Apply connector style</button>
     <div class="ca-buttons"><button type="button" data-ca-tool="waypoint">＋ Add bend point</button>
     <button type="button" data-ca-tool="clear">Reset bends</button>
+    <button type="button" data-ca-tool="elbow-h">Elbow · horizontal first</button>
+    <button type="button" data-ca-tool="elbow-v">Elbow · vertical first</button>
     <button type="button" data-ca-tool="straighten">Straighten manual bends</button>
     <button type="button" data-ca-tool="auto">↻ Restore auto-route</button>
     <button type="button" data-ca-tool="reverse">⇄ Reverse direction</button>
@@ -209,6 +211,17 @@ export function openConnectorControls(target) {
           next.avoidObstacles = false;
         }
       }
+      if (action === 'elbow-h' || action === 'elbow-v') {
+        const automatic = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects);
+        if (automatic.start && automatic.end) {
+          const p = action === 'elbow-h'
+            ? { x: Math.round(automatic.end.x), y: Math.round(automatic.start.y) }
+            : { x: Math.round(automatic.start.x), y: Math.round(automatic.end.y) };
+          next.route = 'elbow';
+          next.waypoints = [p];
+          next.avoidObstacles = false;
+        }
+      }
       if (action === 'clear' || action === 'auto') restoreAutoRouting(next);
       if (action === 'unpin' && next.relationship) {
         delete next.fromPort;
@@ -230,6 +243,8 @@ export function openConnectorControls(target) {
         ? 'Drag the blue bend point on the canvas'
         : ['left', 'right', 'up', 'down', 'set', 'remove', 'straighten'].includes(action)
           ? 'Elbow bend adjusted'
+        : action === 'elbow-h' || action === 'elbow-v'
+          ? 'Elbow orientation updated; drag the blue bend for fine adjustment'
         : action === 'clear'
           ? 'Bend points reset'
           : action === 'auto'
