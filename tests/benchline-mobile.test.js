@@ -12,9 +12,10 @@ test('Benchline phone shell is a labelled view bar, not a bottom dock', () => {
   assert.match(shell, /aria-label="Planner view"/);
   assert.match(shell, /className="bpc-view"/);
   assert.match(shell, /onViewChange\(event.target.value as View\)/);
-  for (const label of ['Home', 'Tasks', 'Calendar', 'Kanban', 'Gantt', 'New', 'Settings', 'Help']) {
+  for (const label of ['Home', 'Tasks', 'Calendar', 'Gantt', 'New', 'Settings', 'Help']) {
     assert.match(shell, new RegExp(label));
   }
+  assert.match(shell, /currentView === View.KANBAN \? View.TASKS : currentView/);
   assert.doesNotMatch(shell, /benchline-mobile-dock/);
   assert.match(shell, /#4262ff/);
   assert.match(shell, /\/\?workspace=1/);
