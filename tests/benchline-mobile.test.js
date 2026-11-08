@@ -9,7 +9,9 @@ test('Benchline phone shell is a labelled view bar, not a bottom dock', () => {
   const manifest = JSON.parse(fs.readFileSync('integration/sai/manifest.webmanifest', 'utf8'));
   assert.match(shell, /\(max-width: 650px\), \(max-height: 500px\) and \(pointer: coarse\)/);
   assert.match(shell, /id="benchline-phone-chrome"/);
-  assert.match(shell, /aria-label="Planner views"/);
+  assert.match(shell, /aria-label="Planner view"/);
+  assert.match(shell, /className="bpc-view"/);
+  assert.match(shell, /onViewChange\(event.target.value as View\)/);
   for (const label of ['Home', 'Tasks', 'Calendar', 'Kanban', 'Gantt', 'New', 'Settings', 'Help']) {
     assert.match(shell, new RegExp(label));
   }
