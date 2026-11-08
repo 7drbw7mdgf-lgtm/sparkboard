@@ -115,6 +115,7 @@ function patchHostedCalendar(root) {
     '                        <details className="benchline-calendar-more">',
     '                            <summary aria-label="More calendar options" title="More calendar options">Options</summary>',
     '                            <div className="benchline-calendar-more-panel">',
+    '                                <button type="button" className="benchline-calendar-menu-today" onClick={handleToday}>Today</button>',
     '                                <label htmlFor="benchline-calendar-jump">Jump to date</label>',
     '                        <input type="date" id="benchline-calendar-jump" aria-label="Jump to date" value={dateInputValue} onChange={e => handleJumpToDate(e.target.value)} />',
     '                        <details className="benchline-calendar-sources">',
