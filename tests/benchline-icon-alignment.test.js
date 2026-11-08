@@ -20,7 +20,8 @@ test('Benchline uses a single fixed-size icon system across navigation and menus
   assert.match(header, /HostedIcon name="search"/);
   assert.match(header, /HostedIcon name="chevron-down"/);
   assert.match(mobile, /HostedIcon name="menu"/);
-  assert.match(mobile, /HostedIcon name="kanban"/);
+  const switcher = fs.readFileSync('integration/sai/HostedTasksSwitch.tsx', 'utf8');
+  assert.match(switcher, /HostedIcon name="kanban"/);
   assert.match(theme, /#root \.benchline-icon/);
   assert.match(mobile, /#benchline-phone-chrome \.benchline-icon/);
   assert.match(build, /'HostedIcon\.tsx'/);
