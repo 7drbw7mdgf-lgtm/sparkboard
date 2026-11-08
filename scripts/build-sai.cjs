@@ -256,6 +256,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   );
   // Keep upstream data structures and Gantt interaction code; apply focused view patches.
   require('./patch-sai-planner.cjs').patchHostedPlanner(source);
+  require('./patch-sai-gantt.cjs').patchHostedGantt(source);
   for (const name of [
     'HostedPersistence.ts',
     'HostedAIPanel.tsx',
