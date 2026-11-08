@@ -34,11 +34,11 @@ test('Benchline uses a focused home view and consistent simplified navigation', 
     home,
     /PriorityBreakdownWidget|ProjectHealthWidget|MyTasksWidget|RecentActivityWidget/,
   );
-  assert.match(sidebar, /More views/);
+  assert.doesNotMatch(sidebar, /More views/);
   assert.match(sidebar, /New task/);
   assert.match(header, /Download project backup/);
   assert.match(header, /global-search-bar/);
-  assert.match(mobile, /Kanban board/);
+  assert.doesNotMatch(mobile, /Kanban board/);
   assert.match(mobile, /benchline-search-open/);
 });
 
@@ -185,6 +185,25 @@ test('Benchline uses a white workspace, movable Gantt bars and compact planner m
   assert.match(calendar, /More calendar options/);
   assert.match(calendar, /Calendar settings/);
   assert.match(calendar, /Jump to date/);
+});
+
+test('Kanban is nested within Tasks on both desktop and mobile', () => {
+  const build = fs.readFileSync('scripts/build-sai.cjs', 'utf8');
+  const switcher = fs.readFileSync('integration/sai/HostedTasksSwitch.tsx', 'utf8');
+  const sidebar = fs.readFileSync('integration/sai/HostedSidebar.tsx', 'utf8');
+  const mobile = fs.readFileSync('integration/sai/HostedMobileShell.tsx', 'utf8');
+  const theme = fs.readFileSync('integration/sai/HostedTheme.ts', 'utf8');
+  assert.match(build, /HostedTasksSwitch/);
+  assert.match(build, /currentView === View.TASKS \|\| currentView === View.KANBAN/);
+  assert.match(switcher, /aria-label="Tasks view"/);
+  assert.match(switcher, /aria-pressed=\{currentView === View.TASKS\}/);
+  assert.match(switcher, /aria-pressed=\{currentView === View.KANBAN\}/);
+  assert.doesNotMatch(sidebar, /More views/);
+  assert.match(sidebar, /item.id === View.TASKS && currentView === View.KANBAN/);
+  assert.match(mobile, /currentView === View.KANBAN \? View.TASKS : currentView/);
+  assert.doesNotMatch(mobile, /id: View.KANBAN, label: 'Kanban'/);
+  assert.match(theme, /benchline-tasks-subview/);
+  assert.match(theme, /benchline-tasks-workspace/);
 });
 
 test('mobile Tasks view uses full-information cards without affecting the desktop table', () => {
