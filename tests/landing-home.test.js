@@ -35,8 +35,8 @@ test('swipe-first homepage has working previews and preserves access to the real
   assert.match(index, /data-demo-route/);
   assert.match(index, /data-demo-plan-reset/);
   assert.match(index, /src="src\/landing-tour\.js"/);
-  assert.match(css, /scroll-snap-type:x mandatory/);
-  assert.match(css, /@media\(max-width:740px\)/);
+  assert.match(css, /scroll-snap-type:\s*x mandatory/);
+  assert.match(css, /@media\s*\(max-width:\s*740px\)/);
   const script = readFileSync(new URL('../src/landing-tour.js', import.meta.url), 'utf8');
   assert.match(script, /rail\.addEventListener\('scroll'/);
   assert.match(script, /pointermove/);
