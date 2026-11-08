@@ -269,6 +269,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   require('./patch-sai-planner.cjs').patchHostedPlanner(source);
   require('./patch-sai-gantt.cjs').patchHostedGantt(source);
   require('./patch-sai-calendar.cjs').patchHostedCalendar(source);
+  require('./patch-sai-controls.cjs').patchHostedControls(source);
   for (const name of [
     'HostedPersistence.ts',
     'HostedAIPanel.tsx',
