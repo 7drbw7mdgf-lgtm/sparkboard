@@ -25,9 +25,9 @@
             ></a
           >
           <nav class="landing-nav-links" aria-label="Explore Sparkboard">
-            <a href="#start-features">Features</a>
-            <a href="#start-steps">How it works</a>
-            <a href="#start-uses">Use cases</a>
+            <a href="#start-features">Live demos</a>
+            <a href="#start-steps">Mind maps</a>
+            <a href="#start-uses">Flowcharts</a>
             <a href="#start-benchline">Planner</a>
             <a href="/pulse/">Pulse literature</a>
           </nav>
@@ -68,7 +68,7 @@
                   >Start creating <span aria-hidden="true">↗</span></a
                 >
                 <a class="landing-secondary-cta" href="#start-features"
-                  >Explore features <span aria-hidden="true">↓</span></a
+                  >Try the demos <span aria-hidden="true">↔</span></a
                 >
               </div>
               <p class="landing-hero-footnote">
@@ -317,6 +317,109 @@
             </div>
           </section>
 
+          <section id="start-features" class="landing-tour" aria-labelledby="tour-title">
+            <div class="landing-tour-header">
+              <div>
+                <span class="tour-kicker">TRY IT YOURSELF · INTERACTIVE PRODUCT TOUR</span>
+                <h2 id="tour-title">Less reading. More doing.</h2>
+                <p>Swipe through four hands-on previews, or use the arrows.</p>
+              </div>
+              <div class="tour-nav" aria-label="Product tour controls">
+                <button type="button" data-tour-prev aria-label="Previous demo">‹</button>
+                <button type="button" data-tour-next aria-label="Next demo">›</button>
+              </div>
+            </div>
+            <div class="tour-tabs" role="group" aria-label="Choose a demo">
+              <button type="button" data-slide="0" aria-current="true">Sticky notes</button>
+              <button type="button" data-slide="1">Mind maps</button>
+              <button type="button" data-slide="2">Flowcharts</button>
+              <button type="button" data-slide="3">Planning</button>
+            </div>
+            <div class="tour-viewport">
+              <div class="tour-track" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Swipeable interactive Sparkboard demonstrations">
+                <article class="tour-slide" aria-label="Demo 1 of 4: Move a sticky note">
+                  <div class="tour-copy">
+                    <span class="tour-kicker">01 / SPARKBOARD</span>
+                    <h3>Move your ideas around.</h3>
+                    <p>Drag the yellow note. The canvas stays flexible when your thinking changes.</p>
+                    <button type="button" class="tour-action" data-demo-sticky-reset>Reset note</button>
+                    <span class="tour-proof">Interactive preview · not saved to your boards</span>
+                  </div>
+                  <div class="tour-demo" data-demo-board>
+                    <span class="tour-demo-caption">Try dragging the yellow note</span>
+                    <div class="tour-sticky" data-demo-sticky role="img" aria-label="Draggable yellow sticky note">Project idea<small>What could we make?</small></div>
+                    <div class="tour-sticky tour-sticky-secondary" aria-hidden="true">Next step<small>Make it happen ↗</small></div>
+                  </div>
+                </article>
+                <article class="tour-slide" aria-label="Demo 2 of 4: Build a mind map">
+                  <div class="tour-copy">
+                    <span class="tour-kicker">02 / SPARKBOARD</span>
+                    <h3>Watch a thought branch out.</h3>
+                    <p>Add a branch to this miniature mind map. Build structure as you go.</p>
+                    <button type="button" class="tour-action" data-demo-branch-add>Add a branch ＋</button>
+                    <button type="button" data-demo-branch-reset class="tour-more">Reset branches</button>
+                    <span class="tour-proof">Interactive preview · full editing in the board</span>
+                  </div>
+                  <div class="tour-demo">
+                    <span class="tour-demo-caption">Tap Add a branch</span>
+                    <div class="tour-tree">
+                      <div class="tour-tree-node tour-tree-root">Big idea</div>
+                      <div class="tour-tree-line" aria-hidden="true"></div>
+                      <div class="tour-tree-branches" data-demo-branches aria-live="polite"></div>
+                    </div>
+                  </div>
+                </article>
+                <article class="tour-slide" aria-label="Demo 3 of 4: Change connector routing">
+                  <div class="tour-copy">
+                    <span class="tour-kicker">03 / SPARKBOARD</span>
+                    <h3>Make the connections clear.</h3>
+                    <p>Switch between straight and elbow routes to see how a diagram takes shape.</p>
+                    <button type="button" class="tour-action" data-demo-route aria-pressed="false">Try elbow connectors</button>
+                    <span class="tour-proof">Interactive preview · full routing controls in the editor</span>
+                  </div>
+                  <div class="tour-demo">
+                    <span class="tour-demo-caption">Change the connector style</span>
+                    <div class="tour-flow-grid">
+                      <div class="tour-flow-node">Idea</div>
+                      <div class="tour-flow-link" aria-hidden="true"></div>
+                      <div class="tour-flow-node">Explore</div>
+                      <div class="tour-flow-link" aria-hidden="true"></div>
+                      <div class="tour-flow-node">Done ✓</div>
+                    </div>
+                  </div>
+                </article>
+                <article class="tour-slide" id="start-benchline" aria-label="Demo 4 of 4: Plan tasks with Benchline">
+                  <div class="tour-copy">
+                    <span class="tour-kicker">04 / BENCHLINE · SEPARATE PLANNER</span>
+                    <h3>Give your ideas a timeline.</h3>
+                    <p>Drag a sample task bar to adjust its position. For actual projects, open Benchline.</p>
+                    <button type="button" class="tour-action" data-demo-plan-reset>Reset timeline</button>
+                    <a href="/sai/" class="tour-more">Open Benchline ↗</a>
+                    <span class="tour-proof">Preview only · real tasks are edited in Benchline</span>
+                  </div>
+                  <div class="tour-demo">
+                    <span class="tour-demo-caption">Drag the task bars horizontally</span>
+                    <div class="tour-plan">
+                      <div class="tour-plan-row"><span>Research</span><div class="tour-plan-track"><span class="tour-plan-bar" data-bar="0" aria-label="Movable sample Research task bar"></span></div></div>
+                      <div class="tour-plan-row"><span>Design</span><div class="tour-plan-track"><span class="tour-plan-bar" data-bar="1" aria-label="Movable sample Design task bar"></span></div></div>
+                      <div class="tour-plan-row"><span>Launch</span><div class="tour-plan-track"><span class="tour-plan-bar" data-bar="2" aria-label="Movable sample Launch task bar"></span></div></div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <div class="tour-progress">
+              <span>Swipe sideways to explore <span aria-hidden="true">↔</span></span>
+              <span data-tour-counter aria-live="polite">1 / 4</span>
+              <div class="tour-dots" aria-label="Demo pagination">
+                <button type="button" data-slide="0" aria-label="Sticky note demo" aria-current="true"></button>
+                <button type="button" data-slide="1" aria-label="Mind map demo"></button>
+                <button type="button" data-slide="2" aria-label="Flowchart demo"></button>
+                <button type="button" data-slide="3" aria-label="Planning demo"></button>
+              </div>
+            </div>
+            <span id="start-steps" hidden></span><span id="start-uses" hidden></span>
+          </section>
           <section id="start-auth" class="start-auth landing-auth" aria-labelledby="start-title">
             <div class="start-auth-inner">
               <span class="start-mark" aria-hidden="true">✳</span>
@@ -360,325 +463,6 @@
                 workspace, not live multiuser collaboration.
               </p>
             </div>
-          </section>
-          <section class="landing-value-strip" aria-label="Sparkboard highlights">
-            <span>✳ Free to start</span><span>◇ Editable shapes</span
-            ><span>↗ Connected diagrams</span><span>▧ Media &amp; PDF support</span
-            ><a href="#start-benchline">▦ Benchline planner</a>
-          </section>
-
-          <section
-            id="start-features"
-            class="landing-section landing-features"
-            aria-labelledby="landing-features-title"
-          >
-            <div class="landing-section-heading">
-              <p class="landing-eyebrow">SPARKBOARD · VISUAL THINKING</p>
-              <h2 id="landing-features-title">
-                Less juggling tabs.<br /><em>More connecting ideas.</em>
-              </h2>
-              <p>
-                Draw, connect and organise ideas without turning your whiteboard into another
-                project-management dashboard.
-              </p>
-              <p class="landing-feature-hint">
-                <span aria-hidden="true">↔</span> Scroll across. Each card is one part of the board.
-              </p>
-            </div>
-            <div class="landing-feature-rail">
-              <div class="landing-feature-grid" tabindex="0" aria-label="Sparkboard features">
-                <article class="landing-feature landing-feature-yellow">
-                  <div class="landing-feature-graphic" aria-hidden="true">
-                    <div class="landing-sticky-mini">
-                      <b>Research notes</b><span>Start somewhere ✳</span>
-                    </div>
-                    <div class="landing-sticky-mini landing-sticky-mini-two">
-                      <b>Next idea</b><span>→ build on it</span>
-                    </div>
-                  </div>
-                  <div class="landing-feature-body">
-                    <span class="landing-feature-index">01 / THINK</span>
-                    <h3>Capture every little spark.</h3>
-                    <p>
-                      Drop sticky notes and text onto an open board. Move them around as your
-                      thinking changes.
-                    </p>
-                  </div>
-                </article>
-                <article class="landing-feature landing-feature-blue">
-                  <div class="landing-feature-graphic" aria-hidden="true">
-                    <svg viewBox="0 0 320 158" class="landing-feature-svg">
-                      <path
-                        d="M104 80 H165 Q179 80 179 64 V38 H221 M179 92V120 H221"
-                        fill="none"
-                        stroke="#689fbf"
-                        stroke-width="3.5"
-                      />
-                      <rect
-                        x="22"
-                        y="56"
-                        width="102"
-                        height="49"
-                        rx="14"
-                        fill="#e8f6ff"
-                        stroke="#73a6c6"
-                        stroke-width="2"
-                      />
-                      <rect
-                        x="218"
-                        y="12"
-                        width="82"
-                        height="49"
-                        rx="14"
-                        fill="#fff"
-                        stroke="#83b7d0"
-                        stroke-width="2"
-                      />
-                      <rect
-                        x="218"
-                        y="103"
-                        width="82"
-                        height="49"
-                        rx="14"
-                        fill="#fff"
-                        stroke="#83b7d0"
-                        stroke-width="2"
-                      />
-                      <text
-                        x="73"
-                        y="85"
-                        text-anchor="middle"
-                        font-size="14"
-                        font-weight="700"
-                        fill="#3c739b"
-                      >
-                        Idea
-                      </text>
-                      <text
-                        x="259"
-                        y="42"
-                        text-anchor="middle"
-                        font-size="13"
-                        font-weight="700"
-                        fill="#3c739b"
-                      >
-                        Option A
-                      </text>
-                      <text
-                        x="259"
-                        y="133"
-                        text-anchor="middle"
-                        font-size="13"
-                        font-weight="700"
-                        fill="#3c739b"
-                      >
-                        Option B
-                      </text>
-                    </svg>
-                  </div>
-                  <div class="landing-feature-body">
-                    <span class="landing-feature-index">02 / CONNECT</span>
-                    <h3>See how it all fits.</h3>
-                    <p>
-                      Draw lines and connectors, map relationships and build flows that make sense
-                      at a glance.
-                    </p>
-                  </div>
-                </article>
-                <article class="landing-feature landing-feature-green">
-                  <div class="landing-feature-graphic" aria-hidden="true">
-                    <svg viewBox="0 0 320 160" class="landing-feature-svg">
-                      <path
-                        d="M61 123V59L127 20L190 59V123Z"
-                        fill="#fff"
-                        stroke="#448966"
-                        stroke-width="3"
-                      />
-                      <circle cx="61" cy="59" r="6" fill="#fff" stroke="#34764e" stroke-width="3" />
-                      <circle
-                        cx="127"
-                        cy="20"
-                        r="6"
-                        fill="#fff"
-                        stroke="#34764e"
-                        stroke-width="3"
-                      />
-                      <circle
-                        cx="190"
-                        cy="59"
-                        r="6"
-                        fill="#fff"
-                        stroke="#34764e"
-                        stroke-width="3"
-                      />
-                      <path
-                        d="M224 42L288 56L272 127L214 103Z"
-                        fill="#d9ecda"
-                        stroke="#448966"
-                        stroke-width="3"
-                      />
-                      <circle
-                        cx="288"
-                        cy="56"
-                        r="7"
-                        fill="#5c9a70"
-                        stroke="#fff"
-                        stroke-width="3"
-                      />
-                      <circle
-                        cx="214"
-                        cy="103"
-                        r="7"
-                        fill="#5c9a70"
-                        stroke="#fff"
-                        stroke-width="3"
-                      />
-                    </svg>
-                  </div>
-                  <div class="landing-feature-body">
-                    <span class="landing-feature-index">03 / SHAPE</span>
-                    <h3>Make it your own.</h3>
-                    <p>
-                      Choose vector shapes, scale them and reshape their outlines using editable
-                      nodes and curves.
-                    </p>
-                  </div>
-                </article>
-                <article class="landing-feature landing-feature-lilac">
-                  <div class="landing-feature-graphic" aria-hidden="true">
-                    <div class="landing-media-mini">
-                      <div class="landing-media-sky"><span>☼</span><i></i></div>
-                      <div class="landing-media-caption">Inspiration.pdf <span>↗</span></div>
-                    </div>
-                    <div class="landing-media-tag">Add context, not clutter</div>
-                  </div>
-                  <div class="landing-feature-body">
-                    <span class="landing-feature-index">04 / GATHER</span>
-                    <h3>Keep the context close.</h3>
-                    <p>
-                      Add images, PDFs, links and embeds to the same board as your notes and
-                      diagrams.
-                    </p>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </section>
-
-          <section
-            class="landing-sai-promo"
-            id="start-benchline"
-            aria-labelledby="landing-sai-title"
-          >
-            <div class="landing-sai-promo-copy">
-              <span class="landing-eyebrow">SEPARATE APP · TASK HANDOFF</span>
-              <h2 id="landing-sai-title">
-                Meet Benchline. <em>Your project planner, not your canvas.</em>
-              </h2>
-              <p>
-                Sparkboard handles the visual thinking. Benchline handles task lists, Gantt
-                timelines, calendars and notes. A task you create here shows on Benchline's home
-                list and task list in this browser, including while the planner is already open.
-              </p>
-              <p class="landing-sai-disclosure">
-                Task handoff is one-way on this website and browser profile; it is not cross-device
-                project sync. Benchline projects remain local, independent of Sparkboard's optional
-                board sync. The hosted AI assistant is not enabled.
-              </p>
-              <a href="/sai/" class="landing-primary-cta"
-                >Open Benchline <span aria-hidden="true">↗</span></a
-              >
-            </div>
-            <div class="landing-sai-preview" aria-hidden="true">
-              <div class="landing-sai-preview-head">
-                <span>◉ BENCHLINE</span><span>Project timeline</span><span>⋯</span>
-              </div>
-              <div class="landing-sai-preview-row">
-                <span>Research</span><i class="sai-bar sai-bar-one"></i>
-              </div>
-              <div class="landing-sai-preview-row">
-                <span>Experiments</span><i class="sai-bar sai-bar-two"></i>
-              </div>
-              <div class="landing-sai-preview-row">
-                <span>Analysis</span><i class="sai-bar sai-bar-three"></i>
-              </div>
-              <div class="landing-sai-preview-row">
-                <span>Draft paper</span><i class="sai-bar sai-bar-four"></i>
-              </div>
-            </div>
-          </section>
-
-          <section
-            id="start-steps"
-            class="landing-section landing-steps"
-            aria-labelledby="landing-steps-title"
-          >
-            <div class="landing-section-heading">
-              <p class="landing-eyebrow">HOW IT WORKS</p>
-              <h2 id="landing-steps-title">From blank board to <em>brainwave.</em></h2>
-            </div>
-            <div class="landing-step-grid">
-              <article>
-                <span class="landing-step-number">01</span>
-                <h3>Open a board.</h3>
-                <p>Start blank or choose a template for brainstorming, mind maps and more.</p>
-              </article>
-              <article>
-                <span class="landing-step-number">02</span>
-                <h3>Make a little mess.</h3>
-                <p>Sketch, write, connect and rearrange as your ideas take shape.</p>
-              </article>
-              <article>
-                <span class="landing-step-number">03</span>
-                <h3>Turn ideas into tasks.</h3>
-                <p>
-                  Create task cards on your board. Benchline shows them in this browser. Board cloud
-                  sync remains separate.
-                </p>
-              </article>
-            </div>
-          </section>
-
-          <section
-            id="start-uses"
-            class="landing-section landing-uses"
-            aria-labelledby="landing-uses-title"
-          >
-            <div class="landing-section-heading">
-              <p class="landing-eyebrow">MADE FOR YOUR NEXT PROJECT</p>
-              <h2 id="landing-uses-title">Whatever you're working on, <em>see it clearly.</em></h2>
-            </div>
-            <div class="landing-use-grid">
-              <div>
-                <span aria-hidden="true">◎</span>
-                <h3>Mind mapping</h3>
-                <p>Follow ideas, branches and unexpected connections.</p>
-              </div>
-              <div>
-                <span aria-hidden="true">▤</span>
-                <h3>Study &amp; research</h3>
-                <p>Group concepts, evidence, notes and resources.</p>
-              </div>
-              <div>
-                <span aria-hidden="true">⌁</span>
-                <h3>Planning &amp; flows</h3>
-                <p>Turn rough steps into diagrams you can refine.</p>
-              </div>
-              <div>
-                <span aria-hidden="true">✦</span>
-                <h3>Creative thinking</h3>
-                <p>Collect inspiration and develop the next direction.</p>
-              </div>
-            </div>
-          </section>
-
-          <section class="landing-bottom-cta" aria-labelledby="landing-cta-title">
-            <span class="landing-bottom-spark" aria-hidden="true">✳</span>
-            <h2 id="landing-cta-title">Good ideas deserve<br />room to grow.</h2>
-            <p>Your next thought can turn into something bigger. Give it a board.</p>
-            <a class="landing-primary-cta" href="#start-auth"
-              >Open your workspace <span aria-hidden="true">↗</span></a
-            >
           </section>
         </main>
         <footer class="landing-footer">
@@ -943,5 +727,6 @@
       hidden
     />
     <script type="module" src="app.js"></script>
+    <script type="module" src="src/landing-tour.js"></script>
   </body>
 </html>
