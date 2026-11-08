@@ -11,6 +11,8 @@ function patchHostedCalendar(root) {
     "import CalendarSyncModal from './CalendarSyncModal';",
     "import CalendarSyncModal from './CalendarSyncModal';\nimport HostedCalendarOverview from './HostedCalendarOverview';");
   s = swap(s,
+    "import { syncWithServerFeed } from '../services/calendarSync';\n", '');
+  s = swap(s,
     "type CalendarViewMode = 'month' | 'week' | 'day';",
     "type CalendarViewMode = 'month' | 'week' | 'day' | '3day' | 'quarter' | 'year';");
 
@@ -27,6 +29,14 @@ function patchHostedCalendar(root) {
       "    });",
       "    useEffect(() => { try { localStorage.setItem('benchline-calendar-view', viewMode); } catch { /* storage unavailable */ } }, [viewMode]);",
     ].join('\n'));
+
+  // Feed export stays in Calendar settings; remove duplicate quick-sync state.
+  s = swap(s,
+    '    const [isSyncing, setIsSyncing] = useState(false);\n    const [syncToast, setSyncToast] = useState<string | null>(null);\n', '');
+  const quickSyncStart = s.indexOf('    const handleQuickSync = async () => {');
+  const quickSyncEnd = s.indexOf('    // Navigation Handlers\n', quickSyncStart);
+  if (quickSyncStart < 0 || quickSyncEnd < 0) throw Error('Calendar quick-sync source changed');
+  s = s.slice(0, quickSyncStart) + s.slice(quickSyncEnd);
 
   const from = s.indexOf('    // Navigation Handlers\n');
   const to = s.indexOf('    const handleToggleCalendar = ', from);
@@ -117,7 +127,6 @@ function patchHostedCalendar(root) {
     '                        </details>',
     '                        <button type="button" className="benchline-calendar-settings" onClick={() => setIsSyncModalOpen(true)}>Calendar settings</button>',
     '                    </div>',
-    '                    {syncToast && <div className="benchline-calendar-sync-message" role="status">{syncToast}</div>}',
     '                </header>',
     '',
   ].join('\n');
