@@ -330,6 +330,76 @@ body.benchline-phone header.benchline-app-header .benchline-search-open{top:46px
   #benchline-phone-chrome .bpc-view-label{display:none}
   #benchline-phone-chrome .bpc-view select{max-width:none}
 }
+
+/* Single-line mobile planner controls. Only primary actions stay in sight. */
+body.benchline-phone #root .benchline-gantt-toolbar{
+  height:43px!important;min-height:43px!important;padding:4px 8px!important;
+  flex-wrap:nowrap!important;overflow:visible!important;gap:4px!important;
+}
+body.benchline-phone #root .benchline-gantt-actions{
+  display:flex;align-items:center;justify-content:flex-end;
+  width:100%!important;min-width:0!important;gap:6px!important;
+}
+body.benchline-phone #root .benchline-gantt-scale-controls{flex:1;min-width:0;max-width:none}
+body.benchline-phone #root .benchline-gantt-scale-select{
+  max-width:180px;min-width:0;width:100%;min-height:34px;
+}
+body.benchline-phone #root .benchline-gantt-new,
+body.benchline-phone #root .benchline-gantt-zoom{display:none!important}
+body.benchline-phone #root .benchline-gantt-more>summary{min-height:34px;min-width:38px}
+body.benchline-phone #root .benchline-gantt-more-panel{min-width:220px;max-width:calc(100vw - 20px)}
+#root .benchline-gantt-mobile-zoom{display:none}
+body.benchline-phone #root .benchline-gantt-mobile-zoom{
+  display:flex;align-items:center;gap:8px;min-height:40px;
+  color:var(--benchline-ink);
+}
+body.benchline-phone #root .benchline-gantt-mobile-zoom>span{flex:1;font-weight:650;font-size:13px}
+body.benchline-phone #root .benchline-gantt-mobile-zoom>button{
+  min-width:40px;min-height:38px;border:1px solid var(--benchline-border);
+  background:var(--benchline-subtle);border-radius:8px;font-size:18px;
+}
+body.benchline-phone #root .benchline-calendar-toolbar{
+  display:flex;align-items:center;flex-wrap:nowrap!important;
+  min-height:44px!important;height:44px!important;
+  padding:4px 7px!important;gap:4px!important;overflow:visible!important;
+}
+body.benchline-phone #root .benchline-calendar-title-row{
+  display:flex;align-items:center;flex:1;min-width:0;gap:4px!important;
+}
+body.benchline-phone #root .benchline-calendar-title{
+  min-width:0;max-width:clamp(76px,26vw,154px);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  font-size:12px!important;line-height:1.25;
+}
+body.benchline-phone #root .benchline-calendar-nav{
+  display:flex;flex:none;gap:1px!important;align-items:center;
+}
+body.benchline-phone #root .benchline-calendar-nav>button{
+  min-height:34px;min-width:30px;padding:0 4px!important;
+}
+body.benchline-phone #root .benchline-calendar-nav>.benchline-calendar-today{display:none!important}
+body.benchline-phone #root .benchline-calendar-actions{
+  display:flex;align-items:center;flex:none;width:auto!important;
+  min-width:0!important;gap:4px!important;overflow:visible!important;
+  flex-wrap:nowrap!important;padding:0!important;
+}
+body.benchline-phone #root .benchline-calendar-actions>select{
+  width:82px;min-width:82px!important;max-width:82px;
+  min-height:34px!important;padding:0 3px!important;font-size:12px;
+}
+body.benchline-phone #root .benchline-calendar-more>summary{
+  min-height:34px!important;min-width:37px;padding:0 7px!important;
+  font-size:12px;
+}
+body.benchline-phone #root .benchline-calendar-more-panel{
+  right:0;min-width:210px;max-width:calc(100vw - 20px);
+  max-height:calc(100dvh - 155px);overflow-y:auto;
+}
+@media(max-width:370px){
+  body.benchline-phone #root .benchline-calendar-title{max-width:83px}
+  body.benchline-phone #root .benchline-calendar-actions>select{width:72px;min-width:72px!important;max-width:72px}
+  body.benchline-phone #root .benchline-calendar-nav>button{min-width:26px}
+}
 `;
 
 const VIEWS: { id: View; label: string }[] = [
