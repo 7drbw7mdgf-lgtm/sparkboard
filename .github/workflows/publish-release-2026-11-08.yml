@@ -1,0 +1,55 @@
+name: Publish Sparkboard and Benchline release (2026-11-08)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-release-2026-11-08.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Create versioned GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v2026.11.08-09bb01e"
+          TARGET="09bb01e99a806431c029c76ba5f3c3f17a364b6f"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; nothing to do."
+            exit 0
+          fi
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          ## Sparkboard & Benchline — November 2026 update
+
+          ### Sparkboard
+          - Separate **Add child** and **Add sibling** buttons from connector anchors, including larger touch targets.
+          - Extend elbow connectors with horizontal-first and vertical-first routing.
+          - Precisely edit bend points via X/Y coordinates, nudge by 1/5/10/25/50 canvas units, straighten, remove bends and restore auto-routing.
+          - Keep connector precision controls open for repeated adjustments with normal undo/redo support.
+          - Improve task handoff feedback to Benchline with queued, delivered and retry states.
+
+          ### Benchline
+          - Use a consistent Sparkboard blue/neutral palette throughout navigation, overview, tasks, Kanban, Gantt, Calendar, mobile panels and modals.
+          - Align browser theme, installed app icon and PWA manifest colours.
+          - Add accessible task editing/completion and shared desktop/mobile editing shortcuts.
+
+          ### Known limitations
+          - Sparkboard-to-Benchline task transfer is a one-way, same-browser handoff; it is **not** cross-device sync.
+          - GitHub release publication does **not** imply that Fasthosts deployment succeeded.
+          - Complete production smoke testing and live website validation are not confirmed by this release.
+          NOTES
+          gh release create "$TAG" \
+            --target "$TARGET" \
+            --title "Sparkboard + Benchline | 2026-11-08" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --latest
