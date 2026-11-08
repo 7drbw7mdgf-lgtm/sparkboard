@@ -106,7 +106,7 @@ export function mergeSparkboardTasks(project: ProjectData | null): ProjectData |
       startDate,
       endDate,
       assignedTo: [],
-      color: '#d6ecde',
+      color: '#e8edff',
       completion: 0,
       priority: ['Urgent', 'High', 'Medium', 'Low'].includes(incoming.priority || '')
         ? (incoming.priority as NonNullable<ProjectData['tasks'][number]['priority']>)
