@@ -71,6 +71,11 @@ export default function HostedHeader({
       const modalOpen = !!document.querySelector('dialog[open], [role="dialog"]');
       if (typing || modalOpen) return;
       const modifier = event.metaKey || event.ctrlKey;
+      if (modifier && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        focusSearch();
+        return;
+      }
       if (modifier && event.key.toLowerCase() === 'z') {
         if (event.shiftKey) {
           if (!canRedo) return;
@@ -88,7 +93,18 @@ export default function HostedHeader({
         redo();
         return;
       }
+      if (!modifier && !event.altKey && event.key === '?' && onHelp) {
+        event.preventDefault();
+        onHelp();
+        return;
+      }
       if (modifier || event.altKey || event.shiftKey) return;
+      if (onViewChange && ['1', '2', '3', '4', '5'].includes(event.key)) {
+        const destinations = [View.HOME, View.TASKS, View.GANTT, View.CALENDAR, View.KANBAN];
+        event.preventDefault();
+        onViewChange(destinations[Number(event.key) - 1]);
+        return;
+      }
       if (event.key.toLowerCase() === 'n' && onAddTask) {
         event.preventDefault();
         onAddTask();
@@ -102,7 +118,7 @@ export default function HostedHeader({
     };
     document.addEventListener('keydown', handleShortcuts);
     return () => document.removeEventListener('keydown', handleShortcuts);
-  }, [canUndo, canRedo, undo, redo, onAddTask, onHelp]);
+  }, [canUndo, canRedo, undo, redo, onAddTask, onHelp, onViewChange]);
 
   const focusSearch = () => {
     setMobileSearch(true);
