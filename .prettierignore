@@ -6,3 +6,8 @@ package-lock.json
 build/
 assets/pdfjs/
 src/vendor/
+
+# Hosted adapter applies exact source anchors against a pinned upstream revision.
+# Its output is typechecked by the downstream Sai build.
+scripts/patch-sai-gantt.cjs
+integration/sai/HostedViewControls.tsx
