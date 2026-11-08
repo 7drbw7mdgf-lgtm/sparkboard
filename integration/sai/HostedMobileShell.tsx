@@ -28,6 +28,14 @@ html:not(.dark) input[type=checkbox],html:not(.dark) input[type=radio],html:not(
 .benchline-top-actions button:disabled{opacity:.35;cursor:not-allowed}
 .benchline-top-actions .benchline-top-new{font:700 12px/1 'DM Sans',sans-serif;background:#4262ff!important;color:white!important;border-color:#4262ff}
 .benchline-top-actions .benchline-top-new:hover{background:#2f4fe0!important}
+/* Task list: immediate, reversible row actions accessible to mouse, touch and keyboard. */
+.benchline-task-actions-cell{width:115px;min-width:115px;white-space:nowrap}
+.benchline-task-row-actions{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.benchline-task-row-actions button{min-width:36px;min-height:36px;border:1px solid #e6e6e2;border-radius:8px;background:white;color:#45546c;font:700 12px/1 'DM Sans',sans-serif;padding:0 9px}
+.benchline-task-row-actions button:hover{background:#e8edff;border-color:#a5b4fc;color:#304bdc}
+.dark .benchline-task-row-actions button{background:#293344;border-color:#4b5566;color:#dee7ff}
+@media(pointer:coarse){.benchline-task-row-actions button{min-width:44px;min-height:44px}}
+
 @media(max-width:650px),(max-height:500px) and (pointer:coarse){.benchline-top-actions{display:none}}
 
 html:not(.dark) body{background:#fafaf8;color:#292c31}
