@@ -171,4 +171,84 @@ html:not(.dark) #root .benchline-gantt-toolbar{
   #root .benchline-calendar-more-panel{right:0;min-width:205px}
 }
 .dark #root .benchline-gantt-more-panel,.dark #root .benchline-calendar-more-panel{background:var(--benchline-surface);border-color:var(--benchline-border)}
+
+/* Unified icon geometry and control alignment across all Benchline views. */
+#root .benchline-icon{
+  display:block!important;
+  width:18px;
+  height:18px;
+  min-width:18px;
+  min-height:18px;
+  flex:none;
+  vertical-align:middle;
+  stroke-width:1.8;
+}
+#root .benchline-sidebar .benchline-nav-icon{
+  display:inline-flex;
+  flex:0 0 20px;
+  width:20px;height:20px;
+  align-items:center;justify-content:center;
+}
+#root .benchline-sidebar button,
+#root .benchline-sidebar summary{
+  display:flex;
+  align-items:center;
+  column-gap:10px;
+  min-height:42px;
+  line-height:1.2;
+}
+#root .benchline-sidebar button>span:last-child{min-width:0}
+#root .benchline-sidebar .group>summary .benchline-icon{margin-left:auto}
+#root .benchline-app-header .benchline-top-actions,
+#root .benchline-app-header .benchline-top-actions button,
+#root .benchline-app-header>div>button[aria-label="Search project"],
+#root .benchline-app-header details>summary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+#root .benchline-app-header .benchline-top-actions button{
+  box-sizing:border-box;
+  height:36px;min-height:36px;min-width:36px;
+  gap:6px;line-height:1.2;
+}
+#root .benchline-app-header .benchline-top-actions button.benchline-top-new{padding-inline:10px}
+#root .benchline-app-header>div>button[aria-label="Search project"]{
+  width:36px;height:36px;min-width:36px;padding:0;
+}
+#root .benchline-app-header details>summary{min-height:36px;gap:6px;line-height:1.2}
+#root .benchline-gantt-toolbar,
+#root .benchline-gantt-actions,
+#root .benchline-gantt-scale-controls,
+#root .benchline-calendar-toolbar,
+#root .benchline-calendar-title-row,
+#root .benchline-calendar-nav,
+#root .benchline-calendar-actions{
+  align-items:center;
+}
+#root .benchline-gantt-toolbar :is(button,select,summary),
+#root .benchline-calendar-toolbar :is(button,select,summary){
+  box-sizing:border-box;
+  line-height:1.2;
+}
+#root .benchline-gantt-zoom,
+#root .benchline-calendar-nav{align-self:center}
+#root .benchline-gantt-zoom>button,
+#root .benchline-calendar-nav>button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+#root .benchline-gantt-more>summary,
+#root .benchline-calendar-more>summary{
+  flex:none;
+  align-items:center;
+  justify-content:center;
+}
+#root .benchline-task-row-actions button,
+#root .benchline-kanban-edit-action{
+  display:inline-flex;align-items:center;justify-content:center;
+  line-height:1.2;
+}
+#root .benchline-overview :is(h1,h2,p){margin-block-start:0}
 `;
