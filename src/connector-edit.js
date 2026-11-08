@@ -91,9 +91,28 @@ export function openConnectorControls(target) {
         edge.waypoints?.length ? 'manual' : edge.avoidObstacles === false ? 'direct' : 'auto',
       )}</select></label>
     </div>
+    <fieldset class="ca-bend-editor" id="ca-bend-editor">
+      <legend>Elbow bend points</legend>
+      <p>Precisely position each bend, or nudge it by 10 canvas units. Manual points keep the chosen route fixed until you restore auto-routing.</p>
+      <div class="ca-grid">
+        <label>Choose bend<select id="ca-bend-index">${(edge.waypoints || []).map((point, index) => '<option value="' + index + '">Bend ' + (index + 1) + '</option>').join('') || '<option value="">No manual bends yet</option>'}</select></label>
+        <label>Step size<select id="ca-bend-step"><option value="1">1 unit</option><option value="5">5 units</option><option value="10" selected>10 units</option><option value="25">25 units</option><option value="50">50 units</option></select></label>
+        <label>X position<input id="ca-bend-x" type="number" step="1" value="${edge.waypoints?.[0]?.x ?? ''}" placeholder="Canvas X"></label>
+        <label>Y position<input id="ca-bend-y" type="number" step="1" value="${edge.waypoints?.[0]?.y ?? ''}" placeholder="Canvas Y"></label>
+      </div>
+      <div class="ca-buttons">
+        <button type="button" data-ca-tool="left">← Left</button>
+        <button type="button" data-ca-tool="right">Right →</button>
+        <button type="button" data-ca-tool="up">↑ Up</button>
+        <button type="button" data-ca-tool="down">↓ Down</button>
+        <button type="button" data-ca-tool="set">Set X / Y</button>
+        <button type="button" data-ca-tool="remove">Remove bend</button>
+      </div>
+    </fieldset>
     <button type="submit" class="ca-primary">Apply connector style</button>
     <div class="ca-buttons"><button type="button" data-ca-tool="waypoint">＋ Add bend point</button>
     <button type="button" data-ca-tool="clear">Reset bends</button>
+    <button type="button" data-ca-tool="straighten">Straighten manual bends</button>
     <button type="button" data-ca-tool="auto">↻ Restore auto-route</button>
     <button type="button" data-ca-tool="reverse">⇄ Reverse direction</button>
     ${edge.relationship ? '<button type="button" data-ca-tool="unpin">Unpin relationship ends</button>' : ''}</div>
@@ -117,10 +136,37 @@ export function openConnectorControls(target) {
       setEndpointChoice(next, 'from', $('#ca-from').value);
       setEndpointChoice(next, 'to', $('#ca-to').value);
       setConnectorRouting(next, $('#ca-auto').value, state.board.objects);
+      // Coordinate editing is optional: only update a bend when numbers are explicitly supplied.
+      if (next.route === 'elbow' && $('#ca-auto').value === 'manual') {
+        const selected = Number($('#ca-bend-index').value);
+        const rawX = $('#ca-bend-x').value;
+        const rawY = $('#ca-bend-y').value;
+        if (next.waypoints?.[selected] && rawX !== '' && rawY !== '') {
+          const x = Number(rawX);
+          const y = Number(rawY);
+          if (Number.isFinite(x) && Number.isFinite(y)) {
+            next.waypoints[selected] = { x: Math.round(x), y: Math.round(y) };
+          }
+        }
+      }
     });
     $('#dialog').close();
     toast('Connector updated');
   };
+  const bendSelector = $('#ca-bend-index');
+  const refreshBendPosition = () => {
+    const value = liveConnector(id)?.waypoints?.[Number(bendSelector.value)];
+    $('#ca-bend-x').value = value ? String(Math.round(value.x)) : '';
+    $('#ca-bend-y').value = value ? String(Math.round(value.y)) : '';
+  };
+  bendSelector.addEventListener('change', refreshBendPosition);
+  const hasBends = Boolean(edge.waypoints?.length);
+  $('#ca-bend-editor').disabled = !hasBends;
+  // Route and pattern editing remain available for non-elbow connectors.
+  element.addEventListener('change', (event) => {
+    if (event.target.id === 'ca-route')
+      $('#ca-bend-editor').disabled = event.target.value !== 'elbow' || !liveConnector(id)?.waypoints?.length;
+  });
   element.addEventListener('click', (event) => {
     const action = event.target.closest('[data-ca-tool]')?.dataset.caTool;
     if (!action) return;
@@ -133,6 +179,35 @@ export function openConnectorControls(target) {
         next.waypoints ??= [];
         next.waypoints.push({ x: Math.round(route.labelX), y: Math.round(route.labelY + 55) });
         next.avoidObstacles = false;
+      }
+      if (['left', 'right', 'up', 'down', 'set', 'remove', 'straighten'].includes(action)) {
+        const points = next.waypoints || [];
+        const selected = Number($('#ca-bend-index').value);
+        const step = Number($('#ca-bend-step').value) || 10;
+        if (action === 'straighten') {
+          if (points.length && points.every((point) => Number.isFinite(point.x) && Number.isFinite(point.y))) {
+            const start = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects).start;
+            const end = M.connectorRoute({ ...next, waypoints: [] }, state.board.objects).end;
+            const horizontal = Math.abs(end.x - start.x) >= Math.abs(end.y - start.y);
+            next.waypoints = points.map((point) => horizontal ? { x: point.x, y: Math.round(start.y) } : { x: Math.round(start.x), y: point.y });
+            next.avoidObstacles = false;
+          }
+        } else if (Number.isInteger(selected) && selected >= 0 && points[selected]) {
+          const point = points[selected];
+          if (action === 'remove') points.splice(selected, 1);
+          else if (action === 'set') {
+            const x = Number($('#ca-bend-x').value);
+            const y = Number($('#ca-bend-y').value);
+            if ($('#ca-bend-x').value !== '' && $('#ca-bend-y').value !== '' && Number.isFinite(x) && Number.isFinite(y)) {
+              points[selected] = { x: Math.round(x), y: Math.round(y) };
+            }
+          } else {
+            const dx = action === 'right' ? step : action === 'left' ? -step : 0;
+            const dy = action === 'down' ? step : action === 'up' ? -step : 0;
+            points[selected] = { x: Math.round(point.x + dx), y: Math.round(point.y + dy) };
+          }
+          next.avoidObstacles = false;
+        }
       }
       if (action === 'clear' || action === 'auto') restoreAutoRouting(next);
       if (action === 'unpin' && next.relationship) {
@@ -153,6 +228,8 @@ export function openConnectorControls(target) {
     toast(
       action === 'waypoint'
         ? 'Drag the blue bend point on the canvas'
+        : ['left', 'right', 'up', 'down', 'set', 'remove', 'straighten'].includes(action)
+          ? 'Elbow bend adjusted'
         : action === 'clear'
           ? 'Bend points reset'
           : action === 'auto'
