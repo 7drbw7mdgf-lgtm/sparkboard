@@ -213,6 +213,9 @@ export default function HostedHeader({
             {menuButton('Download project backup', onSave)}
             {menuButton('Change project dates', onTimeframe)}
             {onHelp && menuButton('Keyboard shortcuts', onHelp)}
+            <p className="px-3 py-1 text-[11px] leading-relaxed text-[#667085] dark:text-gray-400">
+              N new task · / search · 1–5 views · ⌘/Ctrl+Z undo
+            </p>
             <div className="my-1 border-t border-[#edf0f3] dark:border-gray-800" />
             <div className="flex gap-1">
               {menuButton('Undo', undo, !canUndo)}
