@@ -1,4 +1,5 @@
 name: Repair formatting and redeploy Fasthosts
+# Retry after fixing whitespace-sensitive CSS assertions.
 
 on:
   push:
