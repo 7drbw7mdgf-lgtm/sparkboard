@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ProjectData } from './types';
+import { ProjectData } from '../types';
 
 interface HostedCalendarOverviewProps {
     projectData: ProjectData;
