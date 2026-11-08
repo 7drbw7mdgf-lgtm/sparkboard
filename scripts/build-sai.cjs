@@ -275,6 +275,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     'HostedAIPanel.tsx',
     'HostedMobileShell.tsx',
     'HostedTheme.ts',
+    'HostedIcon.tsx',
     'HostedHomeScreen.tsx',
     'HostedSidebar.tsx',
     'HostedHeader.tsx',
