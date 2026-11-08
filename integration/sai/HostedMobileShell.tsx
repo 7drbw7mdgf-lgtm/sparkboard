@@ -306,6 +306,30 @@ body.benchline-phone .gantt-x-scroll{display:none!important}
 #benchline-phone-chrome .bpc-command-row button:disabled{opacity:.35;cursor:not-allowed}
 
 #benchline-phone-chrome button:focus-visible{outline:2px solid #4262ff;outline-offset:2px}
+
+/* Compact navigation: one view selector instead of four scrolling tabs. */
+body.benchline-phone header.benchline-app-header{height:42px!important;min-height:42px!important}
+body.benchline-phone header.benchline-app-header>div>span[aria-label="Benchline"]{font-size:14px!important}
+body.benchline-phone header.benchline-app-header details summary{min-height:32px!important;padding:0 7px!important}
+body.benchline-phone main{padding-top:42px!important}
+body.benchline-phone header.benchline-app-header .benchline-search-open{top:46px!important}
+#benchline-phone-chrome{top:42px}
+#benchline-phone-chrome .bpc-row{height:42px;align-items:center;padding:0 8px;gap:5px}
+#benchline-phone-chrome .bpc-view{display:flex;align-items:center;flex:1;min-width:0;gap:7px;margin:0}
+#benchline-phone-chrome .bpc-view-label{font:650 11px/1 'DM Sans',sans-serif;color:#757f8e}
+#benchline-phone-chrome .bpc-view select{
+  width:100%;max-width:170px;min-width:0;min-height:34px;padding:0 26px 0 10px;
+  border:1px solid #e6e6e2;border-radius:8px;background:#fff;
+  color:#292c31;font:700 13px/1 'DM Sans',sans-serif;
+}
+#benchline-phone-chrome .bpc-new{background:#4262ff;color:white;border-radius:8px;min-height:34px;padding:0 11px;font-size:13px}
+#benchline-phone-chrome .bpc-menu-btn{min-width:38px;min-height:36px;padding:0 8px;border-radius:8px;color:#485466;font-size:17px}
+#benchline-phone-chrome .bpc-menu{top:42px;right:8px}
+@media(max-width:360px){
+  body.benchline-phone #benchline-sparkboard{font-size:10px!important}
+  #benchline-phone-chrome .bpc-view-label{display:none}
+  #benchline-phone-chrome .bpc-view select{max-width:none}
+}
 `;
 
 const VIEWS: { id: View; label: string }[] = [
@@ -389,21 +413,23 @@ export default function HostedMobileShell({
       {compact ? (
         <div id="benchline-phone-chrome">
           <div className="bpc-row">
-            <nav className="bpc-pivot" aria-label="Planner views">
-              {VIEWS.map((view) => (
-                <button
-                  key={view.id}
-                  type="button"
-                  aria-pressed={currentView === view.id}
-                  onClick={() => {
-                    setMenu(false);
-                    onViewChange(view.id);
-                  }}
-                >
-                  {view.label}
-                </button>
-              ))}
-            </nav>
+            <label className="bpc-view">
+              <span className="bpc-view-label">View</span>
+              <select
+                aria-label="Planner view"
+                value={currentView}
+                onChange={(event) => {
+                  setMenu(false);
+                  onViewChange(event.target.value as View);
+                }}
+              >
+                {[...VIEWS, { id: View.KANBAN, label: 'Kanban' }].map((view) => (
+                  <option key={view.id} value={view.id}>
+                    {view.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               className="bpc-new"
