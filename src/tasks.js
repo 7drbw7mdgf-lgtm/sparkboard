@@ -8,18 +8,20 @@ import { toast } from './notifications.js';
 import { centerPoint } from './viewport.js';
 import { appendMindNode, addMindChild, isMindNode, layoutMindmap } from './mindmap-model.js';
 import { themeNewMindTopic } from './mindmap-master.js';
-import { publishTask } from './task-bridge.js';
+import { publishTask, taskHandoffStatus, TASK_BRIDGE_RECEIPT_KEY } from './task-bridge.js';
 
 const taskCSS = `
-#objects .spark-task-tag{position:absolute;top:-13px;left:8px;padding:4px 9px;background:#246c52;color:#fff;border-radius:10px;font:700 11px/1 Manrope,sans-serif;box-shadow:0 2px 7px #193c2b22;pointer-events:none;white-space:nowrap;z-index:5}
-#objects .spark-task-tag.is-pending{background:#a36727}
+#objects .spark-task-tag{position:absolute;top:-13px;left:8px;padding:4px 9px;background:#4262ff;color:#fff;border-radius:10px;font:700 11px/1 Manrope,sans-serif;box-shadow:0 2px 7px #193c2b22;pointer-events:none;white-space:nowrap;z-index:5}
+#objects .spark-task-tag.is-pending{background:#6b778e}
+#objects .spark-task-tag.is-failed{background:#ae6737}
 #spark-task-form{display:grid;gap:12px;max-width:440px}
 #spark-task-form label{display:grid;gap:5px;font-weight:650;font-size:13px}
-#spark-task-form input,#spark-task-form textarea,#spark-task-form select{box-sizing:border-box;width:100%;padding:10px;border:1px solid #b8c8bd;border-radius:9px;background:white;color:#26362e;font:inherit;font-size:16px}
+#spark-task-form input,#spark-task-form textarea,#spark-task-form select{box-sizing:border-box;width:100%;padding:10px;border:1px solid #e6e6e2;border-radius:9px;background:white;color:#292c31;font:inherit;font-size:16px}
 #spark-task-form textarea{min-height:76px;resize:vertical}
 #spark-task-form .spark-task-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#spark-task-form button{background:#27684e;border-radius:10px;color:white;padding:12px;font-weight:700}
-#spark-task-form p{font-size:12px;line-height:1.45;color:#697b6e;margin:0}
+#spark-task-form button{background:#4262ff;border-radius:8px;color:white;padding:12px;font-weight:700}
+#spark-task-form button:hover{background:#2f4fe0}
+#spark-task-form p{font-size:12px;line-height:1.45;color:#5c6570;margin:0}
 @media(max-width:650px){#spark-task-form .spark-task-pair{grid-template-columns:1fr}#objects .spark-task-tag{font-size:10px}}
 `;
 
@@ -33,11 +35,17 @@ function decorateTasks() {
       element.querySelector('.spark-task-tag')?.remove();
       if (!item?.sparkTask) return;
       const tag = document.createElement('span');
-      tag.className = 'spark-task-tag' + (item.sparkTask.pending ? ' is-pending' : '');
-      tag.textContent = item.sparkTask.pending ? '✓ Task · saved here' : '✓ Task';
-      tag.title = item.sparkTask.pending
-        ? 'Stored on this board; Benchline handoff failed in this browser'
-        : 'Showing in Benchline on this browser';
+      const handoff = taskHandoffStatus(item.sparkTask.id);
+      tag.className =
+        'spark-task-tag' + (handoff === 'queued' ? ' is-pending' : handoff === 'missing' ? ' is-failed' : '');
+      tag.textContent =
+        handoff === 'saved' ? '✓ In Benchline' : handoff === 'queued' ? '↗ To Benchline' : '↻ Task not sent';
+      tag.title =
+        handoff === 'saved'
+          ? 'Saved in Benchline on this browser profile'
+          : handoff === 'queued'
+            ? 'Queued for Benchline. Open Benchline in this browser to import.'
+            : 'Stored on this board. Open task creation or revisit this board to retry.';
       element.append(tag);
     });
 }
@@ -54,7 +62,7 @@ function createTask() {
         <label>Priority<select name="priority"><option>Medium</option><option>High</option><option>Urgent</option><option>Low</option></select></label>
       </div>
       <label>Details (optional)<textarea name="notes" maxlength="4000" placeholder="What needs doing?"></textarea></label>
-      <p>The card stays on this board, and Benchline adds it to the task list in this browser.</p>
+      <p>This creates a task in Benchline while keeping a linked visual node on your board. The task transfer works in this browser profile only.</p>
       <button type="submit">Create task</button>
     </form>`,
     'TASK',
@@ -139,17 +147,34 @@ function createTask() {
     if (success) {
       // Handoff confirmation is not a user edit: don't add a phantom Undo step.
       const item = state.board?.objects.find((n) => n.id === nodeId);
-      if (item?.sparkTask) item.sparkTask.pending = false;
+      if (item?.sparkTask) item.sparkTask.pending = taskHandoffStatus(taskId) !== 'saved';
       render();
       save();
     }
     $('#dialog')?.close();
     toast(
       success
-        ? 'Task added to Benchline'
-        : 'Task saved on the board. Benchline could not be updated in this browser',
+        ? 'Task queued for Benchline. Open Benchline to complete the transfer.'
+        : 'Task saved on board. Benchline handoff could not be queued.',
     );
   });
+}
+
+/** Retry any task not yet queued, without creating a new task or history entry. */
+function retryBoardTasks() {
+  if (!state.board) return;
+  let changed = false;
+  for (const item of state.board.objects) {
+    if (!item.sparkTask?.id || taskHandoffStatus(item.sparkTask.id) !== 'missing') continue;
+    if (publishTask(item.sparkTask)) {
+      item.sparkTask.pending = taskHandoffStatus(item.sparkTask.id) !== 'saved';
+      changed = true;
+    }
+  }
+  if (changed) {
+    save();
+    decorateTasks();
+  }
 }
 
 export function setupTaskWorkspace() {
@@ -158,5 +183,11 @@ export function setupTaskWorkspace() {
   document.head.append(styles);
   document.addEventListener('sparkboard:new-task', createTask);
   document.addEventListener('sparkboard:render', decorateTasks);
+  window.addEventListener('storage', (event) => {
+    if (event.key === TASK_BRIDGE_RECEIPT_KEY) decorateTasks();
+  });
+  window.addEventListener('focus', () => { retryBoardTasks(); decorateTasks(); });
+  document.addEventListener('sparkboard:board-ready', retryBoardTasks);
   decorateTasks();
+  retryBoardTasks();
 }
