@@ -4,6 +4,8 @@ A simple, local-first visual whiteboard. Sketch ideas, organize sticky notes, co
 
 **[Download Sparkboard 1.3.1 for Mac (Apple Silicon · macOS 14+)](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/download/v1.3.1/Sparkboard-1.3.1-macOS-arm64.dmg)** · [Release notes](https://github.com/7drbw7mdgf-lgtm/sparkboard/releases/tag/v1.3.1) · [MIT License](LICENSE)
 
+<!-- A main-branch push triggers the Fasthosts production build and live verification. -->
+
 ## Install or run
 
 ### macOS app
