@@ -54,6 +54,8 @@ export function loadHostedProject(): ProjectData | null {
 // This queue is NOT shared across devices or other domains.
 export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
 export const TASK_BRIDGE_CHANNEL = 'sparkboard.sai.tasks';
+// Receipt written only after the imported task is safely saved in a Benchline project.
+export const TASK_BRIDGE_RECEIPT_KEY = 'sparkboard.sai.task-receipts.v1';
 
 type BridgeTask = {
   id: string;
@@ -139,6 +141,17 @@ export function saveHostedProject(data: ProjectData): void {
         .map((t) => t.id.slice('sparkboard:'.length)),
     );
     const queued = incomingTasks();
+    if (imported.size) {
+      // Receipts distinguish a completed transfer from a merely queued task.
+      // Preserve older receipts to avoid showing saved board nodes as unsent again.
+      let previous: string[] = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem(TASK_BRIDGE_RECEIPT_KEY) || '[]');
+        if (Array.isArray(parsed)) previous = parsed.filter((id): id is string => typeof id === 'string');
+      } catch { /* invalid local receipts can be replaced */ }
+      const receiptIds = [...new Set([...previous, ...imported])].slice(-5000);
+      localStorage.setItem(TASK_BRIDGE_RECEIPT_KEY, JSON.stringify(receiptIds));
+    }
     if (queued.some((task) => imported.has(task.id))) {
       localStorage.setItem(
         TASK_BRIDGE_KEY,
