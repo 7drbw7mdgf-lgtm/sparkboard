@@ -187,7 +187,8 @@ export function setupTaskWorkspace() {
     if (event.key === TASK_BRIDGE_RECEIPT_KEY) decorateTasks();
   });
   window.addEventListener('focus', () => { retryBoardTasks(); decorateTasks(); });
-  document.addEventListener('sparkboard:board-ready', retryBoardTasks);
+  // A board may open after initialisation. Render is dispatched when the board is mounted.
+  document.addEventListener('sparkboard:render', retryBoardTasks);
   decorateTasks();
   retryBoardTasks();
 }
