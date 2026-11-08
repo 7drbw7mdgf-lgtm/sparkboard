@@ -187,6 +187,33 @@ test('Benchline uses a white workspace, movable Gantt bars and compact planner m
   assert.match(calendar, /Jump to date/);
 });
 
+test('mobile Tasks view uses full-information cards without affecting the desktop table', () => {
+  const controls = fs.readFileSync('scripts/patch-sai-controls.cjs', 'utf8');
+  const css = fs.readFileSync('integration/sai/HostedTheme.ts', 'utf8');
+  assert.match(controls, /benchline-mobile-task-card/);
+  assert.match(controls, /benchline-desktop-task-table/);
+  assert.match(controls, /sortedTasksForList\.map\(task/);
+  for (const field of [
+    'task.startDate',
+    'task.endDate',
+    'task.priority',
+    'task.completion',
+    'task.notes',
+    'task.tags',
+    'task.customFieldValues',
+    'taskAssignments',
+    'group.name',
+  ]) {
+    assert.ok(controls.includes(field), 'Missing mobile task detail: ' + field);
+  }
+  assert.match(controls, /onRequestEditTask\(task.id\)/);
+  assert.match(controls, /Mark complete/);
+  assert.match(controls, /Reopen/);
+  assert.match(css, /body\.benchline-phone #root \.benchline-mobile-tasks/);
+  assert.match(css, /body\.benchline-phone #root \.benchline-desktop-task-table/);
+  assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
 test('Sai sources are served as an isolated subpath without duplicating authentication', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   assert.match(html, /href="\/sai\/"/);
