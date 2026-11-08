@@ -240,8 +240,8 @@ test('Sai sources are served as an isolated subpath without duplicating authenti
   assert.match(html, /class="sai-mobile-link"/);
   assert.match(html, /Benchline projects remain local/);
   assert.match(html, />Benchline<\/a>/);
-  assert.match(html, /Meet Benchline/);
-  assert.match(html, /Open Benchline project planner/);
+  assert.match(html, /Give your ideas a timeline/);
+  assert.match(html, /Open Benchline/);
   assert.doesNotMatch(html, />Sai planner/);
   // Keep the hosted route intact until a separate Benchline destination is supplied.
   assert.match(html, /href="\/sai\/"/);
