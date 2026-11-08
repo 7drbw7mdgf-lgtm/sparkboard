@@ -13,3 +13,4 @@ scripts/patch-sai-gantt.cjs
 integration/sai/HostedViewControls.tsx
 scripts/patch-sai-calendar.cjs
 integration/sai/HostedCalendarOverview.tsx
+scripts/patch-sai-controls.cjs
