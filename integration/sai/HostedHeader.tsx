@@ -153,7 +153,9 @@ export default function HostedHeader({
             ? 'Overview'
             : currentView === View.GANTT
               ? 'Timeline'
-              : currentView === View.KANBAN ? 'Tasks' : currentView}
+              : currentView === View.KANBAN
+                ? 'Tasks'
+                : currentView}
         </span>
       </div>
       <div className="flex min-w-0 items-center justify-end gap-3">

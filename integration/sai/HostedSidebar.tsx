@@ -42,7 +42,11 @@ export default function HostedSidebar({
               key={item.id}
               type="button"
               onClick={() => onViewChange(item.id)}
-              aria-current={currentView === item.id || (item.id === View.TASKS && currentView === View.KANBAN) ? 'page' : undefined}
+              aria-current={
+                currentView === item.id || (item.id === View.TASKS && currentView === View.KANBAN)
+                  ? 'page'
+                  : undefined
+              }
               className={
                 'flex min-h-[42px] w-full items-center gap-3 rounded-lg px-3 text-left text-sm transition-colors ' +
                 (currentView === item.id || (item.id === View.TASKS && currentView === View.KANBAN)
@@ -57,7 +61,6 @@ export default function HostedSidebar({
             </button>
           ))}
         </div>
-
       </div>
       <div className="space-y-2">
         <button
