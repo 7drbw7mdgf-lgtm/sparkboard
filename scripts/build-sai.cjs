@@ -82,8 +82,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     app,
     "import { useHistory } from './hooks/useHistory';",
-    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';\nimport HostedMobileShell from './HostedMobileShell';
-import HostedTasksSwitch from './HostedTasksSwitch';",
+    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';\nimport HostedMobileShell from './HostedMobileShell';\nimport HostedTasksSwitch from './HostedTasksSwitch';",
   );
   // Benchline opens straight into the workspace with a demo project; a project saved on this
   // device takes its place.
