@@ -54,6 +54,13 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   if (head !== SAI_COMMIT) throw Error('Sai source revision mismatch.');
 
   const app = path.join(source, 'App.tsx');
+  // Show List and Kanban inside one Tasks destination on all screen sizes.
+  replaceRequired(
+    app,
+    '<main className="flex-1 relative overflow-hidden"> {renderView()} </main>',
+    '{(currentView === View.TASKS || currentView === View.KANBAN) && <HostedTasksSwitch currentView={currentView} onViewChange={setCurrentView} />}\n                <main className={"flex-1 relative overflow-hidden" + ((currentView === View.TASKS || currentView === View.KANBAN) ? " benchline-tasks-workspace" : "")}> {renderView()} </main>',
+  );
+
   // Build the hosted planner with a focused homepage and consolidated navigation.
   // All full views remain available; only the default shell is simplified.
   for (const [moduleName, hostedModule] of [
@@ -75,7 +82,8 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     app,
     "import { useHistory } from './hooks/useHistory';",
-    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';\nimport HostedMobileShell from './HostedMobileShell';",
+    "import { useHistory } from './hooks/useHistory';\nimport { loadHostedProject, saveHostedProject, downloadHostedProject, mergeSparkboardTasks, TASK_BRIDGE_KEY, TASK_BRIDGE_CHANNEL } from './HostedPersistence';\nimport HostedMobileShell from './HostedMobileShell';
+import HostedTasksSwitch from './HostedTasksSwitch';",
   );
   // Benchline opens straight into the workspace with a demo project; a project saved on this
   // device takes its place.
@@ -276,6 +284,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     'HostedMobileShell.tsx',
     'HostedTheme.ts',
     'HostedIcon.tsx',
+    'HostedTasksSwitch.tsx',
     'HostedHomeScreen.tsx',
     'HostedSidebar.tsx',
     'HostedHeader.tsx',
