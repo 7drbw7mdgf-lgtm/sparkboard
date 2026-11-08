@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from './types';
+import HostedIcon, { BenchlineIconName } from './HostedIcon';
 
 interface Props {
   currentView: View;
@@ -13,10 +14,10 @@ interface Props {
 }
 
 const navItems = [
-  { id: View.HOME, label: 'Overview', symbol: '⌂' },
-  { id: View.TASKS, label: 'Tasks', symbol: '☑' },
-  { id: View.GANTT, label: 'Timeline', symbol: '≡' },
-  { id: View.CALENDAR, label: 'Calendar', symbol: '▦' },
+  { id: View.HOME, label: 'Overview', symbol: 'home' },
+  { id: View.TASKS, label: 'Tasks', symbol: 'tasks' },
+  { id: View.GANTT, label: 'Timeline', symbol: 'timeline' },
+  { id: View.CALENDAR, label: 'Calendar', symbol: 'calendar' },
 ];
 
 export default function HostedSidebar({
@@ -49,8 +50,8 @@ export default function HostedSidebar({
                   : 'font-medium text-[#5c6570] hover:bg-[#f5f6f8] hover:text-[#252b37] dark:text-gray-300 dark:hover:bg-gray-800')
               }
             >
-              <span aria-hidden="true" className="w-5 text-center text-[17px]">
-                {item.symbol}
+              <span className="benchline-nav-icon" aria-hidden="true">
+                <HostedIcon name={item.symbol as BenchlineIconName} />
               </span>
               <span>{item.label}</span>
             </button>
@@ -59,7 +60,7 @@ export default function HostedSidebar({
         <details className="group mt-3 border-t border-[#edf0f3] pt-2 dark:border-gray-800">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm font-medium text-[#657082] hover:bg-[#f5f6f8] dark:text-gray-400 dark:hover:bg-gray-800">
             <span>More views</span>
-            <span className="text-xs transition-transform group-open:rotate-180">⌄</span>
+            <HostedIcon name="chevron-down" className="transition-transform group-open:rotate-180" />
           </summary>
           <button
             type="button"
@@ -72,7 +73,7 @@ export default function HostedSidebar({
                 : 'text-[#657082] hover:bg-[#f5f6f8] dark:text-gray-400 dark:hover:bg-gray-800')
             }
           >
-            Kanban board
+            <HostedIcon name="kanban" /> Kanban board
           </button>
         </details>
       </div>
@@ -82,7 +83,7 @@ export default function HostedSidebar({
           onClick={onAddTask}
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#4262ff] px-3 text-sm font-semibold text-white hover:bg-[#304bdc]"
         >
-          <span aria-hidden="true">+</span> New task
+          <HostedIcon name="plus" /> New task
         </button>
         <div className="border-t border-[#edf0f3] pt-2 dark:border-gray-800">
           <button
