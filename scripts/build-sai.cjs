@@ -274,6 +274,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
     'HostedPersistence.ts',
     'HostedAIPanel.tsx',
     'HostedMobileShell.tsx',
+    'HostedTheme.ts',
     'HostedHomeScreen.tsx',
     'HostedSidebar.tsx',
     'HostedHeader.tsx',
@@ -301,7 +302,7 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   replaceRequired(
     index,
     '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />\n  <meta name="theme-color" content="#243f30" />\n  <meta name="mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-title" content="Benchline" />\n  <link rel="manifest" href="/sai/manifest.webmanifest" />\n  <link rel="apple-touch-icon" href="/sai/icon.svg" />',
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />\n  <meta name="theme-color" content="#4262ff" />\n  <meta name="mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-capable" content="yes" />\n  <meta name="apple-mobile-web-app-title" content="Benchline" />\n  <link rel="manifest" href="/sai/manifest.webmanifest" />\n  <link rel="apple-touch-icon" href="/sai/icon.svg" />',
   );
   replaceRequired(
     index,
