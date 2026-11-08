@@ -1,0 +1,90 @@
+name: Repair formatting and redeploy Fasthosts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/repair-format-deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sparkboard-format-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: npm ci
+      - name: Format all affected source and test files
+        run: |
+          npx prettier --write \
+            integration/sai/HostedHeader.tsx \
+            integration/sai/HostedMobileShell.tsx \
+            integration/sai/HostedPersistence.ts \
+            src/connector-edit.js \
+            src/task-bridge.js \
+            src/tasks.js \
+            style.css \
+            tests/connector-controls-ui.test.js \
+            tests/sai-hosted.test.js \
+            tests/task-bridge.test.js
+      - name: Verify formatting and tests
+        run: |
+          npm run check
+          npm run format:check
+          npm test
+          python3 -m unittest discover -s tests -p 'test_*website.py'
+          npm run build
+      - name: Verify hosted planner build
+        run: npm run sai:build
+      - name: Verify Pulse build
+        run: npm run pulse:build
+      - name: Commit formatting correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'No formatting corrections required.'
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -- \
+              integration/sai/HostedHeader.tsx \
+              integration/sai/HostedMobileShell.tsx \
+              integration/sai/HostedPersistence.ts \
+              src/connector-edit.js \
+              src/task-bridge.js \
+              src/tasks.js \
+              style.css \
+              tests/connector-controls-ui.test.js \
+              tests/sai-hosted.test.js \
+              tests/task-bridge.test.js
+            git commit -m 'style: format Sparkboard and Benchline changes for CI'
+            git push origin HEAD:main
+          fi
+      - name: Dispatch production deployment at repaired HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          gh workflow run deploy-website.yml --ref main -f layout=direct
+          echo 'Deployment requested; consult the separate deployment workflow for build, FTPS upload, and live verification.'
