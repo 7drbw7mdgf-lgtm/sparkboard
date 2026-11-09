@@ -1,5 +1,7 @@
 /** Shared Sparkboard-aligned palette for every hosted Benchline view. */
 export const hostedThemeCss = `
+#root .benchline-source-board{position:fixed;right:20px;bottom:20px;z-index:80;padding:12px 16px;background:#4262ff;color:white;border-radius:12px;font-weight:700;box-shadow:0 3px 15px #0002;text-decoration:none}
+
 :root{
 --benchline-brand:#4262ff;--benchline-brand-hover:#2f4fe0;--benchline-brand-soft:#e8edff;--benchline-brand-ink:#304bdc;
 --benchline-page:#ffffff;--benchline-surface:#fff;--benchline-subtle:#f5f6f8;--benchline-hover:#f0efeb;

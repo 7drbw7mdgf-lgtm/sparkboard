@@ -72,3 +72,55 @@ export function publishTask(task, storage) {
     return false; // The canvas still holds the task; never claim it reached Sai.
   }
 }
+
+// Benchline is the editor for linked task fields; board layout and custom labels stay local.
+export const TASK_BRIDGE_STATE_KEY = 'sparkboard.sai.task-state.v1';
+
+export function plannerTaskHref(id) {
+  return '/sai/?task=' + encodeURIComponent('sparkboard:' + id);
+}
+
+export function readPlannerTasks(storage) {
+  try {
+    const value = JSON.parse(
+      (storage ?? globalThis.localStorage).getItem(TASK_BRIDGE_STATE_KEY) || '{}',
+    );
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+export function syncLinkedTasks(board, storage) {
+  if (!board?.objects) return false;
+  const saved = readPlannerTasks(storage);
+  let changed = false;
+  for (const item of board.objects) {
+    const linked = item.sparkTask;
+    if (!linked?.id) continue;
+    const task = Object.hasOwn(saved, linked.id) ? saved[linked.id] : null;
+    if (!task || task.boardId !== board.id || (task.nodeId && task.nodeId !== item.id)) continue;
+    if (
+      typeof task.name !== 'string' ||
+      typeof task.notes !== 'string' ||
+      !Number.isFinite(task.completion)
+    )
+      continue;
+    const fields = {
+      name: task.name,
+      notes: task.notes,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      startDate: task.startDate,
+      completion: task.completion,
+      plannerMissing: task.missing === true,
+      pending: false,
+    };
+    if (Object.entries(fields).every(([key, value]) => linked[key] === value)) continue;
+    // Preserve a canvas label that the user deliberately customised.
+    if (item.text === linked.name) item.text = task.name;
+    Object.assign(linked, fields);
+    changed = true;
+  }
+  return changed;
+}

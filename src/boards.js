@@ -9,7 +9,7 @@ import { BoardRepository, boardSummary } from './storage/repository.js';
 import { SaveScheduler } from './storage/save-scheduler.js';
 import { finishEdit } from './editor.js';
 import { render } from './rendering.js';
-import { fit } from './viewport.js';
+import { fit, focusBounds } from './viewport.js';
 import { setTool } from './tools.js';
 import { isCompactEditor, initialToolForLayout } from './mobile-editor-policy.js';
 import { sample } from './templates.js';
@@ -324,11 +324,20 @@ export async function init() {
   };
   state.boards = await repository.listBoards();
   if (state.boards.length) {
-    const active = await repository.getActiveBoard();
+    const requested = new URLSearchParams(location.search).get('board');
+    const active = state.boards.some((board) => board.id === requested)
+      ? requested
+      : await repository.getActiveBoard();
     await openBoard(
       state.boards.some((board) => board.id === active) ? active : state.boards[0].id,
     );
   } else await createBoard('brainstorm');
+  const requestedNode = new URLSearchParams(location.search).get('node');
+  if (requestedNode && state.board?.objects.some((item) => item.id === requestedNode)) {
+    state.selected = new Set([requestedNode]);
+    render();
+    focusBounds(state.board.objects.find((item) => item.id === requestedNode));
+  }
   state.ready = true;
   setTool(initialToolForLayout(isCompactEditor()));
   $('#canvas').removeAttribute('aria-busy');

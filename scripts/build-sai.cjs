@@ -275,10 +275,15 @@ function buildSai(root = path.resolve(__dirname, '..')) {
   );
   require('./patch-sai-planner.cjs').patchHostedPlanner(source);
   require('./patch-sai-gantt.cjs').patchHostedGantt(source);
+  require('./patch-sai-dependencies.cjs').patchHostedDependencies(source);
   require('./patch-sai-calendar.cjs').patchHostedCalendar(source);
   require('./patch-sai-controls.cjs').patchHostedControls(source);
+  require('./patch-sai-task-context.cjs').patchHostedTaskContext(source);
   for (const name of [
     'HostedPersistence.ts',
+    'HostedTaskContext.tsx',
+    'HostedGanttGeometry.ts',
+    'HostedDependencyLines.tsx',
     'HostedAIPanel.tsx',
     'HostedMobileShell.tsx',
     'HostedTheme.ts',

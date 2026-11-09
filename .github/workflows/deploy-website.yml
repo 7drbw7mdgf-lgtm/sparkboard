@@ -48,6 +48,10 @@ jobs:
           npm run build
       - name: Build hosted Sai planner
         run: npm run sai:build
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
+      - name: Test hosted planner interactions
+        run: npm run test:browser
       - name: Build Pulse public homepage
         run: npm run pulse:build
       - name: Build the public website

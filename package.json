@@ -17,9 +17,11 @@
     "build": "node scripts/build.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build:mac": "python3 scripts/build-macos.py"
+    "build:mac": "python3 scripts/build-macos.py",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@supabase/auth-js": "2.118.0",
     "esbuild": "0.28.2",
     "fake-indexeddb": "^6.2.6",

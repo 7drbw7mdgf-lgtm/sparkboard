@@ -25,6 +25,7 @@ function hostedModule() {
     Math,
     Blob,
     URL,
+    URLSearchParams,
     document: {},
   });
   return { bridge: module.exports, storage };
@@ -82,4 +83,45 @@ test('hosted Sai preserves an unconsumed task until its project saves successful
   const saved = bridge.mergeSparkboardTasks(project());
   bridge.saveHostedProject(saved);
   assert.equal(JSON.parse(storage.getItem(bridge.TASK_BRIDGE_KEY)).length, 0);
+});
+
+test('planner publishes saved task edits and safe return links to the source board', () => {
+  const { bridge, storage } = hostedModule();
+  storage.setItem(
+    bridge.TASK_BRIDGE_KEY,
+    JSON.stringify([
+      { id: 't', name: 'Original', notes: 'Details', boardId: 'board & 1', nodeId: 'node#1' },
+    ]),
+  );
+  const merged = bridge.mergeSparkboardTasks(project());
+  const task = merged.tasks[0];
+  task.name = 'Edited in Benchline';
+  task.completion = 100;
+  bridge.saveHostedProject(merged);
+  const snapshot = JSON.parse(storage.getItem(bridge.TASK_BRIDGE_STATE_KEY)).t;
+  assert.equal(snapshot.name, task.name);
+  assert.equal(snapshot.completion, 100);
+  assert.equal(snapshot.notes, 'Details');
+  assert.equal(snapshot.boardId, 'board & 1');
+  assert.equal(snapshot.nodeId, 'node#1');
+  assert.equal(bridge.sourceBoardHref(task), '/?workspace=1&board=board+%26+1&node=node%231');
+  merged.tasks = [];
+  bridge.saveHostedProject(merged);
+  assert.equal(JSON.parse(storage.getItem(bridge.TASK_BRIDGE_STATE_KEY)).t.missing, true);
+  assert.equal(bridge.sourceBoardHref({ id: 'unrelated', notes: 'No source' }), null);
+});
+
+test('failed project save cannot publish an unpersisted task update or acknowledge its queue', () => {
+  const { bridge, storage } = hostedModule();
+  storage.setItem(bridge.TASK_BRIDGE_KEY, JSON.stringify([{ id: 't', name: 'Original' }]));
+  const merged = bridge.mergeSparkboardTasks(project());
+  const setItem = storage.setItem;
+  storage.setItem = (key, value) => {
+    if (key === 'sai.hosted.project.v1') throw Error('quota');
+    setItem(key, value);
+  };
+  bridge.saveHostedProject(merged);
+  assert.equal(storage.getItem(bridge.TASK_BRIDGE_STATE_KEY), null);
+  assert.equal(storage.getItem(bridge.TASK_BRIDGE_RECEIPT_KEY), null);
+  assert.equal(JSON.parse(storage.getItem(bridge.TASK_BRIDGE_KEY)).length, 1);
 });

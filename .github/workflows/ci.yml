@@ -26,6 +26,8 @@ jobs:
       - run: python3 -m unittest discover -s tests -p 'test_*website.py'
       - run: npm run build
       - run: npm run sai:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
       - run: npm run pulse:build
       - run: npm run website:build
         env:

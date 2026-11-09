@@ -56,6 +56,7 @@ export const TASK_BRIDGE_KEY = 'sparkboard.sai.task-creation.v1';
 export const TASK_BRIDGE_CHANNEL = 'sparkboard.sai.tasks';
 // Receipt written only after the imported task is safely saved in a Benchline project.
 export const TASK_BRIDGE_RECEIPT_KEY = 'sparkboard.sai.task-receipts.v1';
+export const TASK_BRIDGE_STATE_KEY = 'sparkboard.sai.task-state.v1';
 
 type BridgeTask = {
   id: string;
@@ -115,6 +116,10 @@ export function mergeSparkboardTasks(project: ProjectData | null): ProjectData |
       tags: ['Sparkboard'],
       source: 'local',
       externalId: incoming.id,
+      sparkboardOrigin: {
+        boardId: String(incoming.boardId || ''),
+        nodeId: String(incoming.nodeId || ''),
+      },
     });
   }
   if (!created.length) return project;
@@ -133,6 +138,7 @@ export function mergeSparkboardTasks(project: ProjectData | null): ProjectData |
 export function saveHostedProject(data: ProjectData): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(data));
+    publishLinkedTaskState(data);
     // Acknowledge only tasks confirmed in a successful project save. Acknowledged
     // creations are never re-imported after somebody intentionally deletes them.
     const imported = new Set(
@@ -175,4 +181,67 @@ export function downloadHostedProject(data: ProjectData): void {
   link.download = 'benchline-project-backup.json';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function publishLinkedTaskState(data: ProjectData): void {
+  try {
+    let previous: Record<string, any> = {};
+    try {
+      const parsed = JSON.parse(localStorage.getItem(TASK_BRIDGE_STATE_KEY) || '{}');
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) previous = parsed;
+    } catch {
+      /* repair malformed state */
+    }
+    const next: Record<string, any> = Object.create(null);
+    // Missing tasks stay visible as unavailable links; never erase their canvas nodes.
+    for (const [id, task] of Object.entries(previous)) {
+      if (task && typeof task === 'object') next[id] = { ...task, missing: true };
+    }
+    for (const task of data.tasks) {
+      if (!task.id.startsWith('sparkboard:')) continue;
+      const origin = task.sparkboardOrigin;
+      const legacyBoard = task.notes?.match(/\nSparkboard source board: ([^\n]+)$/)?.[1] || '';
+      next[task.id.slice('sparkboard:'.length)] = {
+        name: task.name,
+        notes: (task.notes || '').replace(/\nSparkboard source board: [^\n]+$/, ''),
+        priority: task.priority || 'Medium',
+        completion: task.completion,
+        startDate: localDate(task.startDate),
+        dueDate: localDate(task.endDate),
+        boardId: origin?.boardId || legacyBoard,
+        nodeId: origin?.nodeId || '',
+        missing: false,
+      };
+    }
+    const serialised = JSON.stringify(next);
+    if (serialised === localStorage.getItem(TASK_BRIDGE_STATE_KEY)) return;
+    localStorage.setItem(TASK_BRIDGE_STATE_KEY, serialised);
+    try {
+      const channel = new BroadcastChannel(TASK_BRIDGE_CHANNEL);
+      channel.postMessage({ type: 'task-state' });
+      channel.close();
+    } catch {
+      /* other tabs still receive storage events */
+    }
+  } catch {
+    console.warn('Linked board task update failed; the Benchline project is saved.');
+  }
+}
+
+function localDate(date: Date): string {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+export function sourceBoardHref(task: ProjectData['tasks'][number]): string | null {
+  const boardId =
+    task.sparkboardOrigin?.boardId ||
+    task.notes?.match(/\nSparkboard source board: ([^\n]+)$/)?.[1];
+  if (!task.id.startsWith('sparkboard:') || !boardId) return null;
+  const params = new URLSearchParams({ workspace: '1', board: boardId });
+  if (task.sparkboardOrigin?.nodeId) params.set('node', task.sparkboardOrigin.nodeId);
+  return '/?' + params;
 }

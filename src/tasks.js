@@ -8,10 +8,17 @@ import { toast } from './notifications.js';
 import { centerPoint } from './viewport.js';
 import { appendMindNode, addMindChild, isMindNode, layoutMindmap } from './mindmap-model.js';
 import { themeNewMindTopic } from './mindmap-master.js';
-import { publishTask, taskHandoffStatus, TASK_BRIDGE_RECEIPT_KEY } from './task-bridge.js';
+import {
+  publishTask,
+  taskHandoffStatus,
+  TASK_BRIDGE_RECEIPT_KEY,
+  TASK_BRIDGE_STATE_KEY,
+  syncLinkedTasks,
+  plannerTaskHref,
+} from './task-bridge.js';
 
 const taskCSS = `
-#objects .spark-task-tag{position:absolute;top:-13px;left:8px;padding:4px 9px;background:#4262ff;color:#fff;border-radius:10px;font:700 11px/1 Manrope,sans-serif;box-shadow:0 2px 7px #193c2b22;pointer-events:none;white-space:nowrap;z-index:5}
+#objects .spark-task-tag{position:absolute;top:-13px;left:8px;padding:4px 9px;background:#4262ff;color:#fff;border-radius:10px;font:700 11px/1 Manrope,sans-serif;box-shadow:0 2px 7px #193c2b22;pointer-events:auto;white-space:nowrap;z-index:5;text-decoration:none}
 #objects .spark-task-tag.is-pending{background:#6b778e}
 #objects .spark-task-tag.is-failed{background:#ae6737}
 #spark-task-form{display:grid;gap:12px;max-width:440px}
@@ -34,20 +41,27 @@ function decorateTasks() {
       const item = byId.get(element.dataset.id);
       element.querySelector('.spark-task-tag')?.remove();
       if (!item?.sparkTask) return;
-      const tag = document.createElement('span');
+      const tag = document.createElement('a');
+      tag.href = plannerTaskHref(item.sparkTask.id);
+      tag.addEventListener('pointerdown', (event) => event.stopPropagation());
+      tag.addEventListener('click', (event) => event.stopPropagation());
       const handoff = taskHandoffStatus(item.sparkTask.id);
       tag.className =
         'spark-task-tag' +
         (handoff === 'queued' ? ' is-pending' : handoff === 'missing' ? ' is-failed' : '');
       tag.textContent =
         handoff === 'saved'
-          ? '✓ Sent to Benchline'
+          ? item.sparkTask.plannerMissing
+            ? 'Task unavailable in Benchline'
+            : item.sparkTask.completion === 100
+              ? '✓ Complete · Benchline'
+              : '↗ Open in Benchline'
           : handoff === 'queued'
             ? '↗ To Benchline'
             : '↻ Task not sent';
       tag.title =
         handoff === 'saved'
-          ? 'Sent to Benchline on this browser profile. Later edits and deletion are not synchronised.'
+          ? 'Open this linked task in Benchline. Saved changes update this board in the same browser.'
           : handoff === 'queued'
             ? 'Queued for Benchline. Open Benchline in this browser to import.'
             : 'Stored on this board. Open task creation or revisit this board to retry.';
@@ -67,7 +81,7 @@ function createTask() {
         <label>Priority<select name="priority"><option>Medium</option><option>High</option><option>Urgent</option><option>Low</option></select></label>
       </div>
       <label>Details (optional)<textarea name="notes" maxlength="4000" placeholder="What needs doing?"></textarea></label>
-      <p>This creates a task in Benchline while keeping a linked visual node on your board. The task transfer works in this browser profile only.</p>
+      <p>Create a linked task, then open it in Benchline to edit dates and progress. Saved updates appear on this board in this browser profile.</p>
       <button type="submit">Create task</button>
     </form>`,
     'TASK',
@@ -188,12 +202,22 @@ export function setupTaskWorkspace() {
   document.head.append(styles);
   document.addEventListener('sparkboard:new-task', createTask);
   document.addEventListener('sparkboard:render', decorateTasks);
+  const refreshLinkedTasks = () => {
+    if (state.editing) return;
+    if (syncLinkedTasks(state.board)) {
+      save();
+      render();
+    }
+    decorateTasks();
+  };
   window.addEventListener('storage', (event) => {
-    if (event.key === TASK_BRIDGE_RECEIPT_KEY) decorateTasks();
+    if (event.key === TASK_BRIDGE_STATE_KEY || event.key === TASK_BRIDGE_RECEIPT_KEY)
+      refreshLinkedTasks();
   });
+  document.addEventListener('sparkboard:render', refreshLinkedTasks);
   window.addEventListener('focus', () => {
     retryBoardTasks();
-    decorateTasks();
+    refreshLinkedTasks();
   });
   // A board may open after initialisation. Render is dispatched when the board is mounted.
   document.addEventListener('sparkboard:render', retryBoardTasks);
