@@ -63,18 +63,18 @@ if (tour) {
       setActive(active - 1);
     }
   });
-  function activateLinkedDemo() {
-    const index = slides.findIndex((slide) => slide.id && '#' + slide.id === location.hash);
+  function activateLinkedDemo(hash = location.hash) {
+    const index = slides.findIndex((slide) => slide.id && '#' + slide.id === hash);
     if (index >= 0) setActive(index, true, true);
   }
 
   setActive(0, false);
-  window.addEventListener('hashchange', activateLinkedDemo);
-  requestAnimationFrame(activateLinkedDemo);
+  window.addEventListener('hashchange', () => activateLinkedDemo());
+  requestAnimationFrame(() => activateLinkedDemo());
 
-  const menu = document.querySelector('.landing-menu');
-  menu?.addEventListener('click', (event) => {
-    if (event.target.closest('a')) menu.open = false;
+  tour.closest('#start-screen')?.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (link) activateLinkedDemo(link.hash);
   });
 
   // Drag sample sticky by pointer; coordinate calculation stays local to the preview.
