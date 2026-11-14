@@ -11,7 +11,7 @@ if (tour) {
   let active = 0;
   let frame = 0;
 
-  function setActive(index, scroll = true) {
+  function setActive(index, scroll = true, instant = false) {
     active = Math.max(0, Math.min(slides.length - 1, index));
     tabs.forEach((tab, i) => tab.setAttribute('aria-current', String(i === active)));
     dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === active)));
@@ -21,7 +21,8 @@ if (tour) {
     if (scroll)
       rail.scrollTo({
         left: slides[active].offsetLeft - slides[0].offsetLeft,
-        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        behavior:
+          instant || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
       });
   }
 
@@ -62,7 +63,19 @@ if (tour) {
       setActive(active - 1);
     }
   });
+  function activateLinkedDemo() {
+    const index = slides.findIndex((slide) => slide.id && '#' + slide.id === location.hash);
+    if (index >= 0) setActive(index, true, true);
+  }
+
   setActive(0, false);
+  window.addEventListener('hashchange', activateLinkedDemo);
+  requestAnimationFrame(activateLinkedDemo);
+
+  const menu = document.querySelector('.landing-menu');
+  menu?.addEventListener('click', (event) => {
+    if (event.target.closest('a')) menu.open = false;
+  });
 
   // Drag sample sticky by pointer; coordinate calculation stays local to the preview.
   const sticky = tour.querySelector('[data-demo-sticky]');
