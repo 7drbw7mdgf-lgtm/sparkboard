@@ -147,6 +147,20 @@ for (const mobile of [false, true]) {
       el.scrollTop = 0;
     });
     const bar = page.locator('.benchline-gantt-task-bar').filter({ hasText: 'Research' });
+    if (mobile) {
+      await expect(page.getByRole('button', { name: 'Today', exact: true })).toBeVisible();
+      const fourWeeks = page.getByRole('button', { name: '4 weeks', exact: true });
+      await fourWeeks.click();
+      await expect(fourWeeks).toHaveAttribute('aria-pressed', 'true');
+      await alignment(page);
+      await page.getByRole('button', { name: 'Week', exact: true }).click();
+      await timeline.evaluate((el) => {
+        el.scrollLeft = 0;
+      });
+      await bar.click();
+      await expect(page.getByText('Start date', { exact: true })).toBeVisible();
+      return;
+    }
     const box = await bar.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + 9);
     await page.mouse.down();

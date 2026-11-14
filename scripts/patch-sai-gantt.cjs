@@ -103,10 +103,15 @@ function patchHostedGantt(root) {
 
   edit(path.join(components, 'GanttTaskBar.tsx'), s => {
     s = swap(s,
+      'isLinking ? onLinkTask(task.id) : onSelectTask(task.id);',
+      'isLinking ? onLinkTask(task.id) : document.body.classList.contains("benchline-phone") ? onRequestEditTask(task.id) : onSelectTask(task.id);',
+      2);
+
+    s = swap(s,
       'const DRAG_THRESHOLD = 3;', 'const DRAG_THRESHOLD = 5;');
     s = swap(s,
       'const handleMouseDown = (e: React.MouseEvent, type: Interaction) => {',
-      'const handleMouseDown = (e: React.PointerEvent, type: Interaction) => {');
+      'const handleMouseDown = (e: React.PointerEvent, type: Interaction) => {\n        if (e.pointerType === \'touch\' && document.body.classList.contains("benchline-phone")) return;');
     s = swap(s,
       '        const startX = e.clientX;',
       [
@@ -116,7 +121,7 @@ function patchHostedGantt(root) {
       ].join('\n'));
     s = swap(s,
       'const handleCompletionMouseDown = (e: React.MouseEvent) => {',
-      'const handleCompletionMouseDown = (e: React.PointerEvent) => {');
+      'const handleCompletionMouseDown = (e: React.PointerEvent) => {\n        if (e.pointerType === \'touch\' && document.body.classList.contains("benchline-phone")) return;');
     s = swap(s,
       '        setIsChangingCompletion(true);',
       [
@@ -280,6 +285,31 @@ function patchHostedGantt(root) {
     // on empty timeline space and avoid capturing the scroll container.
     // A compact top row: primary time scale and zoom remain visible.
     // Jump-to-today and task editing live in one secondary menu.
+    s = swap(s,
+      '    const handleScrollToToday = () => {',
+      [
+        "    const [phonePeriod, setPhonePeriod] = useState(() => ganttViewMode === 'month' ? 28 : 7);",
+        '    const [visibleDay, setVisibleDay] = useState(0);',
+        "    const formatPhoneDate = (day: number) => addDays(projectStartDate, day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });",
+
+        '    const choosePhonePeriod = (days: number) => {',
+        '        setPhonePeriod(days);',
+        "        onGanttViewModeChange(days === 7 ? 'week' : 'month');",
+        '    };',
+        '    useEffect(() => {',
+        '        if (viewportWidth > 64 && document.body.classList.contains("benchline-phone")) {',
+        '            setCurrentZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, (viewportWidth - 64) / phonePeriod)));',
+        '        }',
+        '    }, [viewportWidth, phonePeriod, initialZoom]);',
+        '    const pagePhoneTimeline = (direction: number) => {',
+        '        timelineScrollRef.current?.scrollBy({ left: direction * phonePeriod * currentZoom });',
+        '    };',
+        '    const handleScrollToToday = () => {',
+      ].join('\n'));
+    s = swap(s, 'todayOffset * currentZoom - 240', '32 + todayOffset * currentZoom - timelineScrollRef.current.clientWidth / 2');
+    s = swap(s,
+      '                    onScroll={handleScroll}',
+      '                    onScroll={(event) => { handleScroll(); setVisibleDay(Math.max(0, Math.floor((event.currentTarget.scrollLeft - 32) / currentZoom))); }}');
     const toolbarStart = s.indexOf('                 <div className="flex-shrink-0 flex items-center justify-between border-b');
     const toolbarEnd = s.indexOf('                {dependencyLink && (', toolbarStart);
     if (toolbarStart < 0 || toolbarEnd < 0) throw Error('Gantt toolbar anchors changed');
@@ -288,6 +318,14 @@ function patchHostedGantt(root) {
       '                    <span className="benchline-gantt-toolbar-title text-sm">Timeline</span>',
       '                    <div className="benchline-gantt-actions flex items-center gap-2.5">',
       control,
+      '                        <div className="benchline-gantt-phone-period" role="group" aria-label="Timeline period">',
+      '                            <button type="button" aria-label="Previous period" onClick={() => pagePhoneTimeline(-1)}>‹</button>',
+      '                            <button type="button" aria-pressed={phonePeriod === 7} onClick={() => choosePhonePeriod(7)}>Week</button>',
+      '                            <button type="button" aria-pressed={phonePeriod === 28} onClick={() => choosePhonePeriod(28)}>4 weeks</button>',
+      '                            <button type="button" aria-label="Next period" onClick={() => pagePhoneTimeline(1)}>›</button>',
+      '                            <button type="button" onClick={handleScrollToToday}>Today</button>',
+      '                        </div>',
+
       '                        <button type="button" onClick={onRequestAddTask} className="benchline-gantt-fit benchline-gantt-new" title="Add a task">＋ Task</button>',
       '                        <details className="benchline-gantt-more">',
       '                            <summary aria-label="More Gantt options" title="More Gantt options">⋯</summary>',
@@ -304,6 +342,7 @@ function patchHostedGantt(root) {
       '                            </div>',
       '                        </details>',
       '                    </div>',
+      '                    <output className="benchline-gantt-phone-range">{formatPhoneDate(visibleDay)} – {formatPhoneDate(visibleDay + phonePeriod - 1)}</output>',
       '                 </div>',
       '',
     ].join('\n');

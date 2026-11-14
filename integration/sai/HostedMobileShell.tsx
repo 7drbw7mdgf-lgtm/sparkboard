@@ -401,6 +401,19 @@ body.benchline-phone #root .benchline-gantt-new,
 body.benchline-phone #root .benchline-gantt-zoom{display:none!important}
 body.benchline-phone #root .benchline-gantt-more>summary{min-height:34px;min-width:38px}
 body.benchline-phone #root .benchline-gantt-more-panel{min-width:220px;max-width:calc(100vw - 20px)}
+#root .benchline-gantt-phone-period,#root .benchline-gantt-phone-range{display:none}
+body.benchline-phone #root .benchline-gantt-toolbar{height:auto!important;min-height:52px!important;flex-direction:column;align-items:stretch;gap:2px!important}
+body.benchline-phone #root .benchline-gantt-scale-controls{display:none}
+body.benchline-phone #root .benchline-gantt-phone-range{display:block;padding:0 4px 2px;color:var(--benchline-ink);font-size:12px}
+body.benchline-phone #root .benchline-gantt-phone-period{display:flex;flex:1;align-items:center;gap:3px;min-width:0}
+body.benchline-phone #root .benchline-gantt-phone-period button{
+  min-height:44px;flex:1;border:1px solid var(--benchline-border);border-radius:8px;
+  padding:0 4px;background:var(--benchline-subtle);color:var(--benchline-ink);white-space:nowrap;font-size:12px
+}
+body.benchline-phone #root .benchline-gantt-phone-period button[aria-pressed=true]{background:#4262ff;color:white}
+body.benchline-phone #root .benchline-gantt-task-bar,
+body.benchline-phone #root .benchline-gantt-task-bar *{touch-action:pan-x pan-y}
+@media(pointer:coarse){body.benchline-phone #root .benchline-gantt-resize-handle{display:none}}
 #root .benchline-gantt-mobile-zoom{display:none}
 body.benchline-phone #root .benchline-gantt-mobile-zoom{
   display:flex;align-items:center;gap:8px;min-height:40px;
