@@ -250,6 +250,8 @@ function patchHostedGantt(root) {
   });
 
   edit(path.join(components, 'GanttChart.tsx'), s => {
+    s = swap(s, "import { diffInDays } from '../services/dateUtils';",
+      "import { addDays, diffInDays } from '../services/dateUtils';");
     s = swap(s,
       'Math.floor((viewport.clientWidth - 12) / days)',
       'Math.round(((viewport.clientWidth - 12) / days) * 100) / 100');
